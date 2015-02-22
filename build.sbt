@@ -10,3 +10,4 @@ version := "1.0"
 //libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
 libraryDependencies += "commons-io" % "commons-io" % "2.4"
 
+libraryDependencies += "com.typesafe.akka" % "akka-actor_2.10" % "2.3.9"
