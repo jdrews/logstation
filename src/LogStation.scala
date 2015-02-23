@@ -1,9 +1,7 @@
 import java.io.File
 
 import akka.event.Logging
-import org.apache.commons.io.input.{Tailer, TailerListener}
-import service.LogStationServiceActor
-import util.LogTailer
+import service.{ServiceShutdown, LogStationServiceActor}
 import util.LogThisFile
 
 import akka.actor.ActorSystem
@@ -16,7 +14,6 @@ import scala.concurrent.duration._
  * Created by jdrews on 2/21/2015.
  */
 
-//TODO: Get akka in here
 //TODO: get spray in here to host up website
 //TODO: website should scroll, but allow user to pause scrolling
 //TODO: config files to hold properties for locations of log files
@@ -37,7 +34,7 @@ object LogStation extends App {
         logger.info("Shutdown hook caught.")
 
         try {
-            Await.result(gracefulStop(logStationServiceActor, 20 seconds), 20 seconds)
+            Await.result(gracefulStop(logStationServiceActor, 20 seconds, ServiceShutdown), 20 seconds)
         } catch {
             case e: AskTimeoutException ⇒ logger.error("The actor didn't stop in time!" + e.toString)
         }

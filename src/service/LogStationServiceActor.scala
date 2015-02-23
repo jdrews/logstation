@@ -1,7 +1,11 @@
 package service
 
 import akka.actor.{ActorRef, Props, Actor, ActorLogging}
+import akka.pattern._
 import util.{LogTailerActor, LogThisFile}
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Created by jdrews on 2/21/2015.
@@ -20,6 +24,15 @@ class LogStationServiceActor extends Actor with ActorLogging{
             logTailers += logTailerActor
         case ServiceShutdown =>
             // for each logTailers, send shutdown call and wait for it to shut down.
+            log.info("got ServiceShutdown")
+            // TODO: This doesn't end cleanly. Probably because read() on LogTailerActor is blocking...
+            logTailers.foreach(actor =>
+                try {
+                    Await.result(gracefulStop(actor, 20 seconds, ServiceShutdown), 20 seconds)
+                } catch {
+                    case e: AskTimeoutException ⇒ log.error("The actor didn't stop in time!" + e.toString)
+                }
+            )
             context.system.shutdown()
         case _       => println("huh?")
     }
