@@ -1,10 +1,11 @@
-import akka.event.Logging
-import service.{ServiceShutdown, LogStationServiceActor}
-import util.LogThisFile
+package com.jdrews.logstation
 
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.{ActorSystem, Props}
+import akka.event.Logging
 import akka.pattern._
+import com.jdrews.logstation.service.{LogStationServiceActor, ServiceShutdown}
+import com.jdrews.logstation.tailer.LogThisFile
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 

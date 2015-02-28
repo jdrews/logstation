@@ -1,6 +1,6 @@
 /**
  * Created by jdrews on 2/21/2015.
  */
-package service
+package com.jdrews.logstation.service
 case object ServiceShutdown
 

@@ -1,8 +1,8 @@
-package service
+package com.jdrews.logstation.service
 
 import akka.actor._
 import akka.pattern._
-import util.{LogTailerActor, LogThisFile}
+import com.jdrews.logstation.tailer.{LogTailerActor, LogThisFile}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

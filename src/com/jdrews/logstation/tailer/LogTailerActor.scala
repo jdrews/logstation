@@ -1,14 +1,16 @@
-package util
+package com.jdrews.logstation.tailer
 
 import java.io._
 
-import akka.actor.{ActorLogging, Actor}
+import akka.actor.{Actor, ActorLogging}
 import com.osinka.tailf.Tail
-import service.ServiceShutdown
+import com.jdrews.logstation.service.ServiceShutdown
+
 /**
  * Created by jdrews on 2/21/2015.
  */
 class LogTailerActor extends Actor with ActorLogging {
+    // TODO: probably doesn't need to be a set. There should be only one thread per actor
     private var readerThreads = Set.empty[Thread]
 //    def countLines(file: File) = {
 //        val lnr = new LineNumberReader(new FileReader(file))
@@ -32,7 +34,8 @@ class LogTailerActor extends Actor with ActorLogging {
         if (!Thread.currentThread().isInterrupted) {
             val l = r.readLine
             if (l != null) {
-                log.info("read line: " + l)
+                log.info(s"read line: $l")
+                // actor ! l
             }
             read(r)
         } else {
