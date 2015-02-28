@@ -16,6 +16,8 @@
 package com.osinka.tailf
 
 import java.io.{File, InputStream}
+import java.lang.InterruptedException
+import java.nio.channels.ClosedByInterruptException
 
 object Tail {
 
@@ -32,7 +34,14 @@ object Tail {
         val waitToOpen = 1000
         val waitBetweenReads = 100
 
-        def sleep(msec: Long) = () => Thread.sleep(msec)
+            def sleep(msec: Long) = () =>
+                try {
+                    Thread.sleep(msec)
+                } catch  {
+                    case ie: InterruptedException =>
+                        println("Interrupt handled")
+                        Thread.currentThread().interrupt() // restore interrupted status
+                }
 
         follow(file, maxRetries, sleep(waitToOpen), sleep(waitBetweenReads))
     }
@@ -69,7 +78,8 @@ object Tail {
      */
     def testExists(file: File, tries: Int, sleep: () => Unit): Boolean = {
         def tryExists(n: Int): Boolean =
-            if (file.exists) true
+            if (Thread.currentThread().isInterrupted) false
+            else if (file.exists) true
             else if (n > tries) false
             else {
                 sleep()
@@ -101,8 +111,14 @@ class FollowingInputStream(val file: File, val waitNewInput: () => Unit) extends
 
     override def close = underlying.close
 
-    protected def rotated_? = try { underlying.getChannel.position > file.length }
-    finally { false }
+    protected def rotated_? = try {
+        underlying.getChannel.position > file.length
+    } catch {
+        case cbie: ClosedByInterruptException =>
+            println("CloseByInterrupt handled")
+            Thread.currentThread().interrupt()
+            false
+    } finally { false }
     protected def closed_? = !underlying.getChannel.isOpen
 
     protected def handle(read: => Int): Int = read match {
