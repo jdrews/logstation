@@ -1,5 +1,3 @@
-import java.io.File
-
 import akka.event.Logging
 import service.{ServiceShutdown, LogStationServiceActor}
 import util.LogThisFile
@@ -27,7 +25,9 @@ object LogStation extends App {
     val logStationServiceActor = system.actorOf(Props[LogStationServiceActor], name = "LogStationServiceActor")
 
     val logFile1 = new LogThisFile("E:\\git\\logstation\\test\\logfile.log")
+    val logFile2 = new LogThisFile("E:\\git\\logstation\\test\\logfile2.log")
     logStationServiceActor ! logFile1
+    logStationServiceActor ! logFile2
 
 
     private def shutdown: Unit = {

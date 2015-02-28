@@ -1,6 +1,6 @@
 package service
 
-import akka.actor.{ActorRef, Props, Actor, ActorLogging}
+import akka.actor._
 import akka.pattern._
 import util.{LogTailerActor, LogThisFile}
 
@@ -34,6 +34,7 @@ class LogStationServiceActor extends Actor with ActorLogging{
                 }
             )
             context.system.shutdown()
-        case _       => println("huh?")
+        case actTerminated: Terminated => log.info(actTerminated.toString)
+        case something => log.warning(s"huh? $something")
     }
 }

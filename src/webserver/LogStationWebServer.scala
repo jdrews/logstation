@@ -9,7 +9,7 @@ import spray.can.Http
  */
 class LogStationWebServer {
 
-    val myListener: ActorRef = // ...
+//    val myListener: ActorRef = // ...
 
 //        IO(Http) ! Http.Bind(myListener, interface = "localhost", port = 8080)
 }
