@@ -33,7 +33,7 @@ class LogStationServiceActor extends Actor with ActorLogging{
                     case e: AskTimeoutException ⇒ log.error("The actor didn't stop in time!" + e.toString)
                 }
             )
-            context.system.shutdown()
+            context stop self
         case actTerminated: Terminated => log.info(actTerminated.toString)
         case something => log.warning(s"huh? $something")
     }
