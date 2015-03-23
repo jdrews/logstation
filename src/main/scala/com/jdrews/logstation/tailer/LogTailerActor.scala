@@ -3,6 +3,7 @@ package com.jdrews.logstation.tailer
 import java.io._
 
 import akka.actor.{Actor, ActorLogging}
+import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.service.ServiceShutdown
 import com.jdrews.logstation.webserver.LogMessage
 import com.osinka.tailf.Tail
@@ -13,7 +14,7 @@ import com.osinka.tailf.Tail
 class LogTailerActor extends Actor with ActorLogging {
     // TODO: probably doesn't need to be a set. There should be only one thread per actor
     private var readerThreads = Set.empty[Thread]
-    val logStationWebServer = context.actorSelection("akka://LogStation/user/logStationWebServer")
+    private val bridge = BridgeController.getBridgeActor
 //    def countLines(file: File) = {
 //        val lnr = new LineNumberReader(new FileReader(file))
 //        lnr.skip(Long.MaxValue)
@@ -37,7 +38,7 @@ class LogTailerActor extends Actor with ActorLogging {
             val l = r.readLine
             if (l != null) {
                 log.info(s"read line: $l")
-                logStationWebServer ! new LogMessage(l, "E:\\git\\logstation\\test\\logfile2.log")
+                bridge ! new LogMessage(l, "E:\\git\\logstation\\test\\logfile2.log")
             }
             read(r)
         } else {
@@ -51,7 +52,7 @@ class LogTailerActor extends Actor with ActorLogging {
     def receive = {
         case LogThisFile(logFile) =>
             log.info(s"About to begin logging $logFile")
-            logStationWebServer ! new LogMessage("from-me-to-you", "myfile2")
+            bridge ! new LogMessage("from-me-to-you", "myfile2")
             // calculate bytes to skip to get to last N bytes of file
             val file: File = new File(logFile)
             val readLastNBytes = 100

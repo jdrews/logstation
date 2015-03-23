@@ -5,3 +5,4 @@ package com.jdrews.logstation.webserver
 
 case class LogMessage( val logMessage: String, val logFile: String)
 
+
