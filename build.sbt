@@ -19,6 +19,8 @@ resolvers += "CB Central Mirror" at "http://repo.cloudbees.com/content/groups/pu
 
 libraryDependencies += "com.typesafe.akka" % "akka-actor_2.10" % "2.3.9"
 
+libraryDependencies += "com.typesafe.akka" % "akka-agent_2.10" % "2.3.9"
+
 libraryDependencies ++= {
     val liftVersion = "2.6-RC1"
     Seq(

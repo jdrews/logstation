@@ -15,7 +15,8 @@ import scala.concurrent.duration._
  * Created by jdrews on 2/21/2015.
  */
 
-//TODO: get lift in here to host up website
+//TODO: Test lift with jetty
+//TODO: Test log messages going to webapp
 //TODO: website should scroll, but allow user to pause scrolling
 //TODO: config files to hold properties for locations of log files
 //TODO: config for coloring logs

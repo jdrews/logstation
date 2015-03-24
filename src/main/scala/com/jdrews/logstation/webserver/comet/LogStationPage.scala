@@ -1,6 +1,6 @@
 package com.jdrews.logstation.webserver.comet
 
-import akka.actor.PoisonPill
+import akka.actor.{ActorRef, PoisonPill}
 import com.jdrews.logstation.config.BridgeController
 import net.liftweb.common.Loggable
 import net.liftweb.http.{CometActor, CometListener}
@@ -14,9 +14,8 @@ import net.liftweb.util.ClearClearable
 class LogStationPage extends CometActor with CometListener with Loggable {
     private var msgs: Vector[String] = Vector("") // private state​
 
-
     // A bridge between the Lift and Akka actor libraries
-    private val bridge = BridgeController.getBridgeActor
+    private lazy val bridge: ActorRef = BridgeController.getBridgeActor
     bridge ! this
 
     // Make sure to stop our BridgeActor when we clean up Comet
@@ -41,6 +40,8 @@ class LogStationPage extends CometActor with CometListener with Loggable {
          case v: Vector[String] =>
              msgs = v
              reRender()
+         case something =>
+             logger.info(s"in LogStationPage: got something, not sure what it is: $something")
      }
     /**
       * Put the messages in the li elements and clear
