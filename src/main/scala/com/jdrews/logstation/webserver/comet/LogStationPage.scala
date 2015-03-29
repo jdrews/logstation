@@ -2,7 +2,9 @@ package com.jdrews.logstation.webserver.comet
 
 import akka.actor.{ActorRef, PoisonPill}
 import com.jdrews.logstation.config.BridgeController
-import net.liftweb.common.Loggable
+import com.jdrews.logstation.webserver.LogMessage
+import net.liftweb.actor.LAPinger
+import net.liftweb.common.{Full, Loggable}
 import net.liftweb.http.{CometActor, CometListener}
 import net.liftweb.util.ClearClearable
 
@@ -13,17 +15,11 @@ import net.liftweb.util.ClearClearable
   */
 class LogStationPage extends CometActor with CometListener with Loggable {
     private var msgs: Vector[String] = Vector("") // private state​
+    override def defaultPrefix = Full("comet")
 
-    // A bridge between the Lift and Akka actor libraries
-    private lazy val bridge: ActorRef = BridgeController.getBridgeActor
-    bridge ! this
 
-    // Make sure to stop our BridgeActor when we clean up Comet
-    override protected def localShutdown() {
-        bridge ! PoisonPill
-    }
 
-     /**
+    /**
       * When the component is instantiated, register as
       * a listener with the ChatServer
       */
@@ -38,7 +34,13 @@ class LogStationPage extends CometActor with CometListener with Loggable {
       */
      override def lowPriority = {
          case v: Vector[String] =>
+             logger.info(s"got some strings: $v")
              msgs = v
+             reRender()
+
+         case l: LogMessage =>
+             logger.info(s"got a LogMessage: $l")
+             msgs = msgs :+ s"${l.logFile}: ${l.logMessage}"
              reRender()
          case something =>
              logger.info(s"in LogStationPage: got something, not sure what it is: $something")

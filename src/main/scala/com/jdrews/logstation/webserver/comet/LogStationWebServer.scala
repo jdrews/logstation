@@ -1,5 +1,7 @@
 package com.jdrews.logstation.webserver.comet
 
+import akka.actor.{PoisonPill, ActorRef}
+import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor._
 import net.liftweb.common.Loggable
@@ -14,6 +16,15 @@ import net.liftweb.http._
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
     private var msgs = Vector("Just starting up... ")
     logger.info("at the front of LogStationWebServer...")
+
+    // A bridge between the Lift and Akka actor libraries
+    private lazy val bridge: ActorRef = BridgeController.getBridgeActor
+    bridge ! this
+
+    // Make sure to stop our BridgeActor when we clean up Comet
+//    override protected def localShutdown() {
+//        bridge ! PoisonPill
+//    }
 
     /**
      * When we update the listeners, what message do we send?

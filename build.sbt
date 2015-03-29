@@ -5,13 +5,15 @@ version := "0.1-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
+lazy val commonSettings = Seq(
+    version := "0.1-SNAPSHOT",
+    organization := "com.jdrews.logstation",
+    scalaVersion := "2.10.4"
+)
+
 seq(webSettings :_*)
 
 resolvers ++= Seq(
-    "Sonatype snapshots"             at
-      "http://oss.sonatype.org/content/repositories/snapshots",
-    "Sonatype releases"              at
-      "http://oss.sonatype.org/content/repositories/releases",
     "Java.net Maven2 Repository"     at "http://download.java.net/maven/2/"
 )
 
@@ -34,6 +36,10 @@ libraryDependencies ++= {
 
 libraryDependencies += "net.liftmodules" % "textile_2.6_2.10" % "1.3"
 
+libraryDependencies += "net.liftmodules" % "lift-jquery-module_2-6_2.10" % "2.7"
+
 libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "8.1.14.v20131031"
 
 libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "8.1.14.v20131031"
+
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.26"
