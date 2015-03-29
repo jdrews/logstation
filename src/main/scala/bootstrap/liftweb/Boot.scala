@@ -1,8 +1,8 @@
 package bootstrap.liftweb
 
 import net.liftmodules.JQueryModule
-import net.liftweb.http.{Html5Properties, Req, LiftRules}
-import net.liftweb.sitemap.{Menu, SiteMap}
+import net.liftweb.http.{Html5Properties, LiftRules, Req}
+import net.liftweb.sitemap.{SiteMap, Menu}
 
 /**
   * A class that's instantiated early and run.  It allows the application
@@ -16,6 +16,11 @@ class Boot {
          // Use HTML5 for rendering
          LiftRules.htmlProperties.default.set((r: Req) =>
              new Html5Properties(r.userAgent))
+
+         // Build SiteMap
+         def sitemap(): SiteMap = SiteMap(
+             Menu.i("Home") / "index"
+         )
 
          JQueryModule.InitParam.JQuery=JQueryModule.JQuery1111
          JQueryModule.init()
