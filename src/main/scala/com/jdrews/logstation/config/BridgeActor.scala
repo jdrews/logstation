@@ -1,6 +1,7 @@
 package com.jdrews.logstation.config
 
 import akka.actor.{ActorLogging, Actor}
+import com.jdrews.logstation.utils.FixedList
 import net.liftweb.actor.LiftActor
 import net.liftweb.http.CometActor
 
@@ -9,7 +10,9 @@ import net.liftweb.http.CometActor
  */
 class BridgeActor extends Actor with ActorLogging {
     private var target: Option[LiftActor] = None
-    private var msgs: Vector[Any] = Vector.empty[Any]
+    // only store n entries
+    private val bufferLength = 1000
+    private var msgs = new FixedList[Any](bufferLength)
     def receive = {
         case lift: LiftActor =>
             log.info(s"received LiftActor: $lift")
@@ -21,12 +24,12 @@ class BridgeActor extends Actor with ActorLogging {
                     target.foreach(_ ! m)
                 }
                 log.info("done. emptying msgs buffer")
-                msgs = Vector.empty[Any]
+                msgs = new FixedList[Any](10)
             }
         case msg =>
             if (target.isEmpty) {
                 log.info(s"buffering this message since target is empty... $msg")
-                msgs :+= msg
+                msgs.append(msg)
             } else {
                 log.info(s"passing the following to $target: $msg")
                 target.foreach(_ ! msg)
