@@ -23,24 +23,24 @@ class LogTailerActor extends Actor with ActorLogging {
 //        lineNumbers
 //    }
 
-    def readLastLines(r: BufferedReader, skipBytes: Long): Unit = {
+    def readLastLines(r: BufferedReader, skipBytes: Long, logFile: String): Unit = {
         if (skipBytes > 0) {
             r.skip(skipBytes)
             // read off any garbage line
             r.readLine()
             // back to normal tailing
         }
-        read(r)
+        read(r, logFile)
     }
 
-    def read(r: BufferedReader): Unit = {
+    def read(r: BufferedReader, logFile: String): Unit = {
         if (!Thread.currentThread().isInterrupted) {
             val l = r.readLine
             if (l != null) {
                 log.info(s"read line: $l")
-                bridge ! new LogMessage(l, "E:\\git\\logstation\\test\\logfile2.log")
+                bridge ! new LogMessage(l, logFile)
             }
-            read(r)
+            read(r, logFile)
         } else {
             r.close()
             log.info("read() Shutdown!")
@@ -62,7 +62,7 @@ class LogTailerActor extends Actor with ActorLogging {
             val r = new BufferedReader(new InputStreamReader(Tail.follow(file)))
             val readerThread = new Thread(new Runnable {
                 def run() {
-                    readLastLines(r, skipBytes)
+                    readLastLines(r, skipBytes, logFile)
                 }
             })
 

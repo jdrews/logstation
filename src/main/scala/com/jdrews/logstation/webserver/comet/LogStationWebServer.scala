@@ -11,8 +11,6 @@ import net.liftweb.http._
  * Created by jdrews on 2/21/2015.
  */
 
-// TODO: Need to get this bundled into an internal webserver (jetty,tomcat,etc). Want it to run in a single jar
-
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
     private var msgs = Vector("Just starting up... ")
     logger.info("at the front of LogStationWebServer...")
