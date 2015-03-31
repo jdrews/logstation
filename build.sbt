@@ -43,3 +43,5 @@ libraryDependencies += "org.eclipse.jetty" % "jetty-webapp" % "8.1.14.v20131031"
 libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "8.1.14.v20131031"
 
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.26"
+
+libraryDependencies += "com.typesafe" % "config" % "1.2.1"

@@ -30,7 +30,8 @@ class LogTailerActor extends Actor with ActorLogging {
             r.readLine()
             // back to normal tailing
         }
-        read(r, logFile)
+        //read(r, logFile)
+        loopRead(r, logFile)
     }
 
     def read(r: BufferedReader, logFile: String): Unit = {
@@ -46,13 +47,24 @@ class LogTailerActor extends Actor with ActorLogging {
             log.info("read() Shutdown!")
             self ! "doneRead"
         }
-
     }
+
+  def loopRead(r: BufferedReader, logFile: String): Unit = {
+    while (!Thread.currentThread().isInterrupted) {
+      val l = r.readLine
+      if (l != null) {
+        log.info(s"read line: $l")
+        bridge ! new LogMessage(l, logFile)
+      }
+    }
+    r.close()
+    log.info("loopRead() shutdown!")
+    self ! "doneRead"
+  }
 
     def receive = {
         case LogThisFile(logFile) =>
             log.info(s"About to begin logging $logFile")
-            bridge ! new LogMessage("from-me-to-you", "myfile2")
             // calculate bytes to skip to get to last N bytes of file
             val file: File = new File(logFile)
             val readLastNBytes = 100

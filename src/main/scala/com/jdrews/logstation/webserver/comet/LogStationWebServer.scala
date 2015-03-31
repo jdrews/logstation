@@ -12,7 +12,7 @@ import net.liftweb.http._
  */
 
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
-    private var msgs = Vector("Just starting up... ")
+    private var msgs = Vector("--------------------------------")
     logger.info("at the front of LogStationWebServer...")
 
     // A bridge between the Lift and Akka actor libraries
