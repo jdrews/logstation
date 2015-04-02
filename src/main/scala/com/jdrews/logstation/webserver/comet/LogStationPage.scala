@@ -49,5 +49,5 @@ class LogStationPage extends CometActor with CometListener with Loggable {
       * Put the messages in the li elements and clear
       * any elements that have the clearable class.
       */
-     def render = "li *" #> msgs & ClearClearable
+     def render = "li *" #> msgs
  }

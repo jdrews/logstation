@@ -17,12 +17,14 @@ class Boot {
          LiftRules.htmlProperties.default.set((r: Req) =>
              new Html5Properties(r.userAgent))
 
+         LiftRules.useXhtmlMimeType = false
+
          // Build SiteMap
          def sitemap(): SiteMap = SiteMap(
              Menu.i("Home") / "index"
          )
 
-         JQueryModule.InitParam.JQuery=JQueryModule.JQuery1111
+         JQueryModule.InitParam.JQuery=JQueryModule.JQuery111Z
          JQueryModule.init()
      }
  }
