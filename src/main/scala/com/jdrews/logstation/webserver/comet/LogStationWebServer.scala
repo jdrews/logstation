@@ -6,13 +6,15 @@ import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor._
 import net.liftweb.common.Loggable
 import net.liftweb.http._
+import scala.collection.mutable
+import scala.collection.mutable.HashMap
 
 /**
  * Created by jdrews on 2/21/2015.
  */
 
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
-    private var msgs = Vector("--------------------------------")
+    private val msgBucket = new HashMap[String, Vector[String]].withDefaultValue(Vector.empty[String])
     logger.info("at the front of LogStationWebServer...")
 
     // A bridge between the Lift and Akka actor libraries
@@ -30,7 +32,10 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      * so it can be shared with lots of threads without any
      * danger or locking.
      */
-    def createUpdate = msgs
+    def createUpdate: Unit = {
+        logger.info(s"createUpdate: msgBucket= $msgBucket")
+        msgBucket
+    }
 
     /**
      * process messages that are sent to the Actor.  In
@@ -39,11 +44,9 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      * messages, and then update all the listeners.
      */
     override def lowPriority = {
-        case s: String => msgs :+= s; updateListeners()
-
         case lm: LogMessage =>
             logger.info(s"got log message $lm")
-            msgs :+= s"${lm.logFile}, ${lm.logMessage}"
+            msgBucket(lm.logFile) = msgBucket(lm.logFile) :+ lm.logMessage
             updateListeners()
         case something =>
             logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")

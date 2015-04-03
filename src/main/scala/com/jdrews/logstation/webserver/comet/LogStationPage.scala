@@ -5,8 +5,14 @@ import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor.LAPinger
 import net.liftweb.common.{Full, Loggable}
+import net.liftweb.http.js.JsCmds
+import net.liftweb.http.js.jquery.JqJsCmds
 import net.liftweb.http.{CometActor, CometListener}
 import net.liftweb.util.ClearClearable
+
+import scala.collection.mutable._
+import scala.collection.mutable.HashMap
+import scala.xml.NodeSeq
 
 /**
   * The screen real estate on the browser will be represented
@@ -14,10 +20,8 @@ import net.liftweb.util.ClearClearable
   * the changes are automatically reflected in the browser.
   */
 class LogStationPage extends CometActor with CometListener with Loggable {
-    private var msgs: Vector[String] = Vector("") // private state​
+    private var msgBucket = new HashMap[String, Vector[String]].withDefaultValue(Vector.empty[String])
     override def defaultPrefix = Full("comet")
-
-
 
     /**
       * When the component is instantiated, register as
@@ -33,14 +37,9 @@ class LogStationPage extends CometActor with CometListener with Loggable {
       * cause changes to be sent to the browser.
       */
      override def lowPriority = {
-         case v: Vector[String] =>
+         case v: Map[String, Vector[String]] =>
              logger.info(s"got some strings: $v")
-             msgs = v
-             reRender()
-
-         case l: LogMessage =>
-             logger.info(s"got a LogMessage: $l")
-             msgs = msgs :+ s"${l.logFile}: ${l.logMessage}"
+             msgBucket = v
              reRender()
          case something =>
              logger.info(s"in LogStationPage: got something, not sure what it is: $something")
@@ -49,5 +48,10 @@ class LogStationPage extends CometActor with CometListener with Loggable {
       * Put the messages in the li elements and clear
       * any elements that have the clearable class.
       */
-     def render = "li *" #> msgs
+    def render = {
+
+        ".logbody *" #> msgBucket.map { bucket => ".logbody *" #> s"""<div id=\"${bucket._1}\"""" andThen s".${bucket._1} *" #> bucket._2 }
+    }
+
+
  }

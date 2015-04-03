@@ -19,6 +19,8 @@ import java.io.{File, InputStream}
 import java.lang.InterruptedException
 import java.nio.channels.ClosedByInterruptException
 
+import scala.annotation.tailrec
+
 object Tail {
 
     /**
@@ -121,7 +123,8 @@ class FollowingInputStream(val file: File, val waitNewInput: () => Unit) extends
     } finally { false }
     protected def closed_? = !underlying.getChannel.isOpen
 
-    protected def handle(read: => Int): Int = read match {
+    @tailrec
+    final protected def handle(read: => Int): Int = read match {
         case -1 if rotated_? || closed_? => -1
         case -1 =>
             waitNewInput()
