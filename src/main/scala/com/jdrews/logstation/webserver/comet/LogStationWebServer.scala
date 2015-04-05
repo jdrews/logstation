@@ -32,7 +32,7 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      * so it can be shared with lots of threads without any
      * danger or locking.
      */
-    def createUpdate: Unit = {
+    def createUpdate = {
         logger.info(s"createUpdate: msgBucket= $msgBucket")
         msgBucket
     }
@@ -46,8 +46,9 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
     override def lowPriority = {
         case lm: LogMessage =>
             logger.info(s"got log message $lm")
-            msgBucket(lm.logFile) = msgBucket(lm.logFile) :+ lm.logMessage
-            updateListeners()
+//            msgBucket(lm.logFile) = msgBucket(lm.logFile) :+ lm.logMessage
+//            updateListeners()
+            sendListenersMessage(lm)
         case something =>
             logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")
 

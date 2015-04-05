@@ -5,7 +5,9 @@ import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor.LAPinger
 import net.liftweb.common.{Full, Loggable}
-import net.liftweb.http.js.JsCmds
+import net.liftweb.http.js.JE.{JsFunc, Call, ValById}
+import net.liftweb.http.js.{Jx, JsCmds}
+import net.liftweb.http.js.jquery.JqJE.{JqAppend, JqId}
 import net.liftweb.http.js.jquery.JqJsCmds
 import net.liftweb.http.{CometActor, CometListener}
 import net.liftweb.util.ClearClearable
@@ -37,6 +39,11 @@ class LogStationPage extends CometActor with CometListener with Loggable {
       * cause changes to be sent to the browser.
       */
      override def lowPriority = {
+         case lm: LogMessage =>
+             logger.info(s"got LogMessage: $lm")
+             //TODO: This isn't working... need to fix it....
+             val appendJs = JqId("logbody") ~> JqAppend(Jx(<div id={lm.logFile}>{lm.logMessage}</div>))
+             partialUpdate(appendJs.cmd)
          case v: Map[String, Vector[String]] =>
              logger.info(s"got some strings: $v")
              msgBucket = v
@@ -52,6 +59,7 @@ class LogStationPage extends CometActor with CometListener with Loggable {
 
         ".logbody *" #> msgBucket.map { bucket => ".logbody *" #> s"""<div id=\"${bucket._1}\"""" andThen s".${bucket._1} *" #> bucket._2 }
     }
+
 
 
  }
