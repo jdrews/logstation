@@ -1,3 +1,9 @@
+import com.github.retronym.SbtOneJar._
+
+oneJarSettings
+
+mainClass in oneJar := Some("com.jdrews.logstation.LogStation")
+
 // Set the project name to the string 'My Project'
 name := "logstation"
 
@@ -45,3 +51,7 @@ libraryDependencies += "org.eclipse.jetty" % "jetty-plus" % "8.1.14.v20131031"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.26"
 
 libraryDependencies += "com.typesafe" % "config" % "1.2.1"
+
+libraryDependencies += "com.google.guava" % "guava" % "16.0.1"
+
+

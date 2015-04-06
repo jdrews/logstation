@@ -14,7 +14,8 @@ class EmbeddedWebapp(val port: Int = 8080, val contextPath: String = "/") {
 
     val context = new WebAppContext()
     context.setContextPath(contextPath)
-    context.setWar("src/main/webapp")
+    //TODO: fix this to work with one-jar
+    context.setWar("src/main/resources/webapp")
     server.setHandler(context)
 
     def start() = server.start

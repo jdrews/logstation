@@ -3,6 +3,8 @@ package com.jdrews.logstation.tailer
 import java.io._
 
 import akka.actor.{Actor, ActorLogging}
+import com.google.common.html.HtmlEscapers
+import com.google.common.xml.XmlEscapers
 import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.service.ServiceShutdown
 import com.jdrews.logstation.webserver.LogMessage
@@ -39,7 +41,7 @@ class LogTailerActor extends Actor with ActorLogging {
             val l = r.readLine
             if (l != null) {
                 log.info(s"read line: $l")
-                bridge ! new LogMessage(l, logFile)
+                bridge ! new LogMessage(XmlEscapers.xmlAttributeEscaper().escape(l), XmlEscapers.xmlAttributeEscaper().escape(logFile))
             }
             read(r, logFile)
         } else {
