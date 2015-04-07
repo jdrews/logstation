@@ -1,6 +1,13 @@
 package com.jdrews.logstation.webserver
 
+import akka.event.Logging
+import com.jdrews.logstation.LogStation._
+import com.jdrews.logstation.config.GlobalActorSystem
+
 class EmbeddedWebapp(val port: Int = 8080, val contextPath: String = "/") {
+
+    val system = GlobalActorSystem.getActorSystem
+    val logger = Logging.getLogger(system, getClass)
 
     import org.eclipse.jetty.server.Server
     import org.eclipse.jetty.server.nio.SelectChannelConnector
@@ -14,8 +21,9 @@ class EmbeddedWebapp(val port: Int = 8080, val contextPath: String = "/") {
 
     val context = new WebAppContext()
     context.setContextPath(contextPath)
-    //TODO: fix this to work with one-jar
-    context.setWar("src/main/resources/webapp")
+    val warUrlString = this.getClass.getClassLoader.getResource("webapp").toExternalForm()
+    logger.info(s"warUrlString: $warUrlString")
+    context.setWar(warUrlString)
     server.setHandler(context)
 
     def start() = server.start
