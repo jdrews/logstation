@@ -7,10 +7,12 @@ import com.jdrews.logstation.config.{BridgeController, GlobalActorSystem}
 import com.jdrews.logstation.service.{LogStationServiceActor, ServiceShutdown}
 import com.jdrews.logstation.tailer.LogThisFile
 import com.jdrews.logstation.webserver.{LogMessage, EmbeddedWebapp}
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ConfigRenderOptions, Config, ConfigFactory}
 import collection.JavaConversions._
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import java.io.{BufferedWriter, FileWriter, File}
+
 
 /**
  * Created by jdrews on 2/21/2015.
@@ -25,6 +27,21 @@ object LogStation extends App {
 
     val system = GlobalActorSystem.getActorSystem
     val logger = Logging.getLogger(system, getClass)
+    if (!new java.io.File("application.conf").exists) {
+        logger.info("creating default application.conf...")
+        val configFile = """logstation {
+    # Windows
+    logs=["C:\\git\\logstation\\test\\logfile.log","C:\\git\\logstation\\test\\logfile2.log"]
+    # Unix
+    # logs=["/home/jdrews/git/logstation/logfile.log","/home/jdrews/git/logstation/logfile2.log"]
+}
+"""
+        val file = new File("application.conf")
+        val bw = new BufferedWriter(new FileWriter(file))
+        bw.write(configFile)
+        bw.close()
+        Thread.sleep(1000)
+    }
     val conf = ConfigFactory.load
     val logs = conf.getStringList("logstation.logs").toList
 
