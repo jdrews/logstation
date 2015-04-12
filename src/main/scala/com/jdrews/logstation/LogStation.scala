@@ -3,7 +3,7 @@ package com.jdrews.logstation
 import akka.actor.Props
 import akka.event.Logging
 import akka.pattern._
-import com.jdrews.logstation.config.{BridgeController, GlobalActorSystem}
+import com.jdrews.logstation.config.{DefaultConfigHolder, BridgeController, GlobalActorSystem}
 import com.jdrews.logstation.service.{LogStationServiceActor, ServiceShutdown}
 import com.jdrews.logstation.tailer.LogThisFile
 import com.jdrews.logstation.webserver.{LogMessage, EmbeddedWebapp}
@@ -19,30 +19,16 @@ import java.io.{BufferedWriter, FileWriter, File}
  */
 
 //TODO: website should scroll, but allow user to pause scrolling
-//TODO: config files to hold properties for locations of log files
 //TODO: config for coloring logs
 //TODO: color logs in web page
 object LogStation extends App {
-    sys.addShutdownHook(shutdown)
-
+    if (!new java.io.File("logstation.conf").exists) {
+        makeConfAndShutdown
+    }
     val system = GlobalActorSystem.getActorSystem
     val logger = Logging.getLogger(system, getClass)
-    if (!new java.io.File("application.conf").exists) {
-        logger.info("creating default application.conf...")
-        val configFile = """logstation {
-    # Windows
-    logs=["C:\\git\\logstation\\test\\logfile.log","C:\\git\\logstation\\test\\logfile2.log"]
-    # Unix
-    # logs=["/home/jdrews/git/logstation/logfile.log","/home/jdrews/git/logstation/logfile2.log"]
-}
-"""
-        val file = new File("application.conf")
-        val bw = new BufferedWriter(new FileWriter(file))
-        bw.write(configFile)
-        bw.close()
-        Thread.sleep(1000)
-    }
-    val conf = ConfigFactory.load
+    sys.addShutdownHook(shutdown)
+    val conf = ConfigFactory.parseFile(new File("logstation.conf"))
     val logs = conf.getStringList("logstation.logs").toList
 
     // Start up the embedded webapp
@@ -72,5 +58,15 @@ object LogStation extends App {
         system.shutdown()
         system.awaitTermination()
         logger.info("Done shutting down.")
+    }
+
+    private def makeConfAndShutdown: Unit = {
+        println("Welcome to logstation! Creating default logstation.conf...")
+        val file = new File("logstation.conf")
+        val bw = new BufferedWriter(new FileWriter(file))
+        bw.write(DefaultConfigHolder.defaultConfig)
+        bw.close()
+        println("Please setup your logstation.conf located here: " + file.getAbsolutePath())
+        System.exit(0)
     }
 }

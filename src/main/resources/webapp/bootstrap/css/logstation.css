@@ -1,0 +1,16 @@
+body {
+    padding-top: 30px;
+    background: #1C1C1C;
+    color: #E0E0E0;
+    font-color: #FFF;
+}
+.float-left {
+	float: left;
+}
+.float-right {
+	float: right;
+}
+footer {
+    background: #222;
+    border-color: #101010;
+}
