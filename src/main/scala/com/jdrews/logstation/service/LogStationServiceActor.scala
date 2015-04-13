@@ -2,16 +2,21 @@ package com.jdrews.logstation.service
 
 import akka.actor._
 import akka.pattern._
+import com.typesafe.config.{ConfigRenderOptions, Config, ConfigFactory}
 import com.jdrews.logstation.tailer.{LogTailerActor, LogThisFile}
+import com.jdrews.logstation.utils.LogStationColorizer
+
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.matching.Regex
 
 /**
  * Created by jdrews on 2/21/2015.
  */
 class LogStationServiceActor extends Actor with ActorLogging{
     private var logTailers = Set.empty[ActorRef]
+    private var logStationColorizers = Set.empty[ActorRef]
 
     def receive = {
         case logThisFile: LogThisFile =>
@@ -22,11 +27,23 @@ class LogStationServiceActor extends Actor with ActorLogging{
             logTailerActor ! logThisFile
             context watch logTailerActor
             logTailers += logTailerActor
+
+            val logStationColorizer = context.actorOf(Props[LogStationColorizer], name = s"LogStationColorizer-${logThisFile.logFile.replaceAll("[^A-Za-z0-9]", ":")}")
+            context watch logStationColorizer
+            logStationColorizers +=logStationColorizer
+        case syntax: Map[String, Regex] =>
+            logStationColorizers.foreach(colorizer => colorizer ! syntax)
         case ServiceShutdown =>
-            // for each logTailers, send shutdown call and wait for it to shut down.
+            // for each logTailers and logStationColorizers, send shutdown call and wait for it to shut down.
             log.info("got ServiceShutdown")
-            // TODO: This doesn't end cleanly. Probably because read() on LogTailerActor is blocking...
             logTailers.foreach(actor =>
+                try {
+                    Await.result(gracefulStop(actor, 20 seconds, ServiceShutdown), 20 seconds)
+                } catch {
+                    case e: AskTimeoutException ⇒ log.error("The actor didn't stop in time!" + e.toString)
+                }
+            )
+            logStationColorizers.foreach(actor =>
                 try {
                     Await.result(gracefulStop(actor, 20 seconds, ServiceShutdown), 20 seconds)
                 } catch {

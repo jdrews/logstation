@@ -11,6 +11,7 @@ object DefaultConfigHolder {
           |    logs=["C:\\git\\logstation\\test\\logfile.log","C:\\git\\logstation\\test\\logfile2.log"]
           |    # Unix example of setting up logs
           |    # logs=["/home/jdrews/git/logstation/logfile.log","/home/jdrews/git/logstation/logfile2.log"]
+          |    syntax-scheme=
           |}
         """.stripMargin
 }

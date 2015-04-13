@@ -11,6 +11,7 @@ import net.liftweb.http.CometActor
 class BridgeActor extends Actor with ActorLogging {
     private var target: Option[LiftActor] = None
     // only store n entries
+    // TODO: make bufferLength an option-- for offline buffering before a web client connects
     private val bufferLength = 1000
     private var msgs = new FixedList[Any](bufferLength)
     def receive = {
@@ -24,7 +25,8 @@ class BridgeActor extends Actor with ActorLogging {
                     target.foreach(_ ! m)
                 }
                 log.info("done. emptying msgs buffer")
-                msgs = new FixedList[Any](10)
+                // TODO: always maintain this bufferlist-- and if a new client connects-- send it this buffer list.
+                msgs = new FixedList[Any](bufferLength)
             }
         case msg =>
             if (target.isEmpty) {

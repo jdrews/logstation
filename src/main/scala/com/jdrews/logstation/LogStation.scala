@@ -13,6 +13,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import java.io.{BufferedWriter, FileWriter, File}
 
+import scala.util.matching.Regex
+
 
 /**
  * Created by jdrews on 2/21/2015.
@@ -22,6 +24,7 @@ import java.io.{BufferedWriter, FileWriter, File}
 //TODO: fix the user lockout follow (or disable altogether) -- add button to scroll to bottom (maybe make it hover or something cool like that?)
 //TODO: config for coloring logs
 //TODO: color logs in web page
+//TODO: how does it work with multiple clients?
 object LogStation extends App {
     if (!new java.io.File("logstation.conf").exists) {
         makeConfAndShutdown
@@ -30,6 +33,11 @@ object LogStation extends App {
     val logger = Logging.getLogger(system, getClass)
     sys.addShutdownHook(shutdown)
     val conf = ConfigFactory.parseFile(new File("logstation.conf"))
+    val syntaxes = conf.getConfig("syntax").entrySet()
+    val syntaxList = scala.collection.mutable.Map[String, Regex]()
+    syntaxes.foreach(syntax => syntaxList += syntax.getKey() -> syntax.getValue().render().r)
+
+
     val logs = conf.getStringList("logstation.logs").toList
 
     // Start up the embedded webapp
@@ -38,7 +46,9 @@ object LogStation extends App {
 
     // Fire up the LogStationServiceActor and push it the files to begin tailing
     val logStationServiceActor = system.actorOf(Props[LogStationServiceActor], name = "LogStationServiceActor")
+    logStationServiceActor ! syntax
     logs.foreach(log => logStationServiceActor ! new LogThisFile(log))
+
 
     private def shutdown: Unit = {
         logger.info("Shutdown hook caught.")
