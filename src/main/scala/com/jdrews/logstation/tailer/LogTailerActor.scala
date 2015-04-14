@@ -2,7 +2,7 @@ package com.jdrews.logstation.tailer
 
 import java.io._
 
-import akka.actor.{Actor, ActorLogging}
+import akka.actor.{ActorRef, Actor, ActorLogging}
 import com.google.common.html.HtmlEscapers
 import com.google.common.xml.XmlEscapers
 import com.jdrews.logstation.config.BridgeController
@@ -16,14 +16,8 @@ import com.osinka.tailf.Tail
 class LogTailerActor extends Actor with ActorLogging {
     // TODO: probably doesn't need to be a set. There should be only one thread per actor
     private var readerThreads = Set.empty[Thread]
+    var colorizer: Option[ActorRef] = None
     private val bridge = BridgeController.getBridgeActor
-//    def countLines(file: File) = {
-//        val lnr = new LineNumberReader(new FileReader(file))
-//        lnr.skip(Long.MaxValue)
-//        val lineNumbers = lnr.getLineNumber() + 1
-//        lnr.close()
-//        lineNumbers
-//    }
 
     def readLastLines(r: BufferedReader, skipBytes: Long, logFile: String): Unit = {
         if (skipBytes > 0) {
@@ -41,7 +35,8 @@ class LogTailerActor extends Actor with ActorLogging {
             val l = r.readLine
             if (l != null) {
                 log.info(s"read line: $l")
-                bridge ! new LogMessage(XmlEscapers.xmlAttributeEscaper().escape(l), XmlEscapers.xmlAttributeEscaper().escape(logFile))
+                // pass to colorizer if it's up, otherwise skip it and go straight to bridge
+                colorizer.getOrElse(bridge) ! new LogMessage(XmlEscapers.xmlAttributeEscaper().escape(l), XmlEscapers.xmlAttributeEscaper().escape(logFile))
             }
             read(r, logFile)
         } else {
@@ -51,18 +46,19 @@ class LogTailerActor extends Actor with ActorLogging {
         }
     }
 
-  def loopRead(r: BufferedReader, logFile: String): Unit = {
-    while (!Thread.currentThread().isInterrupted) {
-      val l = r.readLine
-      if (l != null) {
-        log.info(s"read line: $l")
-        bridge ! new LogMessage(l, logFile)
-      }
+    def loopRead(r: BufferedReader, logFile: String): Unit = {
+        while (!Thread.currentThread().isInterrupted) {
+            val l = r.readLine
+            if (l != null) {
+                log.info(s"read line: $l")
+                // pass to colorizer if it's up, otherwise skip it and go straight to bridge
+                colorizer.getOrElse(bridge) ! new LogMessage(l, logFile)
+            }
+        }
+        r.close()
+        log.info("loopRead() shutdown!")
+        self ! "doneRead"
     }
-    r.close()
-    log.info("loopRead() shutdown!")
-    self ! "doneRead"
-  }
 
     def receive = {
         case LogThisFile(logFile) =>
@@ -84,10 +80,14 @@ class LogTailerActor extends Actor with ActorLogging {
             readerThread.start()
 
             readerThreads += readerThread
-
+        case cref: ActorRef =>
+            // load up the colorizer
+            log.warning(s"got the colorzier! $cref")
+            colorizer = Some(cref)
+            log.info(s"the colorizer.getOrElse -> ${colorizer.getOrElse("nada hombre!")}")
         case ServiceShutdown =>
             log.info("shutting down read thread")
-            readerThreads.foreach( thread => thread.interrupt())
+            readerThreads.foreach(thread => thread.interrupt())
         case "doneRead" =>
             log.info("Read thread shut down. Shutting down self...")
             context stop self

@@ -1,6 +1,6 @@
 body {
     padding-top: 30px;
-    background: #1C1C1C;
+    background: #0D0D0D;
     color: #E0E0E0;
     font-color: #FFF;
 }
@@ -13,4 +13,8 @@ body {
 footer {
     background: #222;
     border-color: #101010;
+}
+
+.logbody {
+    font-family: Courier New, monospace
 }

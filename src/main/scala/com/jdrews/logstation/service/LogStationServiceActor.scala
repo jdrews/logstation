@@ -17,21 +17,30 @@ import scala.util.matching.Regex
 class LogStationServiceActor extends Actor with ActorLogging{
     private var logTailers = Set.empty[ActorRef]
     private var logStationColorizers = Set.empty[ActorRef]
+    var syntaxList = scala.collection.mutable.Map[String, Regex]()
 
     def receive = {
         case logThisFile: LogThisFile =>
             log.info(s"About to begin logging ${logThisFile.logFile}")
 
-            val logTailerActor = context.actorOf(Props[LogTailerActor],
-                name = s"LogTailerActor-${logThisFile.logFile.replaceAll("[^A-Za-z0-9]", ":")}")
+            val logStationColorizer = context.actorOf(Props[LogStationColorizer], name = s"LogStationColorizer-${logThisFile.logFile.replaceAll("[^A-Za-z0-9]", ":")}")
+            logStationColorizer ! syntaxList
+            context watch logStationColorizer
+            logStationColorizers += logStationColorizer
+
+            val logTailerActor = context.actorOf(Props[LogTailerActor], name = s"LogTailerActor-${logThisFile.logFile.replaceAll("[^A-Za-z0-9]", ":")}")
             logTailerActor ! logThisFile
+            logTailerActor ! logStationColorizer
             context watch logTailerActor
             logTailers += logTailerActor
 
-            val logStationColorizer = context.actorOf(Props[LogStationColorizer], name = s"LogStationColorizer-${logThisFile.logFile.replaceAll("[^A-Za-z0-9]", ":")}")
-            context watch logStationColorizer
-            logStationColorizers +=logStationColorizer
-        case syntax: Map[String, Regex] =>
+
+
+
+        case syntax: scala.collection.mutable.Map[String, Regex] =>
+            log.info(s"passing the syntax file! $syntax")
+            // store list to send to any new colorizers
+            syntaxList = syntax
             logStationColorizers.foreach(colorizer => colorizer ! syntax)
         case ServiceShutdown =>
             // for each logTailers and logStationColorizers, send shutdown call and wait for it to shut down.

@@ -33,10 +33,18 @@ object LogStation extends App {
     val logger = Logging.getLogger(system, getClass)
     sys.addShutdownHook(shutdown)
     val conf = ConfigFactory.parseFile(new File("logstation.conf"))
-    val syntaxes = conf.getConfig("syntax").entrySet()
     val syntaxList = scala.collection.mutable.Map[String, Regex]()
-    syntaxes.foreach(syntax => syntaxList += syntax.getKey() -> syntax.getValue().render().r)
-
+    if (conf.hasPath("logstation.syntax")) {
+        //TODO: redo this so LogTailerActor skips LogStationColorizer if it doesn't exist
+        val syntaxes = conf.getConfig("logstation.syntax").entrySet()
+        //filter through each config of syntax and convert into map
+        syntaxes.foreach(syntax => {
+            val matchList: java.util.ArrayList[String] = syntax.getValue().unwrapped().asInstanceOf[java.util.ArrayList[String]]
+            logger.info(matchList.toString)
+            syntaxList(matchList.get(0)) = matchList.get(1).r
+        })
+    }
+    logger.info(s"syntaxList: $syntaxList")
 
     val logs = conf.getStringList("logstation.logs").toList
 
@@ -46,7 +54,7 @@ object LogStation extends App {
 
     // Fire up the LogStationServiceActor and push it the files to begin tailing
     val logStationServiceActor = system.actorOf(Props[LogStationServiceActor], name = "LogStationServiceActor")
-    logStationServiceActor ! syntax
+    logStationServiceActor ! syntaxList
     logs.foreach(log => logStationServiceActor ! new LogThisFile(log))
 
 
