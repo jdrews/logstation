@@ -47,10 +47,14 @@ function showLogFile(logFile) {
 function addNavBarEntry(logFile) {
     console.log("adding nav for " + logFile)
     var logId = stripSpecials(logFile)
-    //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
-    $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>')
-    showLogFile(logFile)
-    incrementNumberOfLogs()
+    // only add it if it doesn't already exist
+    if (logId.length) {
+        //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
+        $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>')
+        showLogFile(logFile)
+        incrementNumberOfLogs()
+    }
+
 }
 
 // creates an id based on the log file path, that doesn't contain any special characters
@@ -64,7 +68,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
     var logId = stripSpecials(logFile)
     // Get the div corresponding to this log file
     var logDiv = $("#"+logId)
-    if (logDiv.length > 0) {
+    if (logDiv.length) {
         // log file already exists, append message
         console.log("appending to " + logFile + " the message " + logMessage)
         logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
@@ -78,23 +82,34 @@ function addOrAppendLogMessage(logFile, logMessage) {
     adjustScroll()
 }
 
+// update the current maxLogLinesPerLog
+function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
+    console.log("updating maxLogLinesPerLog to " + maxLogLinesPerLog)
+    window.maxLogLinesPerLog = maxLogLinesPerLog
+}
+
 // increment number of lines in all logs, and handle truncating if they get too large
 function incrementTotalLogLines() {
+
     // increment number of total lines
     if (typeof window.totalLogLines == 'undefined') {
         window.totalLogLines = 1
     } else {
         window.totalLogLines = window.totalLogLines + 1
     }
-    var maxLogLinesPerLog = 100
-    console.log("log line calculations: " + window.totalLogLines + " / " + (window.numberOfLogs*maxLogLinesPerLog))
+
+    if (typeof window.maxLogLinesPerLog == 'undefined') {
+        window.maxLogLinesPerLog = 1000
+    }
+
+    console.log("log line calculations: " + window.totalLogLines + " / " + (window.numberOfLogs*window.maxLogLinesPerLog))
     // if we've gone over numberOfLogs * maxLogLinesPerLog, truncate!
-    if ( (window.totalLogLines / window.numberOfLogs) > maxLogLinesPerLog) {
+    if ( (window.totalLogLines / window.numberOfLogs) > window.maxLogLinesPerLog) {
         //reset total log lines
         window.totalLogLines = 0
         $( ".logFile" ).each(function( index ) {
           console.log( "working on truncating lines for " + this.id);
-          var truncatedLines = $( this ).children(".logMessage").slice(-maxLogLinesPerLog)
+          var truncatedLines = $( this ).children(".logMessage").slice(-window.maxLogLinesPerLog)
           window.totalLogLines = window.totalLogLines + truncatedLines.length
           $( this ).html(truncatedLines)
         });

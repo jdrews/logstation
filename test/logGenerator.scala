@@ -77,7 +77,7 @@ object LoremIpsum {
 val A = Array("ERROR", "WARN", "INFO", "DEBUG", "TRACE")
 Random.shuffle(A.toList).head
 
-val file = new File("logfile.log")
+val file = new File("logfile2.log")
 val bw = new BufferedWriter(new FileWriter(file))
 var i = 0
 do {

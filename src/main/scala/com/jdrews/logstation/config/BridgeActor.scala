@@ -13,16 +13,21 @@ class BridgeActor extends Actor with ActorLogging {
     // only store n entries
     // TODO: make bufferLength an option-- for offline buffering before a web client connects
     private val bufferLength = 1000
+    private var maxLogLinesPerLog = 1000
     private var msgs = new FixedList[Any](bufferLength)
     def receive = {
         case lift: LiftActor =>
             log.info(s"received LiftActor: $lift")
             target = Some(lift)
+
+            // send LogStationWebServer the maxLogLinesPerLog
+            lift ! maxLogLinesPerLog
+
             if (msgs.nonEmpty) {
                 log.info("clearing out buffered msgs")
                 msgs.foreach{ m =>
-                    log.info(s"passing the following to $target: $m")
-                    target.foreach(_ ! m)
+                    log.info(s"passing the following to $lift: $m")
+                    lift ! m
                 }
                 log.info("done. emptying msgs buffer")
                 // TODO: always maintain this bufferlist-- and if a new client connects-- send it this buffer list.
@@ -36,6 +41,8 @@ class BridgeActor extends Actor with ActorLogging {
                 log.info(s"passing the following to $target: $msg")
                 target.foreach(_ ! msg)
             }
-
+        case mll: Int =>
+            log.info(s"received maxLogLinesPerLog: $mll")
+            maxLogLinesPerLog = mll
     }
 }

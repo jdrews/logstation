@@ -26,6 +26,10 @@ object DefaultConfigHolder {
           |        # cyan
           |        trace=["#4FFFF6",".*TRACE.*"]
           |    }
+          |
+          |    # Number of lines to display per log file
+          |    #    any logs over this will truncate the oldest lines from the page
+          |    maxLogLinesPerLog=1000
           |}
         """.stripMargin
 }

@@ -2,6 +2,7 @@ package com.jdrews.logstation.webserver.comet
 
 import akka.actor.{PoisonPill, ActorRef}
 import com.jdrews.logstation.config.BridgeController
+import com.jdrews.logstation.utils.FixedList
 import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor._
 import net.liftweb.common.Loggable
@@ -14,7 +15,8 @@ import scala.collection.mutable.HashMap
  */
 
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
-    private val msgBucket = new HashMap[String, Vector[String]].withDefaultValue(Vector.empty[String])
+    private var maxLogLinesPerLog = 1000
+    private var msgs = new FixedList[LogMessage](maxLogLinesPerLog)
     logger.info("at the front of LogStationWebServer...")
 
     // A bridge between the Lift and Akka actor libraries
@@ -33,22 +35,26 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      * danger or locking.
      */
     def createUpdate = {
-        logger.info(s"createUpdate: msgBucket= $msgBucket")
-        msgBucket
+        logger.info("client connected")
+        sendListenersMessage(maxLogLinesPerLog)
+
+        // update with some stored messages
+        msgs
     }
 
     /**
-     * process messages that are sent to the Actor.  In
-     * this case, we're looking for Strings that are sent
-     * to the ChatServer.  We append them to our Vector of
-     * messages, and then update all the listeners.
+     * process messages that are sent to the Actor.
      */
     override def lowPriority = {
         case lm: LogMessage =>
             logger.info(s"got log message $lm")
-//            msgBucket(lm.logFile) = msgBucket(lm.logFile) :+ lm.logMessage
-//            updateListeners()
+            // update client
             sendListenersMessage(lm)
+            // store a copy in fixed list so we have something to send new clients
+            msgs.append(lm)
+        case mll: Int =>
+            logger.info(s"got maxLogLinesPerLog: $mll")
+            maxLogLinesPerLog = mll
         case something =>
             logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")
 

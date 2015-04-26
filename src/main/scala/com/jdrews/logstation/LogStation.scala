@@ -46,7 +46,23 @@ object LogStation extends App {
     }
     logger.info(s"syntaxList: $syntaxList")
 
+    val maxLogLinesPerLog = {
+        if (conf.hasPath("logstation.maxLogLinesPerLog")) {
+            val maxLogLinesPerLog = conf.getInt("logstation.maxLogLinesPerLog")
+            logger.info(s"maxLogLinesPerLog (user set): $maxLogLinesPerLog")
+            maxLogLinesPerLog
+        } else {
+            val maxLogLinesPerLog = 1000
+            logger.info(s"maxLogLinesPerLog (default): $maxLogLinesPerLog")
+            maxLogLinesPerLog
+        }
+    }
+
     val logs = conf.getStringList("logstation.logs").toList
+
+    // Start up the BridgeActor
+    private val bridge = BridgeController.getBridgeActor
+    bridge ! maxLogLinesPerLog
 
     // Start up the embedded webapp
     val webServer = new EmbeddedWebapp(8080, "/")
@@ -56,7 +72,6 @@ object LogStation extends App {
     val logStationServiceActor = system.actorOf(Props[LogStationServiceActor], name = "LogStationServiceActor")
     logStationServiceActor ! syntaxList
     logs.foreach(log => logStationServiceActor ! new LogThisFile(log))
-
 
     private def shutdown: Unit = {
         logger.info("Shutdown hook caught.")

@@ -2,6 +2,7 @@ package com.jdrews.logstation.webserver.comet
 
 import akka.actor.{ActorRef, PoisonPill}
 import com.jdrews.logstation.config.BridgeController
+import com.jdrews.logstation.utils.FixedList
 import com.jdrews.logstation.webserver.LogMessage
 import net.liftweb.actor.LAPinger
 import net.liftweb.common.{Full, Loggable}
@@ -9,7 +10,7 @@ import net.liftweb.http.js.JE.{JsRaw, JsFunc, Call, ValById}
 import net.liftweb.http.js.{JsCmd, Jx, JsCmds}
 import net.liftweb.http.js.jquery.JqJE.{JqAppend, JqId}
 import net.liftweb.http.js.jquery.JqJsCmds
-import net.liftweb.http.{CometActor, CometListener}
+import net.liftweb.http.{RenderOut, CometActor, CometListener}
 import net.liftweb.util.ClearClearable
 
 import scala.collection.mutable._
@@ -22,7 +23,6 @@ import scala.xml.NodeSeq
   * the changes are automatically reflected in the browser.
   */
 class LogStationPage extends CometActor with CometListener with Loggable {
-    private var msgBucket = new HashMap[String, Vector[String]].withDefaultValue(Vector.empty[String])
     override def defaultPrefix = Full("comet")
 
     /**
@@ -41,24 +41,20 @@ class LogStationPage extends CometActor with CometListener with Loggable {
      override def lowPriority = {
          case lm: LogMessage =>
              logger.info(s"got LogMessage: $lm")
-             //addOrAppendLogMessage(logFile, logMessage)
              partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
-         case v: Map[String, Vector[String]] =>
-             logger.info(s"got some strings: $v")
-             msgBucket = v
-             reRender()
+         case firstMsgs: FixedList[LogMessage] =>
+             firstMsgs.foreach{ lm =>
+                 logger.info(s"sending first message: $lm")
+                 partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
+             }
+         case maxLogLinesPerLog: Int =>
+             partialUpdate(JsFunc("updateMaxLogLinesPerLog", maxLogLinesPerLog).cmd)
          case something =>
              logger.info(s"in LogStationPage: got something, not sure what it is: $something")
+
      }
 
-    /**
-      * Put the messages in the li elements and clear
-      * any elements that have the clearable class.
-      */
-    def render = {
-        ".logbody *" #> msgBucket.map { bucket => ".logbody *" #> s"""<div id=\"${bucket._1}\"""" andThen s".${bucket._1} *" #> bucket._2 }
-    }
-
-
+    // this should never be called, but needed to comply with CometActor
+    def render = ClearClearable
 
  }

@@ -33,10 +33,6 @@ class LogStationServiceActor extends Actor with ActorLogging{
             logTailerActor ! logStationColorizer
             context watch logTailerActor
             logTailers += logTailerActor
-
-
-
-
         case syntax: scala.collection.mutable.Map[String, Regex] =>
             log.info(s"passing the syntax file! $syntax")
             // store list to send to any new colorizers

@@ -6,6 +6,7 @@ package com.jdrews.logstation.utils
 import scala.collection._
 import mutable.ListBuffer
 
+// store only $max number of elements in list
 class FixedList[A](max: Int) extends Traversable[A] {
 
     val list: ListBuffer[A] = ListBuffer()
