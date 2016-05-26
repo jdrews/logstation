@@ -2,28 +2,6 @@
 
 A tool that tails a configurable set of log files and serves them up on a web server with a configurable syntax colors via regex. 
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+- Focus on support for both Windows and Linux. 
+- Support as many browsers as possible
+- Ease deployment and usage by generating fat jars with minimal configuration required
