@@ -10,6 +10,8 @@ Focus on:
 
 ![image](https://cloud.githubusercontent.com/assets/172766/15561469/288ec01e-22c4-11e6-9609-f268035e7ee1.png)
 
+Developed with Scala, Akka, Lift, Comet (Ajax Push), and JavaScript. 
+
 ### Usage ###
 * Call `java -jar logstation.jar` 
 * It will create an logstation.conf in your current directory and exit
@@ -17,7 +19,7 @@ Focus on:
 * Call `java -jar logstation.jar` again to start it
 * Navigate to `127.0.0.1:8080` to start tailing
 
-Can also use `-c your-logstation.conf` arguement
+Can also use `-c your-logstation.conf` argument
 
 #### logstation.conf example ####
 
