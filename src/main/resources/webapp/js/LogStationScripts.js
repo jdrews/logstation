@@ -78,7 +78,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
         $("#logbody").append("<div id="+stripSpecials(logFile)+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
         addNavBarEntry(logFile)
     }
-    incrementTotalLogLines()
+    incrementTotalLogLines(logId)
     adjustScroll()
 }
 
@@ -89,30 +89,32 @@ function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
 }
 
 // increment number of lines in all logs, and handle truncating if they get too large
-function incrementTotalLogLines() {
+function incrementTotalLogLines(logId) {
 
     // increment number of total lines
     if (typeof window.totalLogLines == 'undefined') {
-        window.totalLogLines = 1
+        // first time incrementing any logs. make the Object
+        window.totalLogLines = {};
+        window.totalLogLines[logId] = 1
+    } else if (!(logId in window.totalLogLines)) {
+        // first time incrementing this log. initialize
+        window.totalLogLines[logId] = 1
     } else {
-        window.totalLogLines = window.totalLogLines + 1
+        // we've managed this log before. increment
+        window.totalLogLines[logId] = window.totalLogLines[logId] + 1
     }
 
     if (typeof window.maxLogLinesPerLog == 'undefined') {
-        window.maxLogLinesPerLog = 1000
+        window.maxLogLinesPerLog = 140
     }
 
-    console.log("log line calculations: " + window.totalLogLines + " / " + (window.numberOfLogs*window.maxLogLinesPerLog))
-    // if we've gone over numberOfLogs * maxLogLinesPerLog, truncate!
-    if ( (window.totalLogLines / window.numberOfLogs) > window.maxLogLinesPerLog) {
-        //reset total log lines
-        window.totalLogLines = 0
-        $( ".logFile" ).each(function( index ) {
-          console.log( "working on truncating lines for " + this.id);
-          var truncatedLines = $( this ).children(".logMessage").slice(-window.maxLogLinesPerLog)
-          window.totalLogLines = window.totalLogLines + truncatedLines.length
-          $( this ).html(truncatedLines)
-        });
+    console.log(logId + " => log line calculations: " + window.totalLogLines[logId] + " / " + (window.maxLogLinesPerLog))
+    // if we've gone over maxLogLinesPerLog, truncate!
+    if ( window.totalLogLines[logId] > window.maxLogLinesPerLog) {
+        console.log( "working on truncating lines for " + logId);
+        $( "#"+logId ).children(".logMessage").first().remove()
+        //window.totalLogLines = window.totalLogLines + truncatedLines.length
+        //$( this ).removeChild(truncatedLine)
     }
 }
 

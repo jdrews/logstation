@@ -29,7 +29,7 @@ object DefaultConfigHolder {
           |
           |    # Number of lines to display per log file
           |    #    any logs over this will truncate the oldest lines from the page
-          |    maxLogLinesPerLog=1000
+          |    maxLogLinesPerLog=500
           |}
         """.stripMargin
 }

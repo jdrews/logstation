@@ -22,8 +22,6 @@ import scala.util.matching.Regex
 
 //TODO: pass in maxLogLinesPerLog from configuration file
 //TODO: fix the user lockout follow (or disable altogether) -- add button to scroll to bottom (maybe make it hover or something cool like that?)
-//TODO: config for coloring logs
-//TODO: color logs in web page
 //TODO: how does it work with multiple clients?
 object LogStation extends App {
     if (!new java.io.File("logstation.conf").exists) {
@@ -52,7 +50,7 @@ object LogStation extends App {
             logger.info(s"maxLogLinesPerLog (user set): $maxLogLinesPerLog")
             maxLogLinesPerLog
         } else {
-            val maxLogLinesPerLog = 1000
+            val maxLogLinesPerLog = 110
             logger.info(s"maxLogLinesPerLog (default): $maxLogLinesPerLog")
             maxLogLinesPerLog
         }

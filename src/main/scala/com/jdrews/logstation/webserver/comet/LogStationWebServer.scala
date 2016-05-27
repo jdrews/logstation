@@ -15,7 +15,7 @@ import scala.collection.mutable.HashMap
  */
 
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
-    private var maxLogLinesPerLog = 1000
+    private var maxLogLinesPerLog = 130
     private var msgs = new FixedList[LogMessage](maxLogLinesPerLog)
     logger.info("at the front of LogStationWebServer...")
 

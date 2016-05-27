@@ -13,7 +13,7 @@ class BridgeActor extends Actor with ActorLogging {
     // only store n entries
     // TODO: make bufferLength an option-- for offline buffering before a web client connects
     private val bufferLength = 1000
-    private var maxLogLinesPerLog = 1000
+    private var maxLogLinesPerLog = 120
     private var msgs = new FixedList[Any](bufferLength)
     def receive = {
         case lift: LiftActor =>
