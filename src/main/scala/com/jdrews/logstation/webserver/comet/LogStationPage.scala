@@ -24,20 +24,10 @@ import scala.xml.NodeSeq
   */
 class LogStationPage extends CometActor with CometListener with Loggable {
     override def defaultPrefix = Full("comet")
+    private var maxLogLinesPerLog = 170
 
-    /**
-      * When the component is instantiated, register as
-      * a listener with the ChatServer
-      */
      def registerWith = LogStationWebServer
 
-     /**
-      * The CometActor is an Actor, so it processes messages.
-      * In this case, we're listening for Vector[String],
-      * and when we get one, update our private state
-      * and reRender() the component.  reRender() will
-      * cause changes to be sent to the browser.
-      */
      override def lowPriority = {
          case lm: LogMessage =>
              logger.info(s"got LogMessage: $lm")
@@ -47,14 +37,17 @@ class LogStationPage extends CometActor with CometListener with Loggable {
                  logger.info(s"sending first message: $lm")
                  partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
              }
-         case maxLogLinesPerLog: Int =>
-             partialUpdate(JsFunc("updateMaxLogLinesPerLog", maxLogLinesPerLog).cmd)
+         case mll: Int =>
+             partialUpdate(JsFunc("updateMaxLogLinesPerLog", mll).cmd)
+             maxLogLinesPerLog = mll
          case something =>
              logger.info(s"in LogStationPage: got something, not sure what it is: $something")
 
      }
 
-    // this should never be called, but needed to comply with CometActor
-    def render = ClearClearable
+    def render = {
+        partialUpdate(JsFunc("updateMaxLogLinesPerLog", maxLogLinesPerLog).cmd)
+        ClearClearable
+    }
 
  }

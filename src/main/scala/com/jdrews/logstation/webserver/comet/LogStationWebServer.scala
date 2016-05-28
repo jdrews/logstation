@@ -36,10 +36,12 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      */
     def createUpdate = {
         logger.info("client connected")
-        sendListenersMessage(maxLogLinesPerLog)
+        //sendListenersMessage(maxLogLinesPerLog)
 
+        // TODO: Eventually migrate this to send a set of properties to initialize the LogStationPage
         // update with some stored messages
-        msgs
+        //msgs
+        maxLogLinesPerLog
     }
 
     /**
@@ -54,7 +56,10 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
             msgs.append(lm)
         case mll: Int =>
             logger.info(s"got maxLogLinesPerLog: $mll")
+            // update our copy
             maxLogLinesPerLog = mll
+            // push to client
+            sendListenersMessage(maxLogLinesPerLog)
         case something =>
             logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")
 
