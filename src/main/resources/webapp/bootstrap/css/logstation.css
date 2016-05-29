@@ -36,3 +36,14 @@ a:visited {
 a:hover {
     color: #999;
 }
+
+.button-link {
+    padding: 2px 3px;
+    background: #333333;
+}
+
+.button-link:hover, .button-link:focus {
+    background: #444;
+    border: solid 1px #555555;
+    text-decoration: none;
+}
