@@ -31,7 +31,10 @@ function showLogFile(logFile) {
     var logId = stripSpecials(logFile)
     $('.logFile').not('#' + logId).hide();
     $("#"+logId).show()
-    makeNavBarEntryActive(logId)
+    // Only set this log to active if there are no other logs
+    if (window.totalLogLines.length > 0) {
+        makeNavBarEntryActive(logId)
+    }
 }
 
 // add a new navigation bar entry for logFile
