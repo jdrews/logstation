@@ -32,10 +32,12 @@ class LogStationPage extends CometActor with CometListener with Loggable {
          case lm: LogMessage =>
              logger.info(s"got LogMessage: $lm")
              partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
-         case firstMsgs: FixedList[LogMessage] =>
-             firstMsgs.foreach{ lm =>
-                 logger.info(s"sending first message: $lm")
-                 partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
+         case nlp: NewListenerPackage =>
+            logger.info(s"received a new listener package: $nlp")
+            partialUpdate(JsFunc("updateMaxLogLinesPerLog", nlp.maxLogLinesPerLog).cmd)
+             nlp.msgs.foreach{ lm =>
+                 logger.info(s"passing the following up: $lm")
+                partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
              }
          case mll: Int =>
              partialUpdate(JsFunc("updateMaxLogLinesPerLog", mll).cmd)
@@ -47,7 +49,7 @@ class LogStationPage extends CometActor with CometListener with Loggable {
 
     def render = {
         partialUpdate(JsFunc("updateMaxLogLinesPerLog", maxLogLinesPerLog).cmd)
-        partialUpdate(JsFunc("resetAll").cmd)
+//        partialUpdate(JsFunc("resetAll").cmd)
         ClearClearable
     }
 

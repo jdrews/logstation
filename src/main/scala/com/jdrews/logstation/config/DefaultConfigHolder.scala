@@ -30,6 +30,11 @@ object DefaultConfigHolder {
           |    # Number of lines to display per log file
           |    #    any logs over this will truncate the oldest lines from the page
           |    maxLogLinesPerLog=500
+          |
+          |    # Number of messages to buffer on server
+          |    #    These will be sent to any new connections so they have some history of logs
+          |    #    bufferLength is multiplied by number of logs, and buffered on best effort for each log
+          |    bufferLength=10
           |}
         """.stripMargin
 }

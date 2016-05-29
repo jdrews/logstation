@@ -19,10 +19,11 @@ import scala.util.matching.Regex
 /**
  * Created by jdrews on 2/21/2015.
  */
+// TODO: move these to their own files to make it a bit cleaner
+case class BufferLength (myVal: Int)
+case class MaxLogLinesPerLog (myVal: Int)
 
-//TODO: pass in maxLogLinesPerLog from configuration file
 //TODO: fix the user lockout follow (or disable altogether) -- add button to scroll to bottom (maybe make it hover or something cool like that?)
-//TODO: how does it work with multiple clients?
 object LogStation extends App {
     if (!new java.io.File("logstation.conf").exists) {
         makeConfAndShutdown
@@ -58,9 +59,23 @@ object LogStation extends App {
 
     val logs = conf.getStringList("logstation.logs").toList
 
+    val bufferLength = {
+        if (conf.hasPath("logstation.bufferLength")) {
+            val bufferLength = conf.getInt("logstation.bufferLength")
+            logger.info(s"bufferLength (user set): $bufferLength")
+            bufferLength*logs.length
+        } else {
+            val bufferLength = 11
+            logger.info(s"bufferLength (default): $bufferLength")
+            bufferLength*logs.length
+        }
+    }
+    logger.info(s"bufferLength based on logs: $bufferLength")
+
     // Start up the BridgeActor
     private val bridge = BridgeController.getBridgeActor
-    bridge ! maxLogLinesPerLog
+    bridge ! MaxLogLinesPerLog(maxLogLinesPerLog)
+    bridge ! BufferLength(bufferLength)
 
     // Start up the embedded webapp
     val webServer = new EmbeddedWebapp(8080, "/")

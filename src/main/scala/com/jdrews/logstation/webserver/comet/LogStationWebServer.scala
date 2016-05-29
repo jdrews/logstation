@@ -1,6 +1,7 @@
 package com.jdrews.logstation.webserver.comet
 
 import akka.actor.{PoisonPill, ActorRef}
+import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
 import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.utils.FixedList
 import com.jdrews.logstation.webserver.LogMessage
@@ -8,15 +9,19 @@ import net.liftweb.actor._
 import net.liftweb.common.Loggable
 import net.liftweb.http._
 import scala.collection.mutable
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{ListBuffer, HashMap}
 
 /**
  * Created by jdrews on 2/21/2015.
  */
 
+case class NewListenerPackage ( maxLogLinesPerLog: Int, msgs: List[LogMessage])
+
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
     private var maxLogLinesPerLog = 130
-    private var msgs = new FixedList[LogMessage](maxLogLinesPerLog)
+    private var bufferLength = 17
+    private var msgs = new FixedList[LogMessage](bufferLength)
+
     logger.info("at the front of LogStationWebServer...")
 
     // A bridge between the Lift and Akka actor libraries
@@ -36,12 +41,7 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      */
     def createUpdate = {
         logger.info("client connected")
-        //sendListenersMessage(maxLogLinesPerLog)
-
-        // TODO: Eventually migrate this to send a set of properties to initialize the LogStationPage
-        // update with some stored messages
-        //msgs
-        maxLogLinesPerLog
+        NewListenerPackage(maxLogLinesPerLog, msgs.toList)
     }
 
     /**
@@ -54,12 +54,15 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
             sendListenersMessage(lm)
             // store a copy in fixed list so we have something to send new clients
             msgs.append(lm)
-        case mll: Int =>
-            logger.info(s"got maxLogLinesPerLog: $mll")
-            // update our copy
-            maxLogLinesPerLog = mll
-            // push to client
+        case mll: MaxLogLinesPerLog =>
+            logger.info(s"received maxLogLinesPerLog: $mll")
+            maxLogLinesPerLog = mll.myVal
             sendListenersMessage(maxLogLinesPerLog)
+        case bl: BufferLength =>
+            logger.info(s"received bufferLength: $bl")
+            bufferLength = bl.myVal
+            // rebuild msgs list with new buffer length
+            msgs = new FixedList[LogMessage](bufferLength)
         case something =>
             logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")
 
