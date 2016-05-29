@@ -45,10 +45,11 @@ function showLogFile(logFile) {
 
 // add a new navigation bar entry for logFile
 function addNavBarEntry(logFile) {
-    console.log("adding nav for " + logFile)
+    console.log("checking nav for " + logFile)
     var logId = stripSpecials(logFile)
     // only add it if it doesn't already exist
-    if (logId.length) {
+    if ($("#link-"+logId).length == 0) {
+        console.log("adding nav for " + logFile)
         //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
         $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>')
         showLogFile(logFile)
@@ -75,7 +76,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
     } else {
         // log file doesn't exist yet. add it with this message
         console.log("adding new logFile " + logFile)
-        $("#logbody").append("<div id="+stripSpecials(logFile)+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
+        $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
         addNavBarEntry(logFile)
     }
     incrementTotalLogLines(logId)
