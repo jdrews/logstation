@@ -58,24 +58,29 @@ function stripSpecials( myid ) {
 
 //if the logFile doesn't exist, add it
 function addOrAppendLogMessage(logFile, logMessage) {
-    //create logId
-    var logId = stripSpecials(logFile)
-    incrementTotalLogLines(logId)
-    // Get the div corresponding to this log file
-    var logDiv = $("#"+logId)
-    console.log("working on " + logId + "; logDiv.length = " + logDiv.length)
-    if (logDiv.length) {
-        // log file already exists, append message
-        console.log("appending to " + logId + " the message " + logMessage)
-        logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
+    if (window.pauseState == "play") {
+        //create logId
+        var logId = stripSpecials(logFile)
+        incrementTotalLogLines(logId)
+        // Get the div corresponding to this log file
+        var logDiv = $("#"+logId)
+        console.log("working on " + logId + "; logDiv.length = " + logDiv.length)
+        if (logDiv.length) {
+            // log file already exists, append message
+            console.log("appending to " + logId + " the message " + logMessage)
+            logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
+
+        } else {
+            // log file doesn't exist yet. add it with this message
+            console.log("adding new logFile " + logId)
+            $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
+            addNavBarEntry(logFile)
+        }
+        truncateLinesIfNeeded(logId)
+        adjustScroll()
     } else {
-        // log file doesn't exist yet. add it with this message
-        console.log("adding new logFile " + logId)
-        $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
-        addNavBarEntry(logFile)
+        console.log("state paused, not appending message")
     }
-    truncateLinesIfNeeded(logId)
-    adjustScroll()
 }
 
 // update the current maxLogLinesPerLog
@@ -92,6 +97,10 @@ function resetAll() {
 
 function enableScrollFollow() {
     window.scrollFollow = "follow"
+}
+
+function enablePlay() {
+    window.pauseState = "play"
 }
 
 // increment number of lines in all logs, and handle truncating if they get too large
@@ -167,6 +176,18 @@ function setScrollFollow(desiredScrollFollow) {
     console.log("scrollFollow: " + window.scrollFollow)
 }
 
+function updatePause () {
+    if ($("#pause-button").text().match(/play/)) { // if we're playing right now
+        console.log("pausing")
+        $("#pause-button").html("paused")
+        window.pauseState = "pause"
+    } else if ($("#pause-button").text().match(/pause/)) { // if we're paused right now
+        console.log("playing")
+        $("#pause-button").html("playing")
+        window.pauseState = "play"
+    }
+}
+
 // If we hit the bottom-- turn on follow scroll. unless the user locked it out
 $(window).scroll(function() {
     if($(window).scrollTop() + $(window).height() == getDocHeight()) {
@@ -181,5 +202,11 @@ $(window).scroll(function() {
 // if user clicks follow-indicator, start the scroll follow user lockout
 $( "#follow-indicator" ).click(function() {
     setScrollFollow("userlockout")
+});
+
+// TODO: Make pause stop the backend from sending any new log messages
+// if user clicks pause-button, update scrolling
+$( "#pause-button" ).click(function() {
+    updatePause()
 });
 
