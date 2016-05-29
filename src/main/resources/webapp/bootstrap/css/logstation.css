@@ -18,3 +18,21 @@ footer {
 .logbody {
     font-family: Courier New, monospace
 }
+
+.navbar {
+    min-height: 30px
+}
+
+.navbar-default {
+    border-color: #222
+}
+
+a:link {
+    color: #777;
+}
+a:visited {
+    color: #777;
+}
+a:hover {
+    color: #999;
+}
