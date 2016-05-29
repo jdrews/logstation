@@ -49,7 +49,7 @@ class LogStationPage extends CometActor with CometListener with Loggable {
 
     def render = {
         partialUpdate(JsFunc("updateMaxLogLinesPerLog", maxLogLinesPerLog).cmd)
-//        partialUpdate(JsFunc("resetAll").cmd)
+        partialUpdate(JsFunc("enableScrollFollow").cmd)
         ClearClearable
     }
 

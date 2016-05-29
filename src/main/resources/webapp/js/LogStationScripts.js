@@ -90,6 +90,10 @@ function resetAll() {
     window.scrollFollow = "follow"
 }
 
+function enableScrollFollow() {
+    window.scrollFollow = "follow"
+}
+
 // increment number of lines in all logs, and handle truncating if they get too large
 function incrementTotalLogLines(logId) {
 
