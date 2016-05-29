@@ -1,9 +1,12 @@
 package com.jdrews.logstation.webserver
 
 import akka.event.Logging
-import com.jdrews.logstation.LogStation._
 import com.jdrews.logstation.config.GlobalActorSystem
 
+
+/**
+ * Serves up the web page
+ */
 class EmbeddedWebapp(val port: Int = 8884, val contextPath: String = "/") {
 
     val system = GlobalActorSystem.getActorSystem

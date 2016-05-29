@@ -2,10 +2,8 @@ package com.jdrews.logstation.service
 
 import akka.actor._
 import akka.pattern._
-import com.typesafe.config.{ConfigRenderOptions, Config, ConfigFactory}
 import com.jdrews.logstation.tailer.{LogTailerActor, LogThisFile}
 import com.jdrews.logstation.utils.LogStationColorizer
-
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -13,6 +11,8 @@ import scala.util.matching.Regex
 
 /**
  * Created by jdrews on 2/21/2015.
+ *
+ * Hold the tailers and colorizer actors
  */
 class LogStationServiceActor extends Actor with ActorLogging{
     private var logTailers = Set.empty[ActorRef]

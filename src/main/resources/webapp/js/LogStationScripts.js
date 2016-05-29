@@ -56,7 +56,8 @@ function stripSpecials( myid ) {
     return myid.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'-')
 }
 
-//if the logFile doesn't exist, add it
+// if the logFile doesn't exist, add it
+// used to push in logs from LogStationPage via a JsFunc
 function addOrAppendLogMessage(logFile, logMessage) {
     if (window.pauseState == "play") {
         //create logId
@@ -84,28 +85,31 @@ function addOrAppendLogMessage(logFile, logMessage) {
 }
 
 // update the current maxLogLinesPerLog
+// called from LogStationPage
 function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
     console.log("updating maxLogLinesPerLog to " + maxLogLinesPerLog);
     window.maxLogLinesPerLog = maxLogLinesPerLog
 }
 
+// called from LogStationPage for resetting all local vars
 function resetAll() {
     console.log("resetting all");
     window.totalLogLines  = {};
     window.scrollFollow = "follow"
 }
 
+// called from LogStationPage to default to following (tailing) to logs
 function enableScrollFollow() {
     window.scrollFollow = "follow"
 }
 
+// called from LogStationPage to default to playing log messages
 function enablePlay() {
     window.pauseState = "play"
 }
 
 // increment number of lines in all logs, and handle truncating if they get too large
 function incrementTotalLogLines(logId) {
-
     // increment number of total lines
     if (typeof window.totalLogLines == 'undefined') {
         // first time incrementing any logs. make the Object
@@ -128,6 +132,7 @@ function logExists(logId) {
     return (logId in window.totalLogLines)
 }
 
+// chop some log messages off the head if we've hit maxLogLinesPerLog
 function truncateLinesIfNeeded(logId) {
     console.log(logId + " => log line calculations: " + window.totalLogLines[logId] + " / " + (window.maxLogLinesPerLog));
     // if we've gone over maxLogLinesPerLog, truncate!
@@ -176,6 +181,7 @@ function setScrollFollow(desiredScrollFollow) {
     console.log("scrollFollow: " + window.scrollFollow)
 }
 
+// Logic to control the state of the pause button
 function updatePause () {
     if ($("#pause-button").text().match(/play/)) { // if we're playing right now
         console.log("pausing");

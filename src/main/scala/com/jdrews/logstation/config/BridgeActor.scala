@@ -1,13 +1,16 @@
 package com.jdrews.logstation.config
 
-import akka.actor.{ActorLogging, Actor}
-import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
+import akka.actor.{Actor, ActorLogging}
 import com.jdrews.logstation.utils.FixedList
+import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
 import net.liftweb.actor.LiftActor
-import net.liftweb.http.CometActor
 
 /**
  * Created by jdrews on 3/22/2015.
+ *
+ * Used to bridge between Lift and Scala
+ * Buffers up messages before a LiftActor connects and then hands over messages
+ * Stores configuration for the LiftActor
  */
 class BridgeActor extends Actor with ActorLogging {
     private var target: Option[LiftActor] = None
@@ -47,6 +50,5 @@ class BridgeActor extends Actor with ActorLogging {
                 log.info(s"passing the following to $target: $msg")
                 target.foreach(_ ! msg)
             }
-
     }
 }

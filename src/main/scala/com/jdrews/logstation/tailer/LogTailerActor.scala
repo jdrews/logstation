@@ -2,8 +2,7 @@ package com.jdrews.logstation.tailer
 
 import java.io._
 
-import akka.actor.{ActorRef, Actor, ActorLogging}
-import com.google.common.html.HtmlEscapers
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import com.google.common.xml.XmlEscapers
 import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.service.ServiceShutdown
@@ -12,6 +11,9 @@ import com.osinka.tailf.Tail
 
 /**
  * Created by jdrews on 2/21/2015.
+ *
+ * Actor to perform the tailing functionality
+ * Should be one of these actors per log
  */
 class LogTailerActor extends Actor with ActorLogging {
     // TODO: probably doesn't need to be a set. There should be only one thread per actor

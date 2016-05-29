@@ -2,9 +2,9 @@ package com.jdrews.logstation.config
 
 import akka.actor.ActorRef
 import akka.agent.Agent
-import scala.concurrent.ExecutionContext.Implicits.global
 import net.liftweb.common.Loggable
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Controls the life-cycle of Actor Bridges

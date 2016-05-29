@@ -1,23 +1,27 @@
 package com.jdrews.logstation
 
+import java.io.{BufferedWriter, File, FileWriter}
+
 import akka.actor.Props
 import akka.event.Logging
 import akka.pattern._
-import com.jdrews.logstation.config.{DefaultConfigHolder, BridgeController, GlobalActorSystem}
+import com.jdrews.logstation.config.{BridgeController, DefaultConfigHolder, GlobalActorSystem}
 import com.jdrews.logstation.service.{LogStationServiceActor, ServiceShutdown}
 import com.jdrews.logstation.tailer.LogThisFile
-import com.jdrews.logstation.webserver.{LogMessage, EmbeddedWebapp}
-import com.typesafe.config.{ConfigRenderOptions, Config, ConfigFactory}
-import collection.JavaConversions._
+import com.jdrews.logstation.webserver.EmbeddedWebapp
+import com.typesafe.config.ConfigFactory
+
+import scala.collection.JavaConversions._
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import java.io.{BufferedWriter, FileWriter, File}
-
 import scala.util.matching.Regex
 
 
 /**
  * Created by jdrews on 2/21/2015.
+ *
+ * The starting point of the LogStation
+ * holds toe GlobalActorSystem and kicks off new actors
  */
 // TODO: move these to their own files to make it a bit cleaner
 case class BufferLength (myVal: Int)

@@ -2,6 +2,8 @@ package com.jdrews.logstation.config
 
 /**
  * Created by jdrews on 4/12/2015.
+ *
+ * Store a copy of the default config to be pushed to user environment on first boot
  */
 object DefaultConfigHolder {
     val defaultConfig =

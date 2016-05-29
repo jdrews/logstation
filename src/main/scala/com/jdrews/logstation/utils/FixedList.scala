@@ -2,6 +2,8 @@ package com.jdrews.logstation.utils
 
 /**
  * Created by jdrews on 3/29/2015.
+ *
+ * Maintain a list of fixed size. i.e. drop old entries if list reaches $max
  */
 import scala.collection._
 import mutable.ListBuffer

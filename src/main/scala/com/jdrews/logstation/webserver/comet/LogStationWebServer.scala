@@ -1,18 +1,18 @@
 package com.jdrews.logstation.webserver.comet
 
-import akka.actor.{PoisonPill, ActorRef}
-import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
+import akka.actor.ActorRef
 import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.utils.FixedList
 import com.jdrews.logstation.webserver.LogMessage
+import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
 import net.liftweb.actor._
 import net.liftweb.common.Loggable
 import net.liftweb.http._
-import scala.collection.mutable
-import scala.collection.mutable.{ListBuffer, HashMap}
 
 /**
  * Created by jdrews on 2/21/2015.
+ *
+ * Communicates with LogStationPages to push updates to the web page
  */
 
 case class NewListenerPackage ( maxLogLinesPerLog: Int, msgs: List[LogMessage])
