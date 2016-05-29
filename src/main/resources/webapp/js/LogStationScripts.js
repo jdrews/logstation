@@ -25,15 +25,6 @@ function makeNavBarEntryActive(logId) {
     $('#link-'+logId).addClass("active")
 }
 
-// increment number of logs monitoring
-function incrementNumberOfLogs() {
-    if (typeof window.numberOfLogs == 'undefined') {
-        window.numberOfLogs = 1
-    } else {
-        window.numberOfLogs = window.numberOfLogs + 1
-    }
-}
-
 // hide all other log files, and make logFile the active one
 function showLogFile(logFile) {
     console.log("making this file shown: " + logFile)
@@ -53,7 +44,6 @@ function addNavBarEntry(logFile) {
         //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
         $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>')
         showLogFile(logFile)
-        incrementNumberOfLogs()
     }
 
 }
@@ -67,19 +57,21 @@ function stripSpecials( myid ) {
 function addOrAppendLogMessage(logFile, logMessage) {
     //create logId
     var logId = stripSpecials(logFile)
+    incrementTotalLogLines(logId)
     // Get the div corresponding to this log file
     var logDiv = $("#"+logId)
+    console.log("working on " + logId + "; logDiv.length = " + logDiv.length)
     if (logDiv.length) {
         // log file already exists, append message
-        console.log("appending to " + logFile + " the message " + logMessage)
+        console.log("appending to " + logId + " the message " + logMessage)
         logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
     } else {
         // log file doesn't exist yet. add it with this message
-        console.log("adding new logFile " + logFile)
+        console.log("adding new logFile " + logId)
         $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
         addNavBarEntry(logFile)
     }
-    incrementTotalLogLines(logId)
+    truncateLinesIfNeeded(logId)
     adjustScroll()
 }
 
@@ -87,6 +79,12 @@ function addOrAppendLogMessage(logFile, logMessage) {
 function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
     console.log("updating maxLogLinesPerLog to " + maxLogLinesPerLog)
     window.maxLogLinesPerLog = maxLogLinesPerLog
+}
+
+function resetAll() {
+    console.log("resetting all")
+    window.totalLogLines  = {}
+    window.scrollFollow = "follow"
 }
 
 // increment number of lines in all logs, and handle truncating if they get too large
@@ -108,7 +106,13 @@ function incrementTotalLogLines(logId) {
     if (typeof window.maxLogLinesPerLog == 'undefined') {
         window.maxLogLinesPerLog = 140
     }
+}
 
+function logExists(logId) {
+    return (logId in window.totalLogLines)
+}
+
+function truncateLinesIfNeeded(logId) {
     console.log(logId + " => log line calculations: " + window.totalLogLines[logId] + " / " + (window.maxLogLinesPerLog))
     // if we've gone over maxLogLinesPerLog, truncate!
     if ( window.totalLogLines[logId] > window.maxLogLinesPerLog) {
