@@ -72,13 +72,25 @@ object LogStation extends App {
     }
     logger.info(s"bufferLength based on logs: $bufferLength")
 
+    val webServerPort = {
+        if (conf.hasPath("logstation.webServerPort")) {
+            val webServerPort = conf.getInt("logstation.webServerPort")
+            logger.info(s"webServerPort (user set): $webServerPort")
+            webServerPort
+        } else {
+            val webServerPort = 8884
+            logger.info(s"webServerPort (default): $webServerPort")
+            webServerPort
+        }
+    }
+
     // Start up the BridgeActor
     private val bridge = BridgeController.getBridgeActor
     bridge ! MaxLogLinesPerLog(maxLogLinesPerLog)
     bridge ! BufferLength(bufferLength)
 
     // Start up the embedded webapp
-    val webServer = new EmbeddedWebapp(8080, "/")
+    val webServer = new EmbeddedWebapp(webServerPort, "/")
     webServer.start()
 
     // Fire up the LogStationServiceActor and push it the files to begin tailing

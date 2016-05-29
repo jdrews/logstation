@@ -4,7 +4,7 @@ import akka.event.Logging
 import com.jdrews.logstation.LogStation._
 import com.jdrews.logstation.config.GlobalActorSystem
 
-class EmbeddedWebapp(val port: Int = 8080, val contextPath: String = "/") {
+class EmbeddedWebapp(val port: Int = 8884, val contextPath: String = "/") {
 
     val system = GlobalActorSystem.getActorSystem
     val logger = Logging.getLogger(system, getClass)

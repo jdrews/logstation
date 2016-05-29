@@ -27,6 +27,10 @@ object DefaultConfigHolder {
           |        trace=["#4FFFF6",".*TRACE.*"]
           |    }
           |
+          |    # Web Server Port
+          |    #    The port used to connect to the LogStation
+          |    webServerPort=8884
+          |
           |    # Number of lines to display per log file
           |    #    any logs over this will truncate the oldest lines from the page
           |    maxLogLinesPerLog=500
