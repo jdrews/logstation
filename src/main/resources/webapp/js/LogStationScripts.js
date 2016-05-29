@@ -16,21 +16,21 @@ function getDocHeight() {
 
 // make a navigation bar entry the active one based on logId
 function makeNavBarEntryActive(logId) {
-    console.log("making this file the active one: " + logId)
+    console.log("making this file the active one: " + logId);
     // takes in stripSpecials(logFile)
 
     //make all others not active
-    $('.link-logfile').not('#link-'+logId).removeClass("active")
+    $('.link-logfile').not('#link-'+logId).removeClass("active");
     //make the active one active
     $('#link-'+logId).addClass("active")
 }
 
 // hide all other log files, and make logFile the active one
 function showLogFile(logFile) {
-    console.log("making this file shown: " + logFile)
-    var logId = stripSpecials(logFile)
+    console.log("making this file shown: " + logFile);
+    var logId = stripSpecials(logFile);
     $('.logFile').not('#' + logId).hide();
-    $("#"+logId).show()
+    $("#"+logId).show();
     // Only set this log to active if there are no other logs
     if (window.totalLogLines.length > 0) {
         makeNavBarEntryActive(logId)
@@ -39,13 +39,13 @@ function showLogFile(logFile) {
 
 // add a new navigation bar entry for logFile
 function addNavBarEntry(logFile) {
-    console.log("checking nav for " + logFile)
-    var logId = stripSpecials(logFile)
+    console.log("checking nav for " + logFile);
+    var logId = stripSpecials(logFile);
     // only add it if it doesn't already exist
     if ($("#link-"+logId).length == 0) {
-        console.log("adding nav for " + logFile)
+        console.log("adding nav for " + logFile);
         //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
-        $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>')
+        $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>');
         showLogFile(logFile)
     }
 
@@ -60,23 +60,23 @@ function stripSpecials( myid ) {
 function addOrAppendLogMessage(logFile, logMessage) {
     if (window.pauseState == "play") {
         //create logId
-        var logId = stripSpecials(logFile)
-        incrementTotalLogLines(logId)
+        var logId = stripSpecials(logFile);
+        incrementTotalLogLines(logId);
         // Get the div corresponding to this log file
-        var logDiv = $("#"+logId)
-        console.log("working on " + logId + "; logDiv.length = " + logDiv.length)
+        var logDiv = $("#"+logId);
+        console.log("working on " + logId + "; logDiv.length = " + logDiv.length);
         if (logDiv.length) {
             // log file already exists, append message
-            console.log("appending to " + logId + " the message " + logMessage)
+            console.log("appending to " + logId + " the message " + logMessage);
             logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
 
         } else {
             // log file doesn't exist yet. add it with this message
-            console.log("adding new logFile " + logId)
-            $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>")
+            console.log("adding new logFile " + logId);
+            $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>");
             addNavBarEntry(logFile)
         }
-        truncateLinesIfNeeded(logId)
+        truncateLinesIfNeeded(logId);
         adjustScroll()
     } else {
         console.log("state paused, not appending message")
@@ -85,13 +85,13 @@ function addOrAppendLogMessage(logFile, logMessage) {
 
 // update the current maxLogLinesPerLog
 function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
-    console.log("updating maxLogLinesPerLog to " + maxLogLinesPerLog)
+    console.log("updating maxLogLinesPerLog to " + maxLogLinesPerLog);
     window.maxLogLinesPerLog = maxLogLinesPerLog
 }
 
 function resetAll() {
-    console.log("resetting all")
-    window.totalLogLines  = {}
+    console.log("resetting all");
+    window.totalLogLines  = {};
     window.scrollFollow = "follow"
 }
 
@@ -129,11 +129,11 @@ function logExists(logId) {
 }
 
 function truncateLinesIfNeeded(logId) {
-    console.log(logId + " => log line calculations: " + window.totalLogLines[logId] + " / " + (window.maxLogLinesPerLog))
+    console.log(logId + " => log line calculations: " + window.totalLogLines[logId] + " / " + (window.maxLogLinesPerLog));
     // if we've gone over maxLogLinesPerLog, truncate!
     if ( window.totalLogLines[logId] > window.maxLogLinesPerLog) {
         console.log( "working on truncating lines for " + logId);
-        $( "#"+logId ).children(".logMessage").first().remove()
+        $( "#"+logId ).children(".logMessage").first().remove();
         //window.totalLogLines = window.totalLogLines + truncatedLines.length
         //$( this ).removeChild(truncatedLine)
     }
@@ -150,25 +150,25 @@ function adjustScroll() {
 function setScrollFollow(desiredScrollFollow) {
     if (typeof window.scrollFollow == 'undefined') {
         // turn it on by default
-        window.scrollFollow = "follow"
+        window.scrollFollow = "follow";
         $("#follow-indicator").html("follow on")
-    } else if (window.scrollFollow == "userlockout" & desiredScrollFollow == "userlockout") {
+    } else if (window.scrollFollow == "userlockout" && desiredScrollFollow == "userlockout") {
         // user wants to turn user lockout off
-        window.scrollFollow = "follow"
+        window.scrollFollow = "follow";
         $("#follow-indicator").html("follow on")
     } else if (desiredScrollFollow == "userlockout") {
         // user wants to turn user lockout on
-        window.scrollFollow = "userlockout"
+        window.scrollFollow = "userlockout";
         $("#follow-indicator").html("follow user disabled")
     } else if (window.scrollFollow != "userlockout") {
         // we're not in a user lockout state
         if (desiredScrollFollow == "follow") {
             // user scrolled to bottom, start following again
-            window.scrollFollow = desiredScrollFollow
+            window.scrollFollow = desiredScrollFollow;
             $("#follow-indicator").html("follow on")
         } else if (desiredScrollFollow == "nofollow") {
             // user scrolled up, stop following.
-            window.scrollFollow = desiredScrollFollow
+            window.scrollFollow = desiredScrollFollow;
             $("#follow-indicator").html("follow off")
         }
     }
@@ -178,12 +178,12 @@ function setScrollFollow(desiredScrollFollow) {
 
 function updatePause () {
     if ($("#pause-button").text().match(/play/)) { // if we're playing right now
-        console.log("pausing")
-        $("#pause-button").html("paused")
+        console.log("pausing");
+        $("#pause-button").html("paused");
         window.pauseState = "pause"
     } else if ($("#pause-button").text().match(/pause/)) { // if we're paused right now
-        console.log("playing")
-        $("#pause-button").html("playing")
+        console.log("playing");
+        $("#pause-button").html("playing");
         window.pauseState = "play"
     }
 }

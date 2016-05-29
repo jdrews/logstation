@@ -3,6 +3,6 @@
  */
 package com.jdrews.logstation.webserver
 
-case class LogMessage( val logMessage: String, val logFile: String)
+case class LogMessage(logMessage: String, logFile: String)
 
 
