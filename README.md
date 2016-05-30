@@ -1,6 +1,8 @@
 # LogStation #
 
-A tool that tails a configurable set of log files and serves them up on a web server with configurable syntax colors via regex. 
+Tails a set of log files and serves them up on a web server with syntax colors via regex. 
+
+Binaries avaiable in [releases](https://github.com/jdrews/logstation/releases). See [usage](https://github.com/jdrews/logstation#usage) below.
 
 Focus on:
 - Support for both Windows and Linux
@@ -9,7 +11,6 @@ Focus on:
 - Ease deployment and usage by generating fat jars with minimal configuration required
 
 ![image](https://cloud.githubusercontent.com/assets/172766/15636224/de3df408-25c5-11e6-9800-850a46d6de41.jpg)
-
 
 Developed with Scala, Akka, Lift, Comet (Ajax Push), and JavaScript. 
 
@@ -47,12 +48,20 @@ logstation {
         trace=["#4FFFF6",".*TRACE.*"]
     }
 
+    # Web Server Port
+    #    The port used to connect to the LogStation
+    webServerPort=8884
+
     # Number of lines to display per log file
     #    any logs over this will truncate the oldest lines from the page
-    maxLogLinesPerLog=1000
+    maxLogLinesPerLog=500
+
+    # Number of messages to buffer on server
+    #    These will be sent to any new connections so they have some history of logs
+    #    bufferLength is multiplied by number of logs, and buffered on best effort for each log
+    bufferLength=10
 }
 ```
-
 
 ### Building ###
 
