@@ -25,7 +25,7 @@ class EmbeddedWebapp(val port: Int = 8884, val contextPath: String = "/") {
     val context = new WebAppContext()
     context.setContextPath(contextPath)
     val warUrlString = this.getClass.getClassLoader.getResource("webapp").toExternalForm()
-    logger.info(s"warUrlString: $warUrlString")
+    logger.debug(s"warUrlString: $warUrlString")
     context.setWar(warUrlString)
     server.setHandler(context)
 

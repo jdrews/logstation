@@ -36,7 +36,7 @@ class LogTailerActor extends Actor with ActorLogging {
         if (!Thread.currentThread().isInterrupted) {
             val l = r.readLine
             if (l != null) {
-                log.info(s"read line: $l")
+//                log.info(s"read line: $l")
                 // pass to colorizer if it's up, otherwise skip it and go straight to bridge
                 colorizer.getOrElse(bridge) ! new LogMessage(XmlEscapers.xmlAttributeEscaper().escape(l), XmlEscapers.xmlAttributeEscaper().escape(logFile))
             }
@@ -52,7 +52,7 @@ class LogTailerActor extends Actor with ActorLogging {
         while (!Thread.currentThread().isInterrupted) {
             val l = r.readLine
             if (l != null) {
-                log.info(s"read line: $l")
+//                log.info(s"read line: $l")
                 // pass to colorizer if it's up, otherwise skip it and go straight to bridge
                 colorizer.getOrElse(bridge) ! new LogMessage(l, logFile)
             }
@@ -64,7 +64,7 @@ class LogTailerActor extends Actor with ActorLogging {
 
     def receive = {
         case LogThisFile(logFile) =>
-            log.info(s"About to begin logging $logFile")
+            log.debug(s"About to begin logging $logFile")
             // calculate bytes to skip to get to last N bytes of file
             val file: File = new File(logFile)
             val readLastNBytes = 100
@@ -84,9 +84,9 @@ class LogTailerActor extends Actor with ActorLogging {
             readerThreads += readerThread
         case cref: ActorRef =>
             // load up the colorizer
-            log.warning(s"got the colorzier! $cref")
+            log.debug(s"got the colorzier! $cref")
             colorizer = Some(cref)
-            log.info(s"the colorizer.getOrElse -> ${colorizer.getOrElse("nada hombre!")}")
+            log.debug(s"the colorizer.getOrElse -> ${colorizer.getOrElse("nada hombre!")}")
         case ServiceShutdown =>
             log.info("shutting down read thread")
             readerThreads.foreach(thread => thread.interrupt())

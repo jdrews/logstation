@@ -20,7 +20,7 @@ class LogStationColorizer extends Actor with ActorLogging {
     private val bridge = BridgeController.getBridgeActor
     def receive = {
         case syntax: scala.collection.mutable.Map[String, Regex] =>
-            log.info(s"Got config $syntax}")
+            log.debug(s"Got config $syntax}")
             // load up the syntaxes
             syntaxList = syntax
 
@@ -33,7 +33,7 @@ class LogStationColorizer extends Actor with ActorLogging {
                 syntaxList.foreach(syntax =>
                     // get the first syntax regex, and find the first one to match the log message
                     if (syntax._2.findFirstIn(lm.logMessage).isDefined) {
-                        log.info(s"got a match! ${syntax._1}")
+                        // log.debug(s"got a match! ${syntax._1}")
                         // wrap log message in new colors
                         msg = s"<span style='color:${syntax._1}'>${lm.logMessage}</span>"
                         loop.break

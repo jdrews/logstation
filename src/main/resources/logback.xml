@@ -12,4 +12,8 @@
     <logger name="org.eclipse.jetty" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
+
+    <logger name="net.liftweb.util.TimeHelpers" level="WARN">
+        <appender-ref ref="STDOUT" />
+    </logger>
 </configuration>

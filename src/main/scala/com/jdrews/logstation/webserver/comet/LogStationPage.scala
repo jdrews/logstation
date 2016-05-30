@@ -19,20 +19,20 @@ class LogStationPage extends CometActor with CometListener with Loggable {
 
      override def lowPriority = {
          case lm: LogMessage =>
-             logger.info(s"got LogMessage: $lm")
+             logger.debug(s"got LogMessage: $lm")
              partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
          case nlp: NewListenerPackage =>
-            logger.info(s"received a new listener package: $nlp")
+            logger.debug(s"received a new listener package: $nlp")
             partialUpdate(JsFunc("updateMaxLogLinesPerLog", nlp.maxLogLinesPerLog).cmd)
              nlp.msgs.foreach{ lm =>
-                 logger.info(s"passing the following up: $lm")
+                 logger.debug(s"passing the following up: $lm")
                 partialUpdate(JsFunc("addOrAppendLogMessage", lm.logFile, lm.logMessage).cmd)
              }
          case mll: Int =>
              partialUpdate(JsFunc("updateMaxLogLinesPerLog", mll).cmd)
              maxLogLinesPerLog = mll
          case something =>
-             logger.info(s"in LogStationPage: got something, not sure what it is: $something")
+             logger.warn(s"in LogStationPage: got something, not sure what it is: $something")
 
      }
 

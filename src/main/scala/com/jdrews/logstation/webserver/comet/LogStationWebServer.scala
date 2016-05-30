@@ -22,7 +22,7 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
     private var bufferLength = 17
     private var msgs = new FixedList[LogMessage](bufferLength)
 
-    logger.info("at the front of LogStationWebServer...")
+    logger.debug("at the front of LogStationWebServer...")
 
     // A bridge between the Lift and Akka actor libraries
     private lazy val bridge: ActorRef = BridgeController.getBridgeActor
@@ -49,22 +49,22 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      */
     override def lowPriority = {
         case lm: LogMessage =>
-            logger.info(s"got log message $lm")
+            logger.debug(s"got log message $lm")
             // update client
             sendListenersMessage(lm)
             // store a copy in fixed list so we have something to send new clients
             msgs.append(lm)
         case mll: MaxLogLinesPerLog =>
-            logger.info(s"received maxLogLinesPerLog: $mll")
+            logger.debug(s"received maxLogLinesPerLog: $mll")
             maxLogLinesPerLog = mll.myVal
             sendListenersMessage(maxLogLinesPerLog)
         case bl: BufferLength =>
-            logger.info(s"received bufferLength: $bl")
+            logger.debug(s"received bufferLength: $bl")
             bufferLength = bl.myVal
             // rebuild msgs list with new buffer length
             msgs = new FixedList[LogMessage](bufferLength)
         case something =>
-            logger.info(s"in LogStationWebServer: got something, not sure what it is: $something")
+            logger.warn(s"in LogStationWebServer: got something, not sure what it is: $something")
 
 //        case ServiceShutdown =>
 //            log.info("Received ServiceShutdown. Shutting down...")

@@ -43,11 +43,11 @@ object LogStation extends App {
         //filter through each config of syntax and convert into map
         syntaxes.foreach(syntax => {
             val matchList: java.util.ArrayList[String] = syntax.getValue().unwrapped().asInstanceOf[java.util.ArrayList[String]]
-            logger.info(matchList.toString)
+            logger.debug(matchList.toString)
             syntaxList(matchList.get(0)) = matchList.get(1).r
         })
     }
-    logger.info(s"syntaxList: $syntaxList")
+    logger.debug(s"syntaxList: $syntaxList")
 
     val maxLogLinesPerLog = {
         if (conf.hasPath("logstation.maxLogLinesPerLog")) {
@@ -130,6 +130,7 @@ object LogStation extends App {
         bw.write(DefaultConfigHolder.defaultConfig)
         bw.close()
         println("Please setup your logstation.conf located here: " + file.getAbsolutePath())
+        println("Then relaunch and logstation will be located at: http://127.0.0.1:" + webServerPort)
         System.exit(0)
     }
 }

@@ -20,34 +20,34 @@ class BridgeActor extends Actor with ActorLogging {
     private var msgs = new FixedList[Any](bufferLength)
     def receive = {
         case lift: LiftActor =>
-            log.info(s"received LiftActor: $lift")
+            log.debug(s"received LiftActor: $lift")
             target = Some(lift)
 
             // send LogStationWebServer the maxLogLinesPerLog
             lift ! MaxLogLinesPerLog(maxLogLinesPerLog)
 
             if (msgs.nonEmpty) {
-                log.info("sending out buffered msgs")
+                log.debug("sending out buffered msgs")
                 msgs.foreach{ m =>
-                    log.info(s"passing the following to $lift: $m")
+                    log.debug(s"passing the following to $lift: $m")
                     lift ! m
                 }
-                log.info("done")
+                log.debug("done")
             }
         case mll: MaxLogLinesPerLog =>
-            log.info(s"received maxLogLinesPerLog: $mll")
+            log.debug(s"received maxLogLinesPerLog: $mll")
             maxLogLinesPerLog = mll.myVal
         case bl: BufferLength =>
-            log.info(s"received bufferLength: $bl")
+            log.debug(s"received bufferLength: $bl")
             bufferLength = bl.myVal
             // rebuild msgs list with new buffer length
             msgs = new FixedList[Any](bufferLength)
         case msg =>
             if (target.isEmpty) {
-                log.info(s"buffering this message since target is empty... $msg")
+                log.debug(s"buffering this message since target is empty... $msg")
                 msgs.append(msg)
             } else {
-                log.info(s"passing the following to $target: $msg")
+                log.debug(s"passing the following to $target: $msg")
                 target.foreach(_ ! msg)
             }
     }
