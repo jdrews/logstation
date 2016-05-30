@@ -19,7 +19,7 @@ Developed with Scala, Akka, Lift, Comet (Ajax Push), and JavaScript.
 * It will create an logstation.conf in your current directory and exit
 * Update logstation.conf 
 * Call `java -jar logstation.jar` again to start it
-* Navigate to `127.0.0.1:8080` to start tailing
+* Navigate to `http://127.0.0.1:8884` to start tailing
 
 Can also use `-c your-logstation.conf` argument
 
