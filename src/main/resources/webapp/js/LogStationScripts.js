@@ -45,7 +45,9 @@ function addNavBarEntry(logFile) {
     if ($("#link-"+logId).length == 0) {
         console.log("adding nav for " + logFile);
         //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
-        $("ul.nav").append('<li class=link-logfile id=link-'+logId+'><a href="javascript:showLogFile(\''+logId+'\')">'+logFile+'</a></li>');
+        var truncatedFileNameArr = logFile.split(/[\\/]+/);
+        var truncatedFileName = truncatedFileNameArr[truncatedFileNameArr.length - 1];
+        $("ul.nav").append('<li class=link-logfile id=link-'+logId+' title='+logFile+'><a href="javascript:showLogFile(\''+logId+'\')">'+truncatedFileName+'</a></li>');
         showLogFile(logFile)
     }
 
