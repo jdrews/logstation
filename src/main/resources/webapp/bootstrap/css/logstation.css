@@ -16,7 +16,8 @@ footer {
 }
 
 .logbody {
-    font-family: Courier New, monospace
+    font-family: Courier New, monospace;
+    padding-bottom: 31px;
 }
 
 .navbar {
