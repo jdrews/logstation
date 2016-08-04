@@ -47,7 +47,7 @@ function addNavBarEntry(logFile) {
         //<li class="active"><a href="javascript:showLogFile('C--git-logstation-test-logfile-log')">Home</a></li>
         var truncatedFileNameArr = logFile.split(/[\\/]+/);
         var truncatedFileName = truncatedFileNameArr[truncatedFileNameArr.length - 1];
-        $("ul.nav").append('<li class=link-logfile id=link-'+logId+' title='+logFile+'><a href="javascript:showLogFile(\''+logId+'\')">'+truncatedFileName+'</a></li>');
+        $("ul.nav").append('<li class=link-logfile id=link-'+logId+' title=\''+logFile+'\'><a href="javascript:showLogFile(\''+logId+'\')">'+truncatedFileName+'</a></li>');
         showLogFile(logFile)
     }
 
@@ -55,7 +55,7 @@ function addNavBarEntry(logFile) {
 
 // creates an id based on the log file path, that doesn't contain any special characters
 function stripSpecials( myid ) {
-    return myid.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'-')
+    return myid.replace(/([~!@#$%^&*()_+=`{}\[\]\|\\:;'<>,.\/? ])+/g, '-').replace(/^(-)+|(-)+$/g,'')
 }
 
 // if the logFile doesn't exist, add it
