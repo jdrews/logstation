@@ -76,7 +76,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
         } else {
             // log file doesn't exist yet. add it with this message
             console.log("adding new logFile " + logId);
-            $("#logbody").append("<div id="+logId+" class=logFile title="+logFile+"><div class=logMessage>"+logMessage+"<br/></div></div>");
+            $("#logbody").append("<div id="+logId+" class=logFile title=\'"+logFile+"\'><div class=logMessage>"+logMessage+"<br/></div></div>");
             addNavBarEntry(logFile)
         }
         truncateLinesIfNeeded(logId);
