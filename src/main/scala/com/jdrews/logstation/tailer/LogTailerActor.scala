@@ -20,6 +20,7 @@ class LogTailerActor extends Actor with ActorLogging {
     private var readerThreads = Set.empty[Thread]
     var colorizer: Option[ActorRef] = None
     private val bridge = BridgeController.getBridgeActor
+    private val sleepIntervalForUpdates = 2000
 
     def readLastLines(r: BufferedReader, skipBytes: Long, logFile: String): Unit = {
         if (skipBytes > 0) {
@@ -55,6 +56,14 @@ class LogTailerActor extends Actor with ActorLogging {
 //                log.info(s"read line: $l")
                 // pass to colorizer if it's up, otherwise skip it and go straight to bridge
                 colorizer.getOrElse(bridge) ! new LogMessage(l, logFile)
+            } else {
+                try {
+                    // wait a bit for some more logs...
+                    Thread.sleep(sleepIntervalForUpdates)
+                } catch {
+                    // clean up if we're sleeping when it's time to quit
+                    case ie: InterruptedException => Thread.currentThread().interrupt()
+                }
             }
         }
         r.close()
