@@ -48,7 +48,7 @@ function addNavBarEntry(logFile) {
         var truncatedFileNameArr = logFile.split(/[\\/]+/);
         var truncatedFileName = truncatedFileNameArr[truncatedFileNameArr.length - 1];
         $("ul.nav").append('<li class=link-logfile id=link-'+logId+' title=\''+logFile+'\'><a href="javascript:showLogFile(\''+logId+'\')">'+truncatedFileName+'</a></li>');
-        showLogFile(logFile)
+        //showLogFile(logFile)
     }
 
 }
