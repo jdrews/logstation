@@ -31,10 +31,7 @@ function showLogFile(logFile) {
     var logId = stripSpecials(logFile);
     $('.logFile').not('#' + logId).hide();
     $("#"+logId).show();
-    // Only set this log to active if there are no other logs
-    if (window.totalLogLines.length > 0) {
-        makeNavBarEntryActive(logId)
-    }
+    makeNavBarEntryActive(logId)
 }
 
 // add a new navigation bar entry for logFile
@@ -48,7 +45,11 @@ function addNavBarEntry(logFile) {
         var truncatedFileNameArr = logFile.split(/[\\/]+/);
         var truncatedFileName = truncatedFileNameArr[truncatedFileNameArr.length - 1];
         $("ul.nav").append('<li class=link-logfile id=link-'+logId+' title=\''+logFile+'\'><a href="javascript:showLogFile(\''+logId+'\')">'+truncatedFileName+'</a></li>');
-        //showLogFile(logFile)
+        // check to see if this is the first nav entry
+        var numNavEntries = $('.link-logfile').length
+        if (numNavEntries == 1) {
+            showLogFile(logFile)
+        }
     }
 
 }
@@ -76,7 +77,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
         } else {
             // log file doesn't exist yet. add it with this message
             console.log("adding new logFile " + logId);
-            $("#logbody").append("<div id="+logId+" class=logFile title=\'"+logFile+"\'><div class=logMessage>"+logMessage+"<br/></div></div>");
+            $("#logbody").append("<div id="+logId+" class=logFile style=\'display: none;\' title=\'"+logFile+"\'><div class=logMessage>"+logMessage+"<br/></div></div>");
             addNavBarEntry(logFile)
         }
         truncateLinesIfNeeded(logId);
