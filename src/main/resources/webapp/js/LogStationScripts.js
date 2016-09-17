@@ -32,6 +32,8 @@ function showLogFile(logFile) {
     $('.logFile').not('#' + logId).hide();
     $("#"+logId).show();
     makeNavBarEntryActive(logId)
+    setScrollFollow("follow")
+    adjustScroll()
 }
 
 // add a new navigation bar entry for logFile
@@ -199,8 +201,11 @@ function updatePause () {
 
 // If we hit the bottom-- turn on follow scroll. unless the user locked it out
 $(window).scroll(function() {
-    if($(window).scrollTop() + $(window).height() == getDocHeight()) {
-        setScrollFollow("follow")
+    // If we're within 30px (one line) of the bottom we scroll follow
+    if($(window).scrollTop() + $(window).height() > (getDocHeight() - 30) ) {
+        if (window.scrollFollow == "nofollow") {
+            setScrollFollow("follow")
+        }
     } else {
         if (window.scrollFollow == "follow") {
             setScrollFollow("nofollow")
