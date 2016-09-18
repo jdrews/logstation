@@ -43,6 +43,13 @@ a:hover {
     background: #333333;
 }
 
+.text-field {
+    padding: 2px 3px;
+    background: #333333;
+    border: none;
+    color: #9c9b9b;
+}
+
 .button-link:hover, .button-link:focus {
     background: #444;
     border: solid 1px #555555;

@@ -4,6 +4,8 @@
  * Distributed under an Apache 2.0 License
  */
 
+window.regexState = "off";
+
 // Safe way to get document height
 function getDocHeight() {
     var D = document;
@@ -65,25 +67,44 @@ function stripSpecials( myid ) {
 // used to push in logs from LogStationPage via a JsFunc
 function addOrAppendLogMessage(logFile, logMessage) {
     if (window.pauseState == "play") {
-        //create logId
-        var logId = stripSpecials(logFile);
-        incrementTotalLogLines(logId);
-        // Get the div corresponding to this log file
-        var logDiv = $("#"+logId);
-        console.log("working on " + logId + "; logDiv.length = " + logDiv.length);
-        if (logDiv.length) {
-            // log file already exists, append message
-            console.log("appending to " + logId + " the message " + logMessage);
-            logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
-
+        if (window.regexState == "on") {
+            regex = $("#regex-field").val()
+            if (regex) {
+                if (logMessage.match(regex)) {
+                    // regex match, display it
+                    displayIt = true
+                } else {
+                    // regex fail, discard
+                    displayIt = false
+                }
+            } else {
+                // regex is empty, default to display it
+                displayIt = true
+            }
         } else {
-            // log file doesn't exist yet. add it with this message
-            console.log("adding new logFile " + logId);
-            $("#logbody").append("<div id="+logId+" class=logFile style=\'display: none;\' title=\'"+logFile+"\'><div class=logMessage>"+logMessage+"<br/></div></div>");
-            addNavBarEntry(logFile)
+            // regex is off, display it
+            displayIt = true
         }
-        truncateLinesIfNeeded(logId);
-        adjustScroll()
+        if (displayIt) {
+            //create logId
+            var logId = stripSpecials(logFile);
+            incrementTotalLogLines(logId);
+            // Get the div corresponding to this log file
+            var logDiv = $("#"+logId);
+            console.log("working on " + logId + "; logDiv.length = " + logDiv.length);
+            if (logDiv.length) {
+                // log file already exists, append message
+                console.log("appending to " + logId + " the message " + logMessage);
+                logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
+            } else {
+                // log file doesn't exist yet. add it with this message
+                console.log("adding new logFile " + logId);
+                $("#logbody").append("<div id="+logId+" class=logFile style=\'display: none;\' title=\'"+logFile+"\'><div class=logMessage>"+logMessage+"<br/></div></div>");
+                addNavBarEntry(logFile)
+            }
+            truncateLinesIfNeeded(logId);
+            adjustScroll()
+        }
     } else {
         console.log("state paused, not appending message")
     }
@@ -199,6 +220,19 @@ function updatePause () {
     }
 }
 
+// Logic to control the state of the regex button
+function updateRegex () {
+    if ($("#regex-button").text().match(/regex on/)) { // if we're playing right now
+        console.log("disabling regex");
+        $("#regex-button").html("regex off");
+        window.regexState = "off"
+    } else if ($("#regex-button").text().match(/regex off/)) { // if we're paused right now
+        console.log("enabling regex");
+        $("#regex-button").html("regex on");
+        window.regexState = "on"
+    }
+}
+
 // If we hit the bottom-- turn on follow scroll. unless the user locked it out
 $(window).scroll(function() {
     // If we're within 30px (one line) of the bottom we scroll follow
@@ -224,3 +258,6 @@ $( "#pause-button" ).click(function() {
     updatePause()
 });
 
+$( "#regex-button" ).click(function() {
+    updateRegex()
+});
