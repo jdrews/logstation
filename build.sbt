@@ -1,6 +1,6 @@
 name := "logstation"
 
-version := "0.3.6"
+version := "0.3.7"
 
 scalaVersion := "2.10.4"
 
