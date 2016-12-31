@@ -10,7 +10,7 @@ Focus on:
 - Support for Java 1.6+
 - Ease deployment and usage by generating fat jars with minimal configuration required
 
-![image](https://cloud.githubusercontent.com/assets/172766/15636224/de3df408-25c5-11e6-9800-850a46d6de41.jpg)
+![image](https://cloud.githubusercontent.com/assets/172766/18618200/a41f9fa0-7daf-11e6-9f64-e077627bf123.jpg)
 
 Developed with Scala, Akka, Lift, Comet (Ajax Push), and JavaScript. 
 
