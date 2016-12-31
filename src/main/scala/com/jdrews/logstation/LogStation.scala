@@ -1,10 +1,13 @@
 package com.jdrews.logstation
 
 import java.io.{BufferedWriter, File, FileWriter}
+import java.awt.Desktop;
+import java.net.URI;
 
 import akka.actor.Props
 import akka.event.Logging
 import akka.pattern._
+
 import com.jdrews.logstation.config.{BridgeController, DefaultConfigHolder, GlobalActorSystem}
 import com.jdrews.logstation.service.{LogStationServiceActor, ServiceShutdown}
 import com.jdrews.logstation.tailer.LogThisFile
@@ -15,7 +18,6 @@ import scala.collection.JavaConversions._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.matching.Regex
-
 
 /**
  * Created by jdrews on 2/21/2015.
@@ -101,6 +103,12 @@ object LogStation extends App {
     val logStationServiceActor = system.actorOf(Props[LogStationServiceActor], name = "LogStationServiceActor")
     logStationServiceActor ! syntaxList
     logs.foreach(log => logStationServiceActor ! new LogThisFile(log))
+
+    // Launch a browser with this URL if available
+    if(Desktop.isDesktopSupported())
+    {
+        Desktop.getDesktop().browse(new URI("http://127.0.0.1:" + webServerPort.toString));
+    }
 
     private def shutdown: Unit = {
         logger.info("Shutdown hook caught.")
