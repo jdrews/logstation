@@ -35,7 +35,7 @@ class LogStationColorizer extends Actor with ActorLogging {
                     if (syntax._2.findFirstIn(lm.logMessage).isDefined) {
                         // log.debug(s"got a match! ${syntax._1}")
                         // wrap log message in new colors
-                        msg = s"<span style='color:${syntax._1}'>${lm.logMessage}</span>"
+                        msg = s"<span style='color:${syntax._1}'>${xml.Utility.escape(lm.logMessage)}</span>"
                         loop.break
                     }
                 )

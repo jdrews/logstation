@@ -95,7 +95,7 @@ function addOrAppendLogMessage(logFile, logMessage) {
             if (logDiv.length) {
                 // log file already exists, append message
                 console.log("appending to " + logId + " the message " + logMessage);
-                logDiv.append("<div class=logMessage>" + logMessage + "<br/></div>")
+                logDiv.append("<div class=logMessage>" + escapeXMLHtml(logMessage) + "<br/></div>")
             } else {
                 // log file doesn't exist yet. add it with this message
                 console.log("adding new logFile " + logId);
@@ -261,3 +261,16 @@ $( "#pause-button" ).click(function() {
 $( "#regex-button" ).click(function() {
     updateRegex()
 });
+
+function escapeXMLHtml(unsafe) {
+    if(unsafe.startsWith("<?xml")) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    } else {
+        return unsafe;
+    }
+}

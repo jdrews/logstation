@@ -1,6 +1,6 @@
 name := "logstation"
 
-version := "0.3.8"
+version := "0.3.9"
 
 scalaVersion := "2.10.4"
 
@@ -17,8 +17,6 @@ assemblyMergeStrategy in assembly := {
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
 }
-
-seq(webSettings :_*)
 
 resolvers ++= Seq(
     "Java.net Maven2 Repository"     at "http://download.java.net/maven/2/"
@@ -37,10 +35,10 @@ libraryDependencies ++= {
     Seq(
         "net.liftweb"       %% "lift-webkit"        % liftVersion        % "compile",
         "net.liftmodules"   %% "lift-jquery-module_2.6" % "2.9",
-        "org.eclipse.jetty" % "jetty-webapp"        % "8.1.7.v20120910"  % "compile,container,test",
-        "org.eclipse.jetty" % "jetty-plus"          % "8.1.7.v20120910"  % "container,test", // For Jetty Config
+        "org.eclipse.jetty" % "jetty-webapp"        % "8.1.7.v20120910"  % "compile,test",
+        "org.eclipse.jetty" % "jetty-plus"          % "8.1.7.v20120910"  % "test", // For Jetty Config
         "org.eclipse.jetty" % "jetty-servlets"      % "8.1.7.v20120910",
-        "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container,test" artifacts Artifact("javax.servlet", "jar", "jar"),
+        "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "test" artifacts Artifact("javax.servlet", "jar", "jar"),
         "ch.qos.logback"    % "logback-classic"     % "1.0.6",
         "org.specs2"        %% "specs2"             % "2.3.12"           % "test"
     )
