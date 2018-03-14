@@ -1,3 +1,3 @@
 logLevel := Level.Warn
 
-addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "0.7.0")
+addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "4.0.2")
