@@ -1,8 +1,8 @@
 package com.jdrews.logstation
 
 import java.io.{BufferedWriter, File, FileWriter}
-import java.awt.Desktop;
-import java.net.URI;
+import java.awt.Desktop
+import java.net.URI
 
 import akka.actor.Props
 import akka.event.Logging
@@ -28,6 +28,7 @@ import scala.util.matching.Regex
 // TODO: move these to their own files to make it a bit cleaner
 case class BufferLength (myVal: Int)
 case class MaxLogLinesPerLog (myVal: Int)
+case class LogStationName (myVal: String)
 
 //TODO: fix the user lockout follow (or disable altogether) -- add button to scroll to bottom (maybe make it hover or something cool like that?)
 object LogStation extends App {
@@ -90,10 +91,23 @@ object LogStation extends App {
         }
     }
 
+    val logStationName = {
+        if (conf.hasPath("logstation.logStationName")) {
+            val logStationName = conf.getString("logstation.logStationName")
+            logger.info(s"logStationName (user set): $logStationName")
+            logStationName
+        } else {
+            val logStationName = ""
+            logger.info(s"logStationName (default): $logStationName")
+            logStationName
+        }
+    }
+
     // Start up the BridgeActor
     private val bridge = BridgeController.getBridgeActor
     bridge ! MaxLogLinesPerLog(maxLogLinesPerLog)
     bridge ! BufferLength(bufferLength)
+    bridge ! LogStationName(logStationName)
 
     // Start up the embedded webapp
     val webServer = new EmbeddedWebapp(webServerPort, "/")

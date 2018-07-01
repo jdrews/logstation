@@ -117,6 +117,16 @@ function updateMaxLogLinesPerLog(maxLogLinesPerLog) {
     window.maxLogLinesPerLog = maxLogLinesPerLog
 }
 
+// update the logStationName in the title of the page
+// called from LogStationPage
+function updateLogStationName(logStationName) {
+    console.log("updating logStationName to " + logStationName);
+    window.logStationName = logStationName
+    if (logStationName !== '') {
+        document.title = logStationName + " - logstation"
+    }
+}
+
 // called from LogStationPage for resetting all local vars
 function resetAll() {
     console.log("resetting all");

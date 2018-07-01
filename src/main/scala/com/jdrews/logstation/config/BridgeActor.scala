@@ -2,7 +2,7 @@ package com.jdrews.logstation.config
 
 import akka.actor.{Actor, ActorLogging}
 import com.jdrews.logstation.utils.FixedList
-import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
+import com.jdrews.logstation.{BufferLength, LogStationName, MaxLogLinesPerLog}
 import net.liftweb.actor.LiftActor
 
 /**
@@ -18,6 +18,7 @@ class BridgeActor extends Actor with ActorLogging {
     private var bufferLength = 12
     private var maxLogLinesPerLog = 120
     private var msgs = new FixedList[Any](bufferLength)
+    private var logStationName = ""
     def receive = {
         case lift: LiftActor =>
             log.debug(s"received LiftActor: $lift")
@@ -25,6 +26,7 @@ class BridgeActor extends Actor with ActorLogging {
 
             // send LogStationWebServer the maxLogLinesPerLog
             lift ! MaxLogLinesPerLog(maxLogLinesPerLog)
+            lift ! LogStationName(logStationName)
 
             if (msgs.nonEmpty) {
                 log.debug("sending out buffered msgs")
@@ -42,6 +44,9 @@ class BridgeActor extends Actor with ActorLogging {
             bufferLength = bl.myVal
             // rebuild msgs list with new buffer length
             msgs = new FixedList[Any](bufferLength)
+        case lsname: LogStationName =>
+            log.debug(s"received logStationName: $logStationName")
+            logStationName = lsname.myVal
         case msg =>
             if (target.isEmpty) {
                 log.debug(s"buffering this message since target is empty... $msg")

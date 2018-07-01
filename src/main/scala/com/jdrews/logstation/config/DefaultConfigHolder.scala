@@ -41,6 +41,11 @@ object DefaultConfigHolder {
           |    #    These will be sent to any new connections so they have some history of logs
           |    #    bufferLength is multiplied by number of logs, and buffered on best effort for each log
           |    bufferLength=10
+          |
+          |    # Unique name for logstation instance
+          |    #    This name will be prepended to the browser tab
+          |    #    Can be useful when connecting to multiple logstations
+          |    #logStationName="dc10srv42"
           |}
         """.stripMargin
 }

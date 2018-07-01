@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import com.jdrews.logstation.config.BridgeController
 import com.jdrews.logstation.utils.FixedList
 import com.jdrews.logstation.webserver.LogMessage
-import com.jdrews.logstation.{BufferLength, MaxLogLinesPerLog}
+import com.jdrews.logstation.{BufferLength, LogStationName, MaxLogLinesPerLog}
 import net.liftweb.actor._
 import net.liftweb.common.Loggable
 import net.liftweb.http._
@@ -15,11 +15,12 @@ import net.liftweb.http._
  * Communicates with LogStationPages to push updates to the web page
  */
 
-case class NewListenerPackage ( maxLogLinesPerLog: Int, msgs: List[LogMessage])
+case class NewListenerPackage ( maxLogLinesPerLog: Int, logStationName: String, msgs: List[LogMessage])
 
 object LogStationWebServer extends LiftActor with ListenerManager with Loggable {
     private var maxLogLinesPerLog = 130
     private var bufferLength = 17
+    private var logStationName = ""
     private var msgs = new FixedList[LogMessage](bufferLength)
 
     logger.debug("at the front of LogStationWebServer...")
@@ -41,7 +42,7 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
      */
     def createUpdate = {
         logger.info("client connected")
-        NewListenerPackage(maxLogLinesPerLog, msgs.toList)
+        NewListenerPackage(maxLogLinesPerLog, logStationName, msgs.toList)
     }
 
     /**
@@ -63,6 +64,10 @@ object LogStationWebServer extends LiftActor with ListenerManager with Loggable 
             bufferLength = bl.myVal
             // rebuild msgs list with new buffer length
             msgs = new FixedList[LogMessage](bufferLength)
+        case lsname: LogStationName =>
+            logger.debug(s"received logStationName: $lsname")
+            logStationName = lsname.myVal
+            sendListenersMessage(lsname)
         case something =>
             logger.warn(s"in LogStationWebServer: got something, not sure what it is: $something")
 
