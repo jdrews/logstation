@@ -64,7 +64,7 @@ logstation {
     # Unique name for logstation instance
     #    This name will be prepended to the browser tab
     #    Can be useful when connecting to multiple logstations
-    #logStationName="dc10srv42"
+    logStationName="dc10srv42"
 }
 ```
 
