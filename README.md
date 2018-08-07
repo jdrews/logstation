@@ -1,4 +1,4 @@
-# LogStation #
+# logstation #
 
 Tails a set of log files and serves them up on a web server with syntax colors via regex. 
 
