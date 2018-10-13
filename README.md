@@ -1,4 +1,4 @@
-# LogStation #
+# logstation #
 
 Tails a set of log files and serves them up on a web server with syntax colors via regex. 
 
@@ -10,7 +10,7 @@ Focus on:
 - Support for Java 1.6+
 - Ease deployment and usage by generating fat jars with minimal configuration required
 
-![image](https://cloud.githubusercontent.com/assets/172766/18618200/a41f9fa0-7daf-11e6-9f64-e077627bf123.jpg)
+![image](https://user-images.githubusercontent.com/172766/42130891-cc14e292-7cc0-11e8-8db6-5f136254172b.png)
 
 Developed with Scala, Akka, Lift, Comet (Ajax Push), and JavaScript. 
 
@@ -60,6 +60,11 @@ logstation {
     #    These will be sent to any new connections so they have some history of logs
     #    bufferLength is multiplied by number of logs, and buffered on best effort for each log
     bufferLength=10
+    
+    # Unique name for logstation instance
+    #    This name will be prepended to the browser tab
+    #    Can be useful when connecting to multiple logstations
+    logStationName="dc10srv42"
 }
 ```
 
