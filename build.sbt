@@ -48,4 +48,6 @@ libraryDependencies += "com.typesafe" % "config" % "1.2.1"
 
 libraryDependencies += "com.google.guava" % "guava" % "16.0.1"
 
+libraryDependencies += "org.rogach" %% "scallop" % "3.1.3"
+
 

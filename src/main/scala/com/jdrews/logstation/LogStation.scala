@@ -19,6 +19,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.matching.Regex
 
+import org.rogach.scallop._
+
+
 /**
  * Created by jdrews on 2/21/2015.
  *
@@ -30,15 +33,32 @@ case class BufferLength (myVal: Int)
 case class MaxLogLinesPerLog (myVal: Int)
 case class LogStationName (myVal: String)
 
+class Conf(arguments: Seq[String]) extends ScallopConf(arguments) {
+    banner("""logstation
+             | tails a set of log files and serves them up on a web server with syntax colors via regex
+             | github.com/jdrews/logstation
+             |
+             |Options:
+             |""".stripMargin)
+    val configfile = opt[String](descr = "path to config file")
+    verify()
+}
+
 //TODO: fix the user lockout follow (or disable altogether) -- add button to scroll to bottom (maybe make it hover or something cool like that?)
 object LogStation extends App {
-    if (!new java.io.File("logstation.conf").exists) {
-        makeConfAndShutdown
+    val confArgs = new Conf(args)
+    var confFilePath = "logstation.conf"
+    if (confArgs.configfile.isSupplied) {
+        confFilePath = confArgs.configfile()
+    } else {
+        if (!new java.io.File(confFilePath).exists) {
+            makeConfAndShutdown
+        }
     }
     val system = GlobalActorSystem.getActorSystem
     val logger = Logging.getLogger(system, getClass)
     sys.addShutdownHook(shutdown)
-    val conf = ConfigFactory.parseFile(new File("logstation.conf"))
+    val conf = ConfigFactory.parseFile(new File(confFilePath))
     val syntaxList = scala.collection.mutable.Map[String, Regex]()
     if (conf.hasPath("logstation.syntax")) {
         //TODO: redo this so LogTailerActor skips LogStationColorizer if it doesn't exist
@@ -152,7 +172,7 @@ object LogStation extends App {
         bw.write(DefaultConfigHolder.defaultConfig)
         bw.close()
         println("Please setup your logstation.conf located here: " + file.getAbsolutePath())
-        println("Then relaunch and logstation will be located at: http://127.0.0.1:" + webServerPort)
+        println("Then relaunch and logstation will be located at: http://127.0.0.1:8884")
         System.exit(0)
     }
 }
