@@ -141,7 +141,11 @@ object LogStation extends App {
     // Launch a browser with this URL if available
     if(Desktop.isDesktopSupported())
     {
-        Desktop.getDesktop().browse(new URI("http://127.0.0.1:" + webServerPort.toString));
+        try {
+            Desktop.getDesktop().browse(new URI("http://127.0.0.1:" + webServerPort.toString));
+        } catch {
+            case uoe: UnsupportedOperationException => logger.info("Unable to launch browser automatically.")
+        }
     }
 
     private def shutdown: Unit = {
