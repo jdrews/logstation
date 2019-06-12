@@ -2,7 +2,7 @@
 
 Tails a set of log files and serves them up on a web server with syntax colors via regex. 
 
-Binaries avaiable in [releases](https://github.com/jdrews/logstation/releases). See [usage](https://github.com/jdrews/logstation#usage) below.
+Binaries available in [releases](https://github.com/jdrews/logstation/releases). See [usage](https://github.com/jdrews/logstation#usage) below.
 
 Focus on:
 - Support for both Windows and Linux
