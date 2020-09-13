@@ -47,12 +47,13 @@ var punctuation = []string{".", "?", "!"}
 var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE"}
 
 func main() {
-
+	// Prepare file
 	rand.Seed(time.Now().Unix())
 	file, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
+		os.Exit(1)
 	}
 
 	c := make(chan os.Signal)
@@ -62,15 +63,24 @@ func main() {
 		fmt.Println("\rCtrl+C pressed in Terminal, closing file...")
 		file.Close()
 		fmt.Println("\rGoodbye!")
-		os.Exit(1)
+		os.Exit(0)
 	}()
 
-	datawriter := bufio.NewWriter(file)
+	file.Close()
 
+	// Begin opening file, write line, flush, and close file.
 	i := 0
 	for {
+		file, err := os.OpenFile(logfile, os.O_APPEND, 0644)
+
+		if err != nil {
+			log.Fatalf("failed opening file: %s", err)
+			os.Exit(1)
+		}
+		datawriter := bufio.NewWriter(file)
 		datawriter.WriteString(fmt.Sprint(i, ": (", time.Now().Format(time.RFC3339), ") [", randomSeverity(), "] ", paragraph(), "\n"))
 		datawriter.Flush()
+		file.Close()
 		time.Sleep(sleeptime)
 		i++
 	}
