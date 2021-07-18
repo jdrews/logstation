@@ -1,5 +1,7 @@
 # logstation #
 
+**Note:** This branch is a rewrite of logstation in Go and React. Lots of work to do here but stay tuned!
+
 Tails a set of log files and serves them up on a web server with syntax colors via regex. 
 
 Binaries available in [releases](https://github.com/jdrews/logstation/releases). See [usage](https://github.com/jdrews/logstation#usage) below.
