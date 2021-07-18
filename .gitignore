@@ -1,4 +1,11 @@
 .idea/
 *.log
+test/target
+test/with space
 test/*.log
 test/*.conf
+web/build/
+web/node_modules/
+statik/
+target/
+logstation
