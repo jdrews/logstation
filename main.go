@@ -4,6 +4,7 @@ import (
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
+	"github.com/jdrews/logstation/internal"
 	_ "github.com/jdrews/logstation/statik"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,10 +19,10 @@ var (
 )
 
 func main() {
+	pubSub := internal.NewPubsub()
 
-	linesChannel := make(chan string, 500)
 	//begin watching the file
-	go follow("test/logfile.log", linesChannel)
+	go follow("test/logfile.log", pubSub)
 
 	e := echo.New()
 
@@ -39,7 +40,7 @@ func main() {
 
 	// pass channel into handler
 	wsHandlerChan := func(c echo.Context) error {
-		return wshandler(c, linesChannel)
+		return wshandler(c, pubSub)
 	}
 	e.GET("/ws", wsHandlerChan)
 
@@ -47,9 +48,13 @@ func main() {
 	e.Logger.Fatal(e.Start(":8081"))
 }
 
-func wshandler(c echo.Context, linesChannel <-chan string) error {
-	// Disable the following line in production. Using in development so I can `npm start` and dev the frontend
+func wshandler(c echo.Context, pubSub *internal.Pubsub) error {
+	// Disable the following line in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+	var err error
+
+	linesChannel := pubSub.Subscribe("lines")
 
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
@@ -57,19 +62,17 @@ func wshandler(c echo.Context, linesChannel <-chan string) error {
 	}
 	defer ws.Close()
 
-	for {
-		select {
-		case lines := <-linesChannel:
-			// Write
-			err := ws.WriteMessage(websocket.TextMessage, []byte(lines))
-			if err != nil {
-				c.Logger().Error(err)
-			}
+	for line := range linesChannel {
+		// Write
+		err := ws.WriteMessage(websocket.TextMessage, []byte(line))
+		if err != nil {
+			c.Logger().Error(err)
 		}
 	}
+	return err
 }
 
-func follow(path string, linesChannel chan<- string) error {
+func follow(path string, pubSub *internal.Pubsub) error {
 	logger := logrus.New()
 	logger.Level = logrus.DebugLevel
 	logger.SetOutput(os.Stdout)
@@ -85,7 +88,7 @@ func follow(path string, linesChannel chan<- string) error {
 		select {
 		case line := <-tailer.Lines():
 			logger.Debug(line.Line)
-			linesChannel <- path + ":" + line.Line
+			pubSub.Publish("lines", line.Line)
 		default:
 			continue
 		}
