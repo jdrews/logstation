@@ -31,10 +31,10 @@ export default class LogViewer extends React.Component {
     }
 
     handleScroll = (e) => {
-        const bottom = e.scrollHeight - e.scrollTop === e.clientHeight;
-        const nearBottom = e.scrollHeight - e.scrollTop - minRowHeight <= e.clientHeight ?? bottom;
+        // const bottom = e.scrollHeight - e.scrollTop === e.clientHeight;
+        const nearBottom = e.scrollHeight - e.scrollTop - minRowHeight <= e.clientHeight;
 
-        if (bottom || nearBottom) {
+        if (nearBottom) {
             this.setState({ atBottom: true })
             console.log("bottom!")
             const list = [ ...this.state.list ];
