@@ -1,16 +1,16 @@
 {
   "name": "logstation",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "faker": "^5.5.3",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-scripts": "4.0.3",
-    "react-virtualized": "^9.22.3",
+    "react-virtualized": "9.21.1",
     "web-vitals": "^1.1.2",
     "websocket": "^1.0.34"
   },

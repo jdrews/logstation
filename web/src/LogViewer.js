@@ -6,14 +6,17 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const url = 'ws://localhost:8081/ws';
 const client = new W3CWebSocket(url);
+const minRowHeight = 23;
 
 export default class LogViewer extends React.Component {
     constructor (props) {
         super(props)
+        this.listRef = React.createRef();
 
         this.state = {
             list: [],
-            scrollToRow: 0
+            scrollToIndex: 0,
+            atBottom: false,
         }
     }
 
@@ -27,17 +30,41 @@ export default class LogViewer extends React.Component {
         };
     }
 
+    handleScroll = (e) => {
+        const bottom = e.scrollHeight - e.scrollTop === e.clientHeight;
+        const nearBottom = e.scrollHeight - e.scrollTop - minRowHeight <= e.clientHeight ?? bottom;
+
+        if (bottom || nearBottom) {
+            this.setState({ atBottom: true })
+            console.log("bottom!")
+            const list = [ ...this.state.list ];
+            const scrollToIndex = list.length;
+            this.setState({
+                scrollToIndex: scrollToIndex
+            });
+            if (this.listRef.current) {
+                this.listRef.current.scrollToRow(scrollToIndex)
+            }
+        } else {
+            this.setState({ atBottom: false})
+            console.log("not bottom...")
+        }
+    }
+
     _updateFeed (message) {
         const list = [ ...this.state.list ];
 
         list.push(message.data);
 
-        const scrollToRow = list.length;
+        const scrollToIndex = list.length;
 
         this.setState({
             list: list,
-            scrollToRow: scrollToRow
+            scrollToIndex: scrollToIndex
         });
+        if (this.state.atBottom) {
+            this.listRef.current.scrollToRow(scrollToIndex)
+        }
     }
 
     rowRenderer = ({ index, isScrolling, key, style }) => (
@@ -46,7 +73,7 @@ export default class LogViewer extends React.Component {
             key={key}
             style={{
                 ...style,
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 width: "100%"
@@ -58,14 +85,17 @@ export default class LogViewer extends React.Component {
 
     render() {
         return (
-            <div className="LogViewer">
-                <AutoSizer disableWidth>
+            <div className="LogViewer" >
+                <AutoSizer disableWidth >
                     {({width, height}) => (
                         <List
+                            ref={this.listRef}
+                            onScroll={this.handleScroll}
                             height={height}
                             rowCount={this.state.list.length}
-                            rowHeight={23}
-                            scrollToRow={this.state.scrollToRow}
+                            rowHeight={minRowHeight}
+                            // autoHeight={true}
+                            scrollToIndex={this.state.scrollToIndex}
                             rowRenderer={this.rowRenderer}
                             width={1}
                             containerStyle={{

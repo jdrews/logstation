@@ -66,6 +66,8 @@ func wshandler(c echo.Context, pubSub *internal.Pubsub) error {
 		// Write
 		err := ws.WriteMessage(websocket.TextMessage, []byte(line))
 		if err != nil {
+			//TODO handle wsasend "An established connection was aborted by the software in your host machine"
+			// {"time":"2021-08-08T23:56:03.7797377-04:00","level":"ERROR","prefix":"echo","file":"main.go","line":"69","message":"write tcp [::1]:8081->[::1]:27058: wsasend: An established connection was aborted by the software in your host machine."}
 			c.Logger().Error(err)
 		}
 	}
