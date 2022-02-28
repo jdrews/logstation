@@ -1,33 +1,42 @@
 import React from 'react';
 import './LogViewer.css';
-import { List, AutoSizer } from 'react-virtualized';
+import {
+    List,
+    AutoSizer,
+    CellMeasurer,
+    CellMeasurerCache
+} from 'react-virtualized';
 import "react-virtualized/styles.css";
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 const url = 'ws://localhost:8081/ws';
-const client = new W3CWebSocket(url);
+const rws = new ReconnectingWebSocket(url);
+
 const minRowHeight = 23;
 
 export default class LogViewer extends React.Component {
     constructor (props) {
         super(props)
-        this.listRef = React.createRef();
+        // this.listRef = React.createRef();
+
+        //TODO: Handle different line sizes with CellMeasurer
+        //  https://github.com/bvaughn/react-virtualized/blob/master/docs/CellMeasurer.md
 
         this.state = {
-            list: [],
+            lines: [],
             scrollToIndex: 0,
             atBottom: false,
         }
-    }
 
-    componentDidMount() {
-        client.onopen = () => {
-            console.log('WebSocket Client Connected');
-        };
-        client.onmessage = (message) => {
-            console.log(message);
-            this._updateFeed(message);
-        };
+        this.cache = new CellMeasurerCache({
+            fixedWidth: true,
+            defaultHeight: 23,
+            keyMapper: rowIndex => this.state.lines[rowIndex].id
+        });
+
+        // this.connect = this.connect.bind(this);
+
+
     }
 
     handleScroll = (e) => {
@@ -37,13 +46,13 @@ export default class LogViewer extends React.Component {
         if (nearBottom) {
             this.setState({ atBottom: true })
             console.log("bottom!")
-            const list = [ ...this.state.list ];
-            const scrollToIndex = list.length;
+            const lines = [ ...this.state.lines ];
+            const scrollToIndex = lines.length;
             this.setState({
                 scrollToIndex: scrollToIndex
             });
-            if (this.listRef.current) {
-                this.listRef.current.scrollToRow(scrollToIndex)
+            if (this.listRef) {
+                this.listRef.scrollToRow(scrollToIndex)
             }
         } else {
             this.setState({ atBottom: false})
@@ -51,49 +60,60 @@ export default class LogViewer extends React.Component {
         }
     }
 
-    _updateFeed (message) {
-        const list = [ ...this.state.list ];
+     _updateFeed (message) {
+        const lines = [ ...this.state.lines ];
 
-        list.push(message.data);
+        lines.push(message.data);
 
-        const scrollToIndex = list.length;
+        const scrollToIndex = lines.length;
 
         this.setState({
-            list: list,
+            lines: lines,
             scrollToIndex: scrollToIndex
         });
         if (this.state.atBottom) {
-            this.listRef.current.scrollToRow(scrollToIndex)
+            this.listRef.scrollToRow(scrollToIndex)
         }
+        //TODO: figure this out
+        // this.listRef.recomputeRowHeights(scrollToIndex);
+
     }
 
-    rowRenderer = ({ index, isScrolling, key, style }) => (
-        <div
-            className="Row"
-            key={key}
-            style={{
-                ...style,
-                whiteSpace: "pre-wrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                width: "100%"
-            }}
-        >
-            {this.state.list[index]}
-        </div>
+    rowRenderer = ({ index, isScrolling, key, style, ...rest }) => (
+        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this.cache}>
+            <div
+                className="Row"
+                key={key}
+                style={{
+                    ...style,
+                    whiteSpace: "pre-wrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    width: "100%",
+                    minHeight: this.state.lines[index].height
+                }}
+            >
+                {this.state.lines[index]}
+            </div>
+        </CellMeasurer>
+
     );
+
+    // setListRef = r => (this.listRef = r);
 
     render() {
         return (
             <div className="LogViewer" >
                 <AutoSizer disableWidth >
-                    {({width, height}) => (
+                    {({height}) => (
                         <List
-                            ref={this.listRef}
+                            // ref={this.setListRef}
+                            ref={(list)=>{this.listRef = list}}
                             onScroll={this.handleScroll}
                             height={height}
-                            rowCount={this.state.list.length}
-                            rowHeight={minRowHeight}
+                            rowCount={this.state.lines.length}
+                            deferredMeasurementCache={this.cache}
+                            rowHeight={this.cache.rowHeight}
                             // autoHeight={true}
                             scrollToIndex={this.state.scrollToIndex}
                             rowRenderer={this.rowRenderer}
@@ -110,5 +130,19 @@ export default class LogViewer extends React.Component {
                 </AutoSizer>
             </div>
         );
+    }
+
+    connect() {
+        rws.onopen = () => {
+            console.log('WebSocket Connected');
+        };
+        rws.onmessage = (message) => {
+            console.log(message);
+            this._updateFeed(message);
+        };
+    }
+
+    componentDidMount() {
+        this.connect();
     }
 }

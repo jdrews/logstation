@@ -11,6 +11,7 @@
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.3",
     "react-virtualized": "9.21.1",
+    "reconnecting-websocket": "^4.4.0",
     "web-vitals": "^1.1.2",
     "websocket": "^1.0.34"
   },
