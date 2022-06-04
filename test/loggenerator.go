@@ -129,5 +129,5 @@ func sentences(count int) string {
 }
 
 func paragraph() string {
-	return sentences(rand.Intn(3) + 2)
+	return sentences(rand.Intn(8) + 2)
 }
