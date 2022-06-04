@@ -1,10 +1,11 @@
 package main
 
 import (
+	"errors"
+	"github.com/cskr/pubsub"
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
-	"github.com/jdrews/logstation/internal"
 	_ "github.com/jdrews/logstation/statik"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -12,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"syscall"
 )
 
 var (
@@ -19,20 +21,19 @@ var (
 )
 
 func main() {
-	pubSub := internal.NewPubsub()
+	pubSub := pubsub.New(1)
 
 	//begin watching the file
 	go follow("test/logfile.log", pubSub)
 
 	e := echo.New()
 
+	e.Use(middleware.Logger())
+
 	statikFS, err := fs.New()
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 
 	h := http.FileServer(statikFS)
 
@@ -48,35 +49,44 @@ func main() {
 	e.Logger.Fatal(e.Start(":8081"))
 }
 
-func wshandler(c echo.Context, pubSub *internal.Pubsub) error {
+func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
 	// Disable the following line in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-
-	var err error
-
-	linesChannel := pubSub.Subscribe("lines")
-
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		return err
+		return nil
 	}
 	defer ws.Close()
 
+	linesChannel := pubSub.Sub("lines")
+	defer pubSub.Unsub(linesChannel, "lines")
+
 	for line := range linesChannel {
 		// Write
-		err := ws.WriteMessage(websocket.TextMessage, []byte(line))
+		err := ws.WriteMessage(websocket.TextMessage, []byte(line.(string)))
 		if err != nil {
-			//TODO handle wsasend "An established connection was aborted by the software in your host machine"
-			// {"time":"2021-08-08T23:56:03.7797377-04:00","level":"ERROR","prefix":"echo","file":"main.go","line":"69","message":"write tcp [::1]:8081->[::1]:27058: wsasend: An established connection was aborted by the software in your host machine."}
-			c.Logger().Error(err)
+			if errors.Is(err, syscall.WSAECONNABORTED) {
+				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
+				logger.Warn(err)
+				break
+			} else if errors.Is(err, syscall.WSAECONNRESET) {
+				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
+				logger.Warn(err)
+				break
+			} else {
+				logger.Error(err)
+				break
+			}
 		}
 	}
-	return err
+	return nil
 }
 
-func follow(path string, pubSub *internal.Pubsub) error {
+func follow(path string, pubSub *pubsub.PubSub) error {
 	logger := logrus.New()
-	logger.Level = logrus.DebugLevel
+	//logger.Level = logrus.DebugLevel
 	logger.SetOutput(os.Stdout)
 
 	parsedGlob, err := glob.Parse(path)
@@ -90,7 +100,7 @@ func follow(path string, pubSub *internal.Pubsub) error {
 		select {
 		case line := <-tailer.Lines():
 			logger.Debug(line.Line)
-			pubSub.Publish("lines", line.Line)
+			pubSub.Pub(line.Line, "lines")
 		default:
 			continue
 		}
