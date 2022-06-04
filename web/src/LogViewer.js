@@ -80,7 +80,7 @@ export default class LogViewer extends React.Component {
     }
 
     rowRenderer = ({ index, isScrolling, key, style, ...rest }) => (
-        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this.cache}>
+        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this.cache} key={key}>
             {({registerChild}) => (
                 <div
                 ref={registerChild}
