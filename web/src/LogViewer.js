@@ -81,7 +81,9 @@ export default class LogViewer extends React.Component {
 
     rowRenderer = ({ index, isScrolling, key, style, ...rest }) => (
         <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this.cache}>
-            <div
+            {({registerChild}) => (
+                <div
+                ref={registerChild}
                 className="Row"
                 key={key}
                 style={{
@@ -94,7 +96,7 @@ export default class LogViewer extends React.Component {
                 }}
             >
                 {this.state.lines[index]}
-            </div>
+            </div> )}
         </CellMeasurer>
 
     );
@@ -108,7 +110,7 @@ export default class LogViewer extends React.Component {
                     {({height}) => (
                         <List
                             // ref={this.setListRef}
-                            ref={(list)=>{this.listRef = list}}
+                            ref={ref => {this.listRef = ref}}
                             onScroll={this.handleScroll}
                             height={height}
                             rowCount={this.state.lines.length}
