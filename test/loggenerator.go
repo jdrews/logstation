@@ -78,7 +78,7 @@ func main() {
 			os.Exit(1)
 		}
 		datawriter := bufio.NewWriter(file)
-		datawriter.WriteString(fmt.Sprint(i, ": (", time.Now().Format(time.RFC3339), ") [", randomSeverity(), "] ", paragraph(), "\n"))
+		datawriter.WriteString(fmt.Sprint(i, ": (", time.Now().Format(time.RFC3339), ") [", randomSeverity(), "] ", paragraph(), ">>STOP\n"))
 		datawriter.Flush()
 		file.Close()
 		time.Sleep(sleeptime)
@@ -129,5 +129,5 @@ func sentences(count int) string {
 }
 
 func paragraph() string {
-	return sentences(rand.Intn(8) + 2)
+	return sentences(rand.Intn(10) + 2)
 }
