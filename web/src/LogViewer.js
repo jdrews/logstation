@@ -16,11 +16,8 @@ const minRowHeight = 23;
 
 export default class LogViewer extends React.Component {
     constructor (props) {
-        super(props)
-        // this.listRef = React.createRef();
-
-        //TODO: Handle different line sizes with CellMeasurer
-        //  https://github.com/bvaughn/react-virtualized/blob/master/docs/CellMeasurer.md
+        super(props);
+        this._listRef = React.createRef();
 
         this.state = {
             lines: [],
@@ -28,14 +25,11 @@ export default class LogViewer extends React.Component {
             atBottom: false,
         }
 
-        this.cache = new CellMeasurerCache({
+        this._cache = new CellMeasurerCache({
             fixedWidth: true,
             defaultHeight: 23,
-            keyMapper: rowIndex => this.state.lines[rowIndex].id
+            // keyMapper: rowIndex => this.state.lines[rowIndex].id
         });
-
-        // this.connect = this.connect.bind(this);
-
 
     }
 
@@ -51,8 +45,8 @@ export default class LogViewer extends React.Component {
             this.setState({
                 scrollToIndex: scrollToIndex
             });
-            if (this.listRef) {
-                this.listRef.scrollToRow(scrollToIndex)
+            if (this._listRef.current) {
+                this._listRef.current.scrollToRow(scrollToIndex)
             }
         } else {
             this.setState({ atBottom: false})
@@ -71,16 +65,19 @@ export default class LogViewer extends React.Component {
             lines: lines,
             scrollToIndex: scrollToIndex
         });
-        if (this.state.atBottom) {
-            this.listRef.scrollToRow(scrollToIndex)
+
+        if (this._listRef.current) {
+            if (this.state.atBottom) {
+                this._listRef.current.scrollToRow(scrollToIndex)
+            }
+             this._cache.clearAll();
+             this._listRef.current.recomputeRowHeights(scrollToIndex);
         }
-        //TODO: figure this out
-        // this.listRef.recomputeRowHeights(scrollToIndex);
 
     }
 
     rowRenderer = ({ index, isScrolling, key, style, ...rest }) => (
-        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this.cache} key={key}>
+        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this._cache} key={key}>
             {({registerChild}) => (
                 <div
                 ref={registerChild}
@@ -101,21 +98,18 @@ export default class LogViewer extends React.Component {
 
     );
 
-    // setListRef = r => (this.listRef = r);
-
     render() {
         return (
             <div className="LogViewer" >
                 <AutoSizer disableWidth >
                     {({height}) => (
                         <List
-                            // ref={this.setListRef}
-                            ref={ref => {this.listRef = ref}}
+                            ref={this._listRef}
                             onScroll={this.handleScroll}
                             height={height}
                             rowCount={this.state.lines.length}
-                            deferredMeasurementCache={this.cache}
-                            rowHeight={this.cache.rowHeight}
+                            deferredMeasurementCache={this._cache}
+                            rowHeight={this._cache.rowHeight}
                             // autoHeight={true}
                             scrollToIndex={this.state.scrollToIndex}
                             rowRenderer={this.rowRenderer}
