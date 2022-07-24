@@ -1,24 +1,30 @@
 package main
 
 import (
+	"embed"
 	"errors"
 	"github.com/cskr/pubsub"
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
-	_ "github.com/jdrews/logstation/statik"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/rakyll/statik/fs"
 	"github.com/sirupsen/logrus"
+	"io/fs"
 	"net/http"
 	"os"
 	"syscall"
 )
 
 var (
+	//go:embed web/build
+	embeddedFiles embed.FS
+
 	upgrader = websocket.Upgrader{}
 )
+
+//todo: Config file
+//todo: bundle app
 
 func main() {
 	pubSub := pubsub.New(1)
@@ -27,17 +33,19 @@ func main() {
 	go follow("test/logfile.log", pubSub)
 
 	e := echo.New()
+	e.HideBanner = true
 
 	e.Use(middleware.Logger())
 
-	statikFS, err := fs.New()
+	fsys, err := fs.Sub(embeddedFiles, "web/build")
 	if err != nil {
-		e.Logger.Fatal(err)
+		panic(err)
 	}
 
-	h := http.FileServer(statikFS)
+	fileHandler := http.FileServer(http.FS(fsys))
 
-	e.GET("/*", echo.WrapHandler(http.StripPrefix("/", h)))
+	e.GET("/*", echo.WrapHandler(fileHandler))
+	//e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", fileHandler)))
 
 	// pass channel into handler
 	wsHandlerChan := func(c echo.Context) error {
@@ -58,7 +66,12 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	if err != nil {
 		return nil
 	}
-	defer ws.Close()
+	defer func(ws *websocket.Conn) {
+		err := ws.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(ws)
 
 	linesChannel := pubSub.Sub("lines")
 	defer pubSub.Unsub(linesChannel, "lines")

@@ -72,5 +72,5 @@ logstation {
 
 ### Building ###
 
-Uses [sbt-assembly](https://github.com/sbt/sbt-assembly) for fat jars. Build via 
-`sbt assembly`
+Refer to the [Makefile](Makefile) for build details.   
+In general, run `make all` to build a `logstation` executable. 
