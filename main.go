@@ -56,7 +56,7 @@ func main() {
 	e.GET("/ws", wsHandlerChan)
 
 	// start server
-	e.Logger.Fatal(e.Start(":8081"))
+	e.Logger.Fatal(e.Start(":" + viper.GetString("additional_settings.webserverport")))
 }
 
 func handleConfigFile() {
