@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"errors"
+	"fmt"
 	"github.com/cskr/pubsub"
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
@@ -10,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"io/fs"
 	"net/http"
 	"os"
@@ -20,14 +22,15 @@ var (
 	//go:embed web/build
 	embeddedFiles embed.FS
 
+	//go:embed logstation.default.conf
+	defaultConfigFile []byte
+
 	upgrader = websocket.Upgrader{}
 )
 
-//todo: Config file
-//todo: bundle app
-
 func main() {
 	pubSub := pubsub.New(1)
+	handleConfigFile()
 
 	//begin watching the file
 	go follow("test/logfile.log", pubSub)
@@ -45,7 +48,6 @@ func main() {
 	fileHandler := http.FileServer(http.FS(fsys))
 
 	e.GET("/*", echo.WrapHandler(fileHandler))
-	//e.GET("/static/*", echo.WrapHandler(http.StripPrefix("/static/", fileHandler)))
 
 	// pass channel into handler
 	wsHandlerChan := func(c echo.Context) error {
@@ -55,6 +57,34 @@ func main() {
 
 	// start server
 	e.Logger.Fatal(e.Start(":8081"))
+}
+
+func handleConfigFile() {
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
+
+	configFilename := "logstation.conf"
+	viper.SetConfigName(configFilename)
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")
+	viper.SetDefault("logs", []string{`test\logfile.log`, `test\logfile2.log`})
+
+	if err := viper.ReadInConfig(); err != nil {
+		if errors.Is(err, os.ErrNotExist) || errors.As(err, &viper.ConfigFileNotFoundError{}) {
+			logger.Warn("Config file %q not found", configFilename)
+			logger.Warn("Writing default config file to ", configFilename)
+			logger.Warn("Please open and edit config file before running this application again.")
+			err := os.WriteFile(configFilename, defaultConfigFile, 0644)
+			if err != nil {
+				panic(err)
+			}
+			os.Exit(0)
+		} else {
+			panic(fmt.Errorf("config file %q loading error: %s", viper.ConfigFileUsed(), err))
+		}
+	}
+	logger.Info("Loaded ", viper.ConfigFileUsed())
+	logger.Info(viper.AllKeys()) // TODO: Use all the configs to set parameters in logstation
 }
 
 func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
