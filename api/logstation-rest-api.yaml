@@ -1,0 +1,98 @@
+openapi: 3.0.3
+x-stoplight:
+  id: p73ubwa66534s
+info:
+  title: logstation-rest-api
+  version: '1.0'
+  license:
+    name: Apache 2.0
+  contact:
+    name: Jon Drews
+    url: 'https://github.com/jdrews/logstation'
+  description: Provides restful access to elements of logstation
+servers:
+  - url: 'http://localhost:8884'
+paths:
+  /settings/logstation-name:
+    parameters: []
+    get:
+      summary: Get Logstation Name
+      tags:
+        - settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogstationName'
+              examples:
+                Get Logstation:
+                  value:
+                    name: Logstation42
+        '404':
+          description: Logstation Name Not Found
+      operationId: get-logstation-name
+      description: Retrieve the name of this logstation
+  /settings/syntax:
+    get:
+      summary: Get Syntax Colors
+      tags:
+        - settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                x-examples:
+                  example-1:
+                    debug:
+                      - '#4F9BFF'
+                      - .*DEBUG.*
+                items:
+                  $ref: '#/components/schemas/SyntaxColor'
+              examples:
+                Get Syntax:
+                  value:
+                    - color: '#FF1F1F'
+                      regex: .*ERROR.*
+                    - color: '#F2FF00'
+                      regex: .*WARN.*
+                    - color: '#00FF2F'
+                      regex: .*INFO.*
+                    - color: '#4F9BFF'
+                      regex: .*DEBUG.*
+                    - color: '#4FFFF6'
+                      regex: .*TRACE.*
+        '404':
+          description: Not Found
+      operationId: get-settings-syntax
+      description: Retrieve an array of syntax colors and regex strings to colorize the log files
+components:
+  schemas:
+    LogstationName:
+      title: LogstationName
+      type: object
+      description: ''
+      properties:
+        name:
+          type: string
+          description: Name of the logstation server
+      required:
+        - name
+    SyntaxColor:
+      type: object
+      properties:
+        color:
+          type: string
+        regex:
+          type: string
+      x-examples:
+        example-1:
+          color: '#FF1F1F'
+          regex: .*ERROR.*
+      description: A syntax color and regex string for highlighting text
+tags:
+  - name: settings
