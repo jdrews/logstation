@@ -8,6 +8,7 @@ import (
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
+	"github.com/jdrews/logstation/api/server/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -39,6 +40,14 @@ func main() {
 	e.HideBanner = true
 
 	e.Use(middleware.Logger())
+
+	c, _ := handlers.NewContainer()
+
+	// GetLogstationName - Get Logstation Name
+	e.GET("/settings/logstation-name", c.GetLogstationName)
+
+	// GetSettingsSyntax - Get Syntax Colors
+	e.GET("/settings/syntax", c.GetSettingsSyntax)
 
 	fsys, err := fs.Sub(embeddedFiles, "web/build")
 	if err != nil {
@@ -84,7 +93,6 @@ func handleConfigFile() {
 		}
 	}
 	logger.Info("Loaded ", viper.ConfigFileUsed())
-	logger.Info(viper.AllKeys()) // TODO: Use all the configs to set parameters in logstation
 }
 
 func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
