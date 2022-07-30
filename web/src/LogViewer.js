@@ -9,7 +9,7 @@ import {
 import "react-virtualized/styles.css";
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-const url = 'ws://localhost:8081/ws';
+const url = 'ws://' + window.location.host + '/ws';
 const rws = new ReconnectingWebSocket(url);
 
 const minRowHeight = 23;
