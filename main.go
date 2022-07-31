@@ -27,6 +27,9 @@ var (
 	defaultConfigFile []byte
 
 	upgrader = websocket.Upgrader{}
+
+	// Set this to false in prod builds. Only used to help in debugging so I can run the frontend on a hotloading npm start
+	disableCORS = true
 )
 
 func main() {
@@ -41,6 +44,13 @@ func main() {
 
 	e.Use(middleware.Logger())
 
+	// Disable the following in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
+	if disableCORS {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{"*"},
+			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		}))
+	}
 	c, _ := handlers.NewContainer()
 
 	// GetLogstationName - Get Logstation Name
@@ -99,7 +109,9 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	logger := logrus.New()
 	logger.SetOutput(os.Stdout)
 	// Disable the following line in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	if disableCORS {
+		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	}
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return nil

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './LogViewer.css';
 import {
     List,
@@ -9,8 +9,12 @@ import {
 import "react-virtualized/styles.css";
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-const url = 'ws://' + window.location.host + '/ws';
-const rws = new ReconnectingWebSocket(url);
+//const wsurl = 'ws://' + window.location.host + '/ws'; //PROD //TODO: Set this to PROD before ship
+//const url = window.location.protocol + "//" + window.location.host //PROD
+const wsurl = 'ws://localhost:8884/ws' //DEV
+const url = 'http://localhost:8884' //DEV
+
+const rws = new ReconnectingWebSocket(wsurl);
 
 const minRowHeight = 23;
 
@@ -23,6 +27,8 @@ export default class LogViewer extends React.Component {
             lines: [],
             scrollToIndex: 0,
             atBottom: false,
+            title: "logstation",
+            syntaxColors: []
         }
 
         this._cache = new CellMeasurerCache({
@@ -93,6 +99,9 @@ export default class LogViewer extends React.Component {
                 }}
             >
                 {this.state.lines[index]}
+                    //TODO: Figure out how to wrap this in a color (div?) when it matches a regex
+                    //TODO: Also read in the /settings/syntax and apply it
+                    //TODO: Also set the server name based on the /settings/logstation-name
             </div> )}
         </CellMeasurer>
 
@@ -139,6 +148,15 @@ export default class LogViewer extends React.Component {
     }
 
     componentDidMount() {
+        fetch(url + "/settings/logstation-name")
+            .then(response => response.json())
+            .then(data => {
+                this.state.title=data.name
+                document.title = this.state.title
+            })
+        fetch(url + "/settings/syntax")
+            .then(response => response.json())
+            .then(data => this.state.syntaxColors=data)
         this.connect();
     }
 }
