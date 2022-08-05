@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cskr/pubsub"
@@ -9,13 +10,16 @@ import (
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
 	"github.com/jdrews/logstation/api/server/handlers"
+	"github.com/jdrews/logstation/api/server/models"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io/fs"
+	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"syscall"
 )
 
@@ -32,12 +36,23 @@ var (
 	disableCORS = true
 )
 
+type LogMessage struct {
+	Text  string `json:"text"`
+	Color string `json:"color"`
+}
+
+type CompiledRegexColors struct {
+	regex *regexp.Regexp
+	color string
+}
+
 func main() {
 	pubSub := pubsub.New(1)
 	handleConfigFile()
+	patterns := parseRegexPatterns()
 
 	//begin watching the file
-	go follow("test/logfile.log", pubSub)
+	go follow("test/logfile.log", pubSub, patterns)
 
 	e := echo.New()
 	e.HideBanner = true
@@ -76,6 +91,21 @@ func main() {
 
 	// start server
 	e.Logger.Fatal(e.Start(":" + viper.GetString("additional_settings.webserverport")))
+}
+
+// Process all the regular expression patterns associated with each color and compile them at boot time to optimize regex matching.
+func parseRegexPatterns() []CompiledRegexColors {
+	var syntaxColors models.SyntaxColors
+	viper.UnmarshalKey("syntaxColors", &syntaxColors)
+	crcs := make([]CompiledRegexColors, len(syntaxColors))
+	for index, element := range syntaxColors {
+		regex, err := regexp.Compile(element.Regex)
+		if err != nil {
+			log.Fatal("Unable to compile the regex of ", element.Regex, " associated with the color ", element.Color, ". Please check the conf file and ensure your regex syntax is valid. More details here: ", err)
+		}
+		crcs[index] = CompiledRegexColors{regex, element.Color}
+	}
+	return crcs
 }
 
 func handleConfigFile() {
@@ -117,9 +147,9 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 		return nil
 	}
 	defer func(ws *websocket.Conn) {
-		err := ws.Close()
-		if err != nil {
-			panic(err)
+		wsCloseErr := ws.Close()
+		if wsCloseErr != nil {
+			panic(wsCloseErr)
 		}
 	}(ws)
 
@@ -127,19 +157,24 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	defer pubSub.Unsub(linesChannel, "lines")
 
 	for line := range linesChannel {
+		jsonLine, marshalErr := json.Marshal(line)
+		if marshalErr != nil {
+			logger.Fatal(marshalErr)
+		}
 		// Write
-		err := ws.WriteMessage(websocket.TextMessage, []byte(line.(string)))
-		if err != nil {
-			if errors.Is(err, syscall.WSAECONNABORTED) {
+		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine) //TODO: look into using WriteJSON instead to simplify code
+		//err := ws.WriteJSON(line)
+		if wsErr != nil {
+			if errors.Is(wsErr, syscall.WSAECONNABORTED) {
 				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-				logger.Warn(err)
+				logger.Warn(wsErr)
 				break
-			} else if errors.Is(err, syscall.WSAECONNRESET) {
+			} else if errors.Is(wsErr, syscall.WSAECONNRESET) {
 				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-				logger.Warn(err)
+				logger.Warn(wsErr)
 				break
 			} else {
-				logger.Error(err)
+				logger.Error(wsErr)
 				break
 			}
 		}
@@ -147,7 +182,7 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	return nil
 }
 
-func follow(path string, pubSub *pubsub.PubSub) error {
+func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) error {
 	logger := logrus.New()
 	//logger.Level = logrus.DebugLevel
 	logger.SetOutput(os.Stdout)
@@ -163,9 +198,23 @@ func follow(path string, pubSub *pubsub.PubSub) error {
 		select {
 		case line := <-tailer.Lines():
 			logger.Debug(line.Line)
-			pubSub.Pub(line.Line, "lines")
+			logMessage := colorize(line.Line, patterns)
+			pubSub.Pub(logMessage, "lines")
 		default:
 			continue
 		}
 	}
+}
+
+// Run each line through the regex patterns to determine if the line should be colored.
+// Outputs a LogMessage with line color information
+func colorize(line string, patterns []CompiledRegexColors) LogMessage {
+	var lineColor = ""
+	for _, element := range patterns {
+		if element.regex.MatchString(line) {
+			lineColor = element.color
+			break
+		}
+	}
+	return LogMessage{line, lineColor}
 }
