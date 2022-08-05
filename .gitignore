@@ -9,3 +9,7 @@ web/node_modules/
 statik/
 target/
 logstation
+logstation.conf
+*.exe
+openapi-generator-cli.jar
+logstation.iml
