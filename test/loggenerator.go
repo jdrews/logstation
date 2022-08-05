@@ -44,7 +44,7 @@ var lipsumwords = []string{"a", "ac", "accumsan", "ad", "adipiscing", "aenean", 
 	"vulputate"}
 
 var punctuation = []string{".", "?", "!"}
-var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE"}
+var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE", ""}
 
 func main() {
 	// Prepare file
