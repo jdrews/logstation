@@ -60,10 +60,10 @@ export default class LogViewer extends React.Component {
         }
     }
 
-     _updateFeed (message) {
+     _updateFeed (logMessage) {
         const lines = [ ...this.state.lines ];
 
-        lines.push(message.data);
+        lines.push(logMessage);
 
         const scrollToIndex = lines.length;
 
@@ -95,13 +95,11 @@ export default class LogViewer extends React.Component {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     width: "100%",
-                    minHeight: this.state.lines[index].height
+                    minHeight: this.state.lines[index].height,
+                    color: JSON.parse(this.state.lines[index]).color
                 }}
             >
-                {this.state.lines[index]}
-                    //TODO: Figure out how to wrap this in a color (div?) when it matches a regex
-                    //TODO: Also read in the /settings/syntax and apply it
-                    //TODO: Also set the server name based on the /settings/logstation-name
+                {JSON.parse(this.state.lines[index]).text}
             </div> )}
         </CellMeasurer>
 
@@ -140,23 +138,29 @@ export default class LogViewer extends React.Component {
     connect() {
         rws.onopen = () => {
             console.log('WebSocket Connected');
+            fetch(url + "/settings/logstation-name")
+                .then(response => response.json())
+                .then(data => {
+                    this.state.title=data.name
+                    document.title = this.state.title
+                });
+            // Commenting this out for now since line coloring is now happening on the server side.
+            //      But it would be neat to present the regex and syntax colors to the frontend for administration CRUD purposes...
+            // fetch(url + "/settings/syntax")
+            //     .then(response => response.json())
+            //     .then(data => {
+            //
+            //         this.state.syntaxColors=JSON.parse(data) //TODO: this shows up as an array of objects, need it to be readable
+            //         console.log("syntaxColors: " + this.state.syntaxColors)
+            //     })
         };
         rws.onmessage = (message) => {
-            console.log(message);
-            this._updateFeed(message);
+            console.log(message.data);
+            this._updateFeed(message.data);
         };
     }
 
     componentDidMount() {
-        fetch(url + "/settings/logstation-name")
-            .then(response => response.json())
-            .then(data => {
-                this.state.title=data.name
-                document.title = this.state.title
-            })
-        fetch(url + "/settings/syntax")
-            .then(response => response.json())
-            .then(data => this.state.syntaxColors=data)
         this.connect();
     }
 }
