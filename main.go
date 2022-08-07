@@ -51,8 +51,11 @@ func main() {
 	handleConfigFile()
 	patterns := parseRegexPatterns()
 
-	//begin watching the file
-	go follow("test/logfile.log", pubSub, patterns)
+	logFiles := viper.GetStringSlice("logs")
+	for _, logFile := range logFiles {
+		//begin watching the file in a goroutine for concurrency
+		go follow(logFile, pubSub, patterns)
+	}
 
 	e := echo.New()
 	e.HideBanner = true
@@ -122,7 +125,7 @@ func handleConfigFile() {
 		if errors.Is(err, os.ErrNotExist) || errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			logger.Warn("Config file %q not found", configFilename)
 			logger.Warn("Writing default config file to ", configFilename)
-			logger.Warn("Please open and edit config file before running this application again.")
+			logger.Warn("Please open and edit config file before running this application again. Exiting...")
 			err := os.WriteFile(configFilename, defaultConfigFile, 0644)
 			if err != nil {
 				panic(err)
@@ -182,15 +185,15 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	return nil
 }
 
-func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) error {
+func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) {
 	logger := logrus.New()
 	//logger.Level = logrus.DebugLevel
 	logger.SetOutput(os.Stdout)
 
 	parsedGlob, err := glob.Parse(path)
 	if err != nil {
-		logger.Error("%q: failed to parse glob: %q", parsedGlob, err)
-		return err
+		panic(fmt.Sprintf("%q: failed to parse glob: %q", parsedGlob, err))
+
 	}
 
 	tailer, err := fswatcher.RunFileTailer([]glob.Glob{parsedGlob}, false, true, logger)
