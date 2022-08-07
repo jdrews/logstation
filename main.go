@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/cskr/pubsub"
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
@@ -48,9 +49,12 @@ type CompiledRegexColors struct {
 }
 
 func main() {
-	pubSub := pubsub.New(1)
-	handleConfigFile()
+	configFilePtr := flag.String("c", "logstation.conf", "path to config file")
+	flag.Parse()
+	handleConfigFile(*configFilePtr)
 	patterns := parseRegexPatterns()
+
+	pubSub := pubsub.New(1)
 
 	logFiles := viper.GetStringSlice("logs")
 	for _, logFile := range logFiles {
@@ -112,7 +116,7 @@ func parseRegexPatterns() []CompiledRegexColors {
 	return crcs
 }
 
-func handleConfigFile() {
+func handleConfigFile(configFilePath string) {
 	logger := logrus.New()
 	logger.SetOutput(os.Stdout)
 
@@ -122,9 +126,10 @@ func handleConfigFile() {
 	viper.AddConfigPath(".")
 	viper.SetDefault("logs", []string{`test\logfile.log`, `test\logfile2.log`})
 
+	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err != nil {
 		if errors.Is(err, os.ErrNotExist) || errors.As(err, &viper.ConfigFileNotFoundError{}) {
-			logger.Warn("Config file %q not found", configFilename)
+			logger.Warn("Config file not found at ", configFilePath)
 			logger.Warn("Writing default config file to ", configFilename)
 			logger.Warn("Please open and edit config file before running this application again. Exiting...")
 			err := os.WriteFile(configFilename, defaultConfigFile, 0644)
