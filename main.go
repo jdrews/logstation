@@ -37,8 +37,9 @@ var (
 )
 
 type LogMessage struct {
-	Text  string `json:"text"`
-	Color string `json:"color"`
+	Text    string `json:"text"`
+	Color   string `json:"color"`
+	LogFile string `json:"logfile"`
 }
 
 type CompiledRegexColors struct {
@@ -185,12 +186,12 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 	return nil
 }
 
-func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) {
+func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) {
 	logger := logrus.New()
 	//logger.Level = logrus.DebugLevel
 	logger.SetOutput(os.Stdout)
 
-	parsedGlob, err := glob.Parse(path)
+	parsedGlob, err := glob.Parse(logFilePath)
 	if err != nil {
 		panic(fmt.Sprintf("%q: failed to parse glob: %q", parsedGlob, err))
 
@@ -201,7 +202,7 @@ func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) 
 		select {
 		case line := <-tailer.Lines():
 			logger.Debug(line.Line)
-			logMessage := colorize(line.Line, patterns)
+			logMessage := colorize(line.Line, logFilePath, patterns)
 			pubSub.Pub(logMessage, "lines")
 		default:
 			continue
@@ -211,7 +212,7 @@ func follow(path string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) 
 
 // Run each line through the regex patterns to determine if the line should be colored.
 // Outputs a LogMessage with line color information
-func colorize(line string, patterns []CompiledRegexColors) LogMessage {
+func colorize(line string, logFile string, patterns []CompiledRegexColors) LogMessage {
 	var lineColor = ""
 	for _, element := range patterns {
 		if element.regex.MatchString(line) {
@@ -219,5 +220,5 @@ func colorize(line string, patterns []CompiledRegexColors) LogMessage {
 			break
 		}
 	}
-	return LogMessage{line, lineColor}
+	return LogMessage{line, lineColor, logFile}
 }
