@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"math/rand"
@@ -11,9 +12,6 @@ import (
 	"syscall"
 	"time"
 )
-
-var logfile = "test/logfile.log"
-var sleeptime = 1000 * time.Millisecond
 
 var lipsumwords = []string{"a", "ac", "accumsan", "ad", "adipiscing", "aenean", "aliquam", "aliquet",
 	"amet", "ante", "aptent", "arcu", "at", "auctor", "augue", "bibendum",
@@ -47,9 +45,18 @@ var punctuation = []string{".", "?", "!"}
 var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE", ""}
 
 func main() {
+	logPtr := flag.String("logfile", "test/logfile.log", "Name of logfile that receives the generated log lines")
+	intervalPtr := flag.Int("interval", 1000, "Log line generation interval in milliseconds")
+	prependLognamePtr := flag.Bool("prependlogname", false, "Prepend the name of the logfile to the loglines")
+	flag.Parse()
+	prependStr := ""
+	if *prependLognamePtr {
+		prependStr = *logPtr
+	}
+
 	// Prepare file
 	rand.Seed(time.Now().Unix())
-	file, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(*logPtr, os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -71,17 +78,17 @@ func main() {
 	// Begin opening file, write line, flush, and close file.
 	i := 0
 	for {
-		file, err := os.OpenFile(logfile, os.O_APPEND, 0644)
+		file, err := os.OpenFile(*logPtr, os.O_APPEND, 0644)
 
 		if err != nil {
 			log.Fatalf("failed opening file: %s", err)
 			os.Exit(1)
 		}
 		datawriter := bufio.NewWriter(file)
-		datawriter.WriteString(fmt.Sprint(i, ": (", time.Now().Format(time.RFC3339), ") [", randomSeverity(), "] ", paragraph(), ">>STOP\n"))
+		datawriter.WriteString(fmt.Sprint(i, ": ", prependStr, " (", time.Now().Format(time.RFC3339), ") [", randomSeverity(), "] ", paragraph(), ">>STOP\n"))
 		datawriter.Flush()
 		file.Close()
-		time.Sleep(sleeptime)
+		time.Sleep(time.Duration(*intervalPtr) * time.Millisecond)
 		i++
 	}
 }
