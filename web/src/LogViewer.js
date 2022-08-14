@@ -8,9 +8,14 @@ import {
     CellMeasurer,
     CellMeasurerCache
 } from 'react-virtualized';
-import "react-virtualized/styles.css";
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import { css } from '@emotion/react'
+import Container from '@mui/material/Container';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 
 //const wsurl = 'ws://' + window.location.host + '/ws'; //PROD //TODO: Set this to PROD before ship
 //const url = window.location.protocol + "//" + window.location.host //PROD
@@ -31,7 +36,8 @@ export default class LogViewer extends React.Component {
             scrollToIndex: 0,
             atBottom: false,
             title: "logstation",
-            syntaxColors: []
+            syntaxColors: [],
+            theme: undefined
         }
 
         this._cache = new CellMeasurerCache({
@@ -118,36 +124,69 @@ export default class LogViewer extends React.Component {
         >logstation notice: No lines detected in watched files</div>;
     }
 
+    a11yProps(index) {
+        return {
+            id: `log-selector-${index}`,
+            'aria-controls': `log-selector-panel-${index}`,
+        };
+    }
+
     //TODO: Figure out how to wrap this in a tabular header that shows the file and lets you swap between files
         // Might be able to have this react class be instantiated within a larger react class that handles the file tabs and switching
     render() {
         return (
-            <div className="LogViewer" >
-                <AutoSizer disableWidth >
-                    {({height}) => (
-                        <List
-                            ref={this._listRef}
-                            onScroll={this.handleScroll}
-                            height={height}
-                            rowCount={this.state.lines.length}
-                            deferredMeasurementCache={this._cache}
-                            rowHeight={this._cache.rowHeight}
-                            // autoHeight={true}
-                            scrollToIndex={this.state.scrollToIndex}
-                            rowRenderer={this.rowRenderer}
-                            noRowsRenderer={this.noRowsRenderer}
-                            width={1}
-                            containerStyle={{
-                                width: "100%",
-                                maxWidth: "100%"
-                            }}
-                            style={{
-                                width: "100%"
-                            }}
-                        />
-                    )}
-                </AutoSizer>
-            </div>
+            <Container disableGutters maxWidth="false" sx={{width: '100%'}}>
+                <ThemeProvider theme={this.theme}>
+                    <SetTheme setTheme={this.setTheme}/>
+                    <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                        <Tabs aria-label="log selector bar" textColor="secondary" indicatorColor="secondary">
+                            {/*<Tabs value={value} onChange={handleChange} aria-label="basic tabs example">*/
+                                /*TODO: use value and onChange to populate tabs dynamically and make them do stuff*/}
+                            <Tab label="logstation" disabled={true} disableRipple={true} {...this.a11yProps(0)}
+                                 sx={{
+                                     color: '#ffffff !important',
+                                     opacity: '0.6 !important',
+                                     textTransform: 'unset',
+                                     fontSize: '110%'
+                                 }}/>
+                            {/*TODO: This should pull from the MUI theme instead of hardcoded.*/}
+                            <Tab label="log1.log" {...this.a11yProps(0)}
+                                 sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
+                            <Tab label="log2.log" {...this.a11yProps(1)}
+                                 sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
+                        </Tabs>
+                    </Box>
+                    <Box sx={{width: '100%'}}>
+                        <div className="LogViewer">
+                            <AutoSizer disableWidth>
+                                {({height}) => (
+                                    <List
+                                        ref={this._listRef}
+                                        onScroll={this.handleScroll}
+                                        height={height}
+                                        rowCount={this.state.lines.length}
+                                        deferredMeasurementCache={this._cache}
+                                        rowHeight={this._cache.rowHeight}
+                                        // autoHeight={true}
+                                        scrollToIndex={this.state.scrollToIndex}
+                                        rowRenderer={this.rowRenderer}
+                                        noRowsRenderer={this.noRowsRenderer}
+                                        width={1}
+                                        containerStyle={{
+                                            width: "100%",
+                                            maxWidth: "100%"
+                                        }}
+                                        style={{
+                                            width: "100%"
+                                        }}
+                                    />
+                                )}
+                            </AutoSizer>
+                        </div>
+                    </Box>
+                </ThemeProvider>
+            </Container>
+
         );
     }
 
@@ -179,4 +218,19 @@ export default class LogViewer extends React.Component {
     componentDidMount() {
         this.connect();
     }
+
+    setTheme = theme => {
+        this.setState({theme})
+    }
+}
+
+const SetTheme = ({ setTheme }) => {
+    const theme = useTheme()
+
+    React.useEffect(() => {
+        setTheme(theme)
+        return () => null
+    },[])
+
+    return null
 }
