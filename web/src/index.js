@@ -3,9 +3,30 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import LogViewer from './LogViewer';
 // import reportWebVitals from './reportWebVitals';
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#00ff78',
+            contrastText: '#ffffff'
+        },
+        secondary: {
+            main: '#455a64',
+            contrastText: '#ffffff'
+        }
+    },
+});
+
 ReactDOM.render(
   <React.StrictMode>
-    <LogViewer />
+      <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <LogViewer />
+      </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
