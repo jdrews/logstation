@@ -1,3 +1,5 @@
+/** @jsxImportSource @emotion/react */
+
 import React, {useEffect} from 'react';
 import './LogViewer.css';
 import {
@@ -8,6 +10,7 @@ import {
 } from 'react-virtualized';
 import "react-virtualized/styles.css";
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import { css } from '@emotion/react'
 
 //const wsurl = 'ws://' + window.location.host + '/ws'; //PROD //TODO: Set this to PROD before ship
 //const url = window.location.protocol + "//" + window.location.host //PROD
@@ -83,7 +86,7 @@ export default class LogViewer extends React.Component {
     }
 
     rowRenderer = ({ index, isScrolling, key, style, ...rest }) => (
-        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this._cache} key={key}>
+        <CellMeasurer {...rest} rowIndex={index} columnIndex={0} cache={this._cache} key={key} >
             {({registerChild}) => (
                 <div
                 ref={registerChild}
@@ -105,6 +108,18 @@ export default class LogViewer extends React.Component {
 
     );
 
+    noRowsRenderer() {
+        return <div css={css`
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            `}
+        >logstation notice: No lines detected in watched files</div>;
+    }
+
+    //TODO: Figure out how to wrap this in a tabular header that shows the file and lets you swap between files
+        // Might be able to have this react class be instantiated within a larger react class that handles the file tabs and switching
     render() {
         return (
             <div className="LogViewer" >
@@ -120,6 +135,7 @@ export default class LogViewer extends React.Component {
                             // autoHeight={true}
                             scrollToIndex={this.state.scrollToIndex}
                             rowRenderer={this.rowRenderer}
+                            noRowsRenderer={this.noRowsRenderer}
                             width={1}
                             containerStyle={{
                                 width: "100%",
