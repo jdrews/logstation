@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
-import React, {useEffect} from 'react';
+import React from 'react';
 import './LogViewer.css';
 import {
     List,
@@ -135,10 +135,10 @@ export default class LogViewer extends React.Component {
         // Might be able to have this react class be instantiated within a larger react class that handles the file tabs and switching
     render() {
         return (
-            <Container disableGutters maxWidth="false" sx={{width: '100%'}}>
+            <Container disableGutters maxWidth="false" sx={{width: '100%', height: '100vh'}}>
                 <ThemeProvider theme={this.theme}>
                     <SetTheme setTheme={this.setTheme}/>
-                    <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
+                    <Box sx={{borderBottom: 1, borderColor: 'divider', height: '8vh', m: 0, p: 0}}>
                         <Tabs aria-label="log selector bar" textColor="secondary" indicatorColor="secondary">
                             {/*<Tabs value={value} onChange={handleChange} aria-label="basic tabs example">*/
                                 /*TODO: use value and onChange to populate tabs dynamically and make them do stuff*/}
@@ -156,8 +156,7 @@ export default class LogViewer extends React.Component {
                                  sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
                         </Tabs>
                     </Box>
-                    <Box sx={{width: '100%'}}>
-                        <div className="LogViewer">
+                    <Box sx={{width: '100%', height: '92vh', m: 0, p: 0}} className="LogViewer">
                             <AutoSizer disableWidth>
                                 {({height}) => (
                                     <List
@@ -182,7 +181,6 @@ export default class LogViewer extends React.Component {
                                     />
                                 )}
                             </AutoSizer>
-                        </div>
                     </Box>
                 </ThemeProvider>
             </Container>
@@ -196,7 +194,7 @@ export default class LogViewer extends React.Component {
             fetch(url + "/settings/logstation-name")
                 .then(response => response.json())
                 .then(data => {
-                    this.state.title=data.name
+                    this.setState({title: data.name})
                     document.title = this.state.title
                 });
             // Commenting this out for now since line coloring is now happening on the server side.
@@ -230,7 +228,7 @@ const SetTheme = ({ setTheme }) => {
     React.useEffect(() => {
         setTheme(theme)
         return () => null
-    },[])
+    })
 
     return null
 }
