@@ -14,8 +14,6 @@ import Container from '@mui/material/Container';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import { useTheme } from '@mui/material/styles';
-import { ThemeProvider } from '@mui/material/styles';
 
 //const wsurl = 'ws://' + window.location.host + '/ws'; //PROD //TODO: Set this to PROD before ship
 //const url = window.location.protocol + "//" + window.location.host //PROD
@@ -136,10 +134,8 @@ export default class LogViewer extends React.Component {
     render() {
         return (
             <Container disableGutters maxWidth="false" sx={{width: '100%', height: '100vh'}}>
-                <ThemeProvider theme={this.theme}>
-                    <SetTheme setTheme={this.setTheme}/>
                     <Box sx={{borderBottom: 1, borderColor: 'divider', height: '8vh', m: 0, p: 0}}>
-                        <Tabs aria-label="log selector bar" textColor="secondary" indicatorColor="secondary">
+                        <Tabs value={1} aria-label="log selector bar" textColor="secondary" indicatorColor="secondary">
                             {/*<Tabs value={value} onChange={handleChange} aria-label="basic tabs example">*/
                                 /*TODO: use value and onChange to populate tabs dynamically and make them do stuff*/}
                             <Tab label="logstation" disabled={true} disableRipple={true} {...this.a11yProps(0)}
@@ -150,9 +146,9 @@ export default class LogViewer extends React.Component {
                                      fontSize: '110%'
                                  }}/>
                             {/*TODO: This should pull from the MUI theme instead of hardcoded.*/}
-                            <Tab label="log1.log" {...this.a11yProps(0)}
+                            <Tab label="log1.log" {...this.a11yProps(1)}
                                  sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
-                            <Tab label="log2.log" {...this.a11yProps(1)}
+                            <Tab label="log2.log" {...this.a11yProps(2)}
                                  sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
                         </Tabs>
                     </Box>
@@ -182,7 +178,6 @@ export default class LogViewer extends React.Component {
                                 )}
                             </AutoSizer>
                     </Box>
-                </ThemeProvider>
             </Container>
 
         );
@@ -216,19 +211,4 @@ export default class LogViewer extends React.Component {
     componentDidMount() {
         this.connect();
     }
-
-    setTheme = theme => {
-        this.setState({theme})
-    }
-}
-
-const SetTheme = ({ setTheme }) => {
-    const theme = useTheme()
-
-    React.useEffect(() => {
-        setTheme(theme)
-        return () => null
-    })
-
-    return null
 }
