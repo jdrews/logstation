@@ -13,3 +13,4 @@ logstation.conf
 *.exe
 openapi-generator-cli.jar
 logstation.iml
+/node_modules/
