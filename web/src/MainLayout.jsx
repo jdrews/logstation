@@ -1,5 +1,5 @@
 import './LogViewer.css';
-import LogViewerComponent from "./LogViewerComponent";
+import LogStationLogViewer from "./LogStationLogViewer";
 
 import Container from '@mui/material/Container';
 import Tabs from '@mui/material/Tabs';
@@ -36,8 +36,8 @@ const MainLayout = (props) => {
                              sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>
                     </Tabs>
                 </Box>
-                <Box sx={{width: '100%', height: '92vh', m: 0, p: 0}} className="LogViewer">
-                       <LogViewerComponent data={props.lines}/>
+                <Box sx={{width: '100%', height: '92vh'}} className="LogViewer">
+                       <LogStationLogViewer data={props.lines}/>
                 </Box>
         </Container>
     );
