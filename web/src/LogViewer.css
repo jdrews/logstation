@@ -1,6 +1,4 @@
 .LogViewer {
-  text-align: left;
-  height: 100vh;
   background-color: #020202;
   color: #e7e7e7;
 }
@@ -38,23 +36,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.AutoSizerWrapper {
-  flex: 1 1 auto;
-}
-
-.List {
-  border: 1px solid #e0e0e0;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0 25px;
-  background-color: #000000;
-  border-bottom: 1px solid #000000;
 }
 
 .checkboxLabel {
