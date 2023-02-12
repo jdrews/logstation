@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cskr/pubsub"
+	"github.com/fatih/color"
 	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"github.com/fstab/grok_exporter/tailer/glob"
 	"github.com/gorilla/websocket"
@@ -39,7 +40,6 @@ var (
 
 type LogMessage struct {
 	Text    string `json:"text"`
-	Color   string `json:"color"`
 	LogFile string `json:"logfile"`
 }
 
@@ -218,12 +218,36 @@ func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexC
 // Run each line through the regex patterns to determine if the line should be colored.
 // Outputs a LogMessage with line color information
 func colorize(line string, logFile string, patterns []CompiledRegexColors) LogMessage {
-	var lineColor = ""
 	for _, element := range patterns {
 		if element.regex.MatchString(line) {
-			lineColor = element.color
+			switch element.color {
+			case "red":
+				line = color.RedString(line)
+			case "green":
+				line = color.GreenString(line)
+			case "yellow":
+				line = color.YellowString(line)
+			case "blue":
+				line = color.BlueString(line)
+			case "magenta":
+				line = color.MagentaString(line)
+			case "cyan":
+				line = color.CyanString(line)
+			case "hired":
+				line = color.HiRedString(line)
+			case "higreen":
+				line = color.HiGreenString(line)
+			case "hiyellow":
+				line = color.HiYellowString(line)
+			case "hiblue":
+				line = color.HiBlueString(line)
+			case "himagenta":
+				line = color.HiMagentaString(line)
+			case "hicyan":
+				line = color.HiCyanString(line)
+			}
 			break
 		}
 	}
-	return LogMessage{line, lineColor, logFile}
+	return LogMessage{line, logFile}
 }

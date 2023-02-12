@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import LogViewer from './LogViewer';
+import App from './App';
 // import reportWebVitals from './reportWebVitals';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -25,7 +25,7 @@ ReactDOM.render(
   <React.StrictMode>
       <ThemeProvider theme={darkTheme}>
           <CssBaseline />
-          <LogViewer />
+          <App />
       </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
