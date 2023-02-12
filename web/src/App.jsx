@@ -9,8 +9,8 @@ const url = 'http://localhost:8884' //DEV
 
 const rws = new ReconnectingWebSocket(wsurl);
 
-const App = (props) => {
-    const [lines, setLines] = useState([]);
+const App = () => {
+    const [logFiles, setLogFiles] = useState(new Map());
     const [title, setTitle] = useState("logstation");
     useEffect(() => {
         connect()
@@ -29,11 +29,14 @@ const App = (props) => {
         };
         rws.onmessage = (message) => {
             console.log(message.data);
-            setLines([...lines, JSON.parse(message.data).text])
+            const logObject = JSON.parse(message.data);
+            const logFileName = logObject.logfile
+            const newLogLines = logObject.text
+            setLogFiles(new Map(logFiles.set(logFileName, [...logFiles.get(logFileName) ?? [], newLogLines])))
         };
     }
 
-    return <MainLayout name={title} lines={lines}/>
+    return <MainLayout name={title} logFiles={logFiles}/>
 }
 
 
