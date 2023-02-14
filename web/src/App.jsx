@@ -11,7 +11,7 @@ const rws = new ReconnectingWebSocket(wsurl);
 
 const App = () => {
     const [logFiles, setLogFiles] = useState(new Map());
-    const [title, setTitle] = useState("logstation");
+
     useEffect(() => {
         connect()
 
@@ -23,21 +23,22 @@ const App = () => {
             fetch(url + "/settings/logstation-name")
                 .then(response => response.json())
                 .then(data => {
-                    setTitle(data.name)
-                    document.title = title
+                    document.title = data.name
                 });
         };
         rws.onmessage = (message) => {
             console.log(message.data);
-            const logObject = JSON.parse(message.data);
+            const logObject = JSON.parse(message.data); // get the JSON object from the websocket message data payload
+            // example object: {logfile: "./logfile2.log", text: "log message body"}
             const logFileName = logObject.logfile
             const newLogLines = logObject.text
+
+            // upsert the new log lines into the ES6 Map for the logFileName
             setLogFiles(new Map(logFiles.set(logFileName, [...logFiles.get(logFileName) ?? [], newLogLines])))
         };
     }
 
-    return <MainLayout name={title} logFiles={logFiles}/>
+    return <MainLayout logFiles={logFiles}/>
 }
-
 
 export default App;
