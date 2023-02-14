@@ -39,7 +39,7 @@ const MainLayout = (props) => {
                     </Tabs>
                 </Box>
                 <Box sx={{width: '100%', height: '92vh'}} className="LogViewerBox">
-                       <LogStationLogViewer data={props.logFiles.get(selectedLogFile) ?? []}/>
+                       <LogStationLogViewer data={props.logFiles.get(selectedLogFile) ?? []} logFileName={selectedLogFile}/>
                 </Box>
         </Container>
     );
