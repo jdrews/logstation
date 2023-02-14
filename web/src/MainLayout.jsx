@@ -21,14 +21,10 @@ const MainLayout = (props) => {
         setSelectedLogFile(newLogFile);
     };
 
-    //TODO: Figure out how to wrap this in a tabular header that shows the file and lets you swap between files
-        // Might be able to have this react class be instantiated within a larger react class that handles the file tabs and switching
     return (
         <Container disableGutters maxWidth="false" sx={{width: '100%', height: '100vh'}}>
                 <Box sx={{borderBottom: 1, borderColor: 'divider', height: '8vh', m: 0, p: 0}}>
                     <Tabs value={selectedLogFile} aria-label="log selector bar" textColor="secondary" indicatorColor="secondary" onChange={handleLogSelection}>
-                        {/*<Tabs value={value} onChange={handleChange} aria-label="basic tabs example">*/
-                            /*TODO: use value and onChange to populate tabs dynamically and make them do stuff*/}
                         <Tab key="0" value="0" label="logstation" disabled={true} disableRipple={true} {...a11yProps("0")}
                              sx={{
                                  color: '#ffffff !important',
@@ -40,11 +36,10 @@ const MainLayout = (props) => {
                         {[...props.logFiles.keys()].map(logFile =>
                             (<Tab key={logFile} value={logFile} label={logFile} {...a11yProps(logFile)} sx={{color: '#ffffff', background: '#222', textTransform: 'unset'}}/>)
                         )}
-
                     </Tabs>
                 </Box>
-                <Box sx={{width: '100%', height: '92vh'}} className="LogViewer">
-                       <LogStationLogViewer data={props.logFiles.get(selectedLogFile)}/>
+                <Box sx={{width: '100%', height: '92vh'}} className="LogViewerBox">
+                       <LogStationLogViewer data={props.logFiles.get(selectedLogFile) ?? []}/>
                 </Box>
         </Container>
     );
