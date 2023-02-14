@@ -17,6 +17,11 @@ const LogStationLogViewer = (props) => {
     // reference for the LogViewer component
     const logViewerRef = React.useRef();
 
+    // when the log file we're viewing changes, reset a few things
+    React.useEffect(() => {
+        setIsPaused(false)
+    }, [props.logFileName]);
+
     React.useEffect(() => {
         if (!isPaused) {
             if (logViewerRef && logViewerRef.current) {
