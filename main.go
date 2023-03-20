@@ -98,7 +98,7 @@ func main() {
 	e.GET("/ws", wsHandlerChan)
 
 	// start server
-	e.Logger.Fatal(e.Start(":" + viper.GetString("additional_settings.webserverport")))
+	e.Logger.Fatal(e.Start(viper.GetString("additional_settings.webserveraddress") + ":" + viper.GetString("additional_settings.webserverport")))
 }
 
 // Process all the regular expression patterns associated with each color and compile them at boot time to optimize regex matching.
@@ -125,6 +125,7 @@ func handleConfigFile(configFilePath string) {
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
 	viper.SetDefault("logs", []string{`test\logfile.log`, `test\logfile2.log`})
+	viper.SetDefault("additional_settings.webserveraddress", "0.0.0.0")
 
 	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err != nil {
