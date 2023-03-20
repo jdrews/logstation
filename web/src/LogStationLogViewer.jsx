@@ -49,13 +49,14 @@ const LogStationLogViewer = (props) => {
         return (
             <Button onClick={handleClick} isBlock>
                 <OutlinedPlayCircleIcon />
+                {" "}
                 resume
                 {/*resume {linesBehind === 0 ? null : `and show ${linesBehind} lines`}*/}
             </Button>
         );
     };
 
-    return (
+    return ( //TODO: Tracking line wrap overflow bug in https://github.com/patternfly/react-log-viewer/issues/3
         <LogViewer hasLineNumbers={false}
                    height={'100%'}
                    width={'100%'}
@@ -67,6 +68,7 @@ const LogStationLogViewer = (props) => {
                    onScroll={onScroll}
                    footer={isPaused && <FooterButton />}
                    //TODO: disabled search for now. Will come back to it.
+                   //TODO: put the search in the top bar on the right. Good place for it.
                    // toolbar={
                    //     <Toolbar>
                    //         <ToolbarContent>
