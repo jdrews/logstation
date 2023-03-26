@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/cskr/pubsub v1.0.2
+	github.com/fatih/color v1.14.1
 	github.com/fstab/grok_exporter v0.2.8
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.3.0
@@ -15,7 +16,6 @@ require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
