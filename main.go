@@ -18,7 +18,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -35,6 +34,8 @@ var (
 	upgrader = websocket.Upgrader{}
 
 	disableCORS = false
+
+	logger = logrus.New()
 )
 
 type LogMessage struct {
@@ -65,13 +66,12 @@ func main() {
 	e.HideBanner = true
 
 	e.Use(middleware.Logger())
-	logger := logrus.New()
 	logger.SetOutput(os.Stdout)
 
 	disableCORS = viper.GetBool("server_settings.disablecors")
 	// Disable the following in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	if disableCORS {
-		logger.Warn("Running in disabled CORS mode. This is very dangerous! Be careful! ")
+		logger.Warn("Running in disabled CORS mode. This is very dangerous! Be careful!")
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -107,12 +107,16 @@ func main() {
 // Process all the regular expression patterns associated with each color and compile them at boot time to optimize regex matching.
 func parseRegexPatterns() []CompiledRegexColors {
 	var syntaxColors models.SyntaxColors
-	viper.UnmarshalKey("syntaxColors", &syntaxColors)
+	err := viper.UnmarshalKey("syntaxColors", &syntaxColors)
+	if err != nil {
+		logger.Fatal("Unable to unmarshall syntax colors from config file. Please check the colors in the config.")
+		return nil
+	}
 	crcs := make([]CompiledRegexColors, len(syntaxColors))
 	for index, element := range syntaxColors {
 		regex, err := regexp.Compile(element.Regex)
 		if err != nil {
-			log.Fatal("Unable to compile the regex of ", element.Regex, " associated with the color ", element.Color, ". Please check the conf file and ensure your regex syntax is valid. More details here: ", err)
+			logger.Fatal("Unable to compile the regex of ", element.Regex, " associated with the color ", element.Color, ". Please check the conf file and ensure your regex syntax is valid. More details here: ", err)
 		}
 		crcs[index] = CompiledRegexColors{regex, element.Color}
 	}
@@ -120,8 +124,6 @@ func parseRegexPatterns() []CompiledRegexColors {
 }
 
 func handleConfigFile(configFilePath string) {
-	logger := logrus.New()
-	logger.SetOutput(os.Stdout)
 
 	configFilename := "logstation.conf"
 	viper.SetConfigName(configFilename)
@@ -150,9 +152,6 @@ func handleConfigFile(configFilePath string) {
 }
 
 func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
-	logger := logrus.New()
-	logger.SetOutput(os.Stdout)
-	// Disable the following line in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	if disableCORS {
 		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	}
@@ -197,9 +196,6 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 }
 
 func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) {
-	logger := logrus.New()
-	//logger.Level = logrus.DebugLevel
-	logger.SetOutput(os.Stdout)
 
 	parsedGlob, err := glob.Parse(logFilePath)
 	if err != nil {
