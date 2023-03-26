@@ -5,6 +5,8 @@ import Container from "@mui/material/Container";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
 
 function a11yProps(index) {
@@ -31,7 +33,7 @@ const MainLayout = (props) => {
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          background: '#090909',
+          background: "#090909",
           height: "8vh",
           m: 0,
           p: 0,
@@ -64,7 +66,25 @@ const MainLayout = (props) => {
             <Tab
               key={logFile}
               value={logFile}
-              label={logFile}
+              label={
+                <Tooltip title={logFile}>
+                  <div
+                    style={{
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      width: "9rem",
+                      direction: "rtl",
+                      textAlign: "left",
+                    }}
+                  >
+                    <Typography noWrap align={"left"} fontSize="0.8rem">
+                      {logFile}
+                    </Typography>
+                  </div>
+                </Tooltip>
+              }
+              wrapped={false}
               {...a11yProps(logFile)}
               sx={{
                 color: "#ffffff",
@@ -74,7 +94,10 @@ const MainLayout = (props) => {
           ))}
         </Tabs>
       </Box>
-      <Box sx={{ width: "100%", height: "92vh", background: '#030303' }} className="LogViewerBox">
+      <Box
+        sx={{ width: "100%", height: "92vh", background: "#030303" }}
+        className="LogViewerBox"
+      >
         <LogStationLogViewer
           data={props.logFiles.get(selectedLogFile) ?? []}
           logFileName={selectedLogFile}
