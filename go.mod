@@ -1,6 +1,6 @@
 module github.com/jdrews/logstation
 
-go 1.18
+go 1.20
 
 require (
 	github.com/cskr/pubsub v1.0.2
