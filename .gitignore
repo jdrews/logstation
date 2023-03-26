@@ -14,3 +14,5 @@ logstation.conf
 openapi-generator-cli.jar
 logstation.iml
 /node_modules/
+
+dist/
