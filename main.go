@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"syscall"
 )
 
 var (
@@ -178,18 +177,9 @@ func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
 		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine) //TODO: look into using WriteJSON instead to simplify code
 		//err := ws.WriteJSON(line)
 		if wsErr != nil {
-			if errors.Is(wsErr, syscall.WSAECONNABORTED) {
-				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-				logger.Warn(wsErr)
-				break
-			} else if errors.Is(wsErr, syscall.WSAECONNRESET) {
-				logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-				logger.Warn(wsErr)
-				break
-			} else {
-				logger.Error(wsErr)
-				break
-			}
+			logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
+			logger.Warn(wsErr)
+			break
 		}
 	}
 	return nil
