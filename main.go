@@ -34,8 +34,7 @@ var (
 
 	upgrader = websocket.Upgrader{}
 
-	// Set this to false in prod builds. Only used to help in debugging so I can run the frontend on a hotloading npm start
-	disableCORS = true
+	disableCORS = false
 )
 
 type LogMessage struct {
@@ -66,9 +65,13 @@ func main() {
 	e.HideBanner = true
 
 	e.Use(middleware.Logger())
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
 
+	disableCORS = viper.GetBool("server_settings.disablecors")
 	// Disable the following in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	if disableCORS {
+		logger.Warn("Running in disabled CORS mode. This is very dangerous! Be careful! ")
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins: []string{"*"},
 			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -98,7 +101,7 @@ func main() {
 	e.GET("/ws", wsHandlerChan)
 
 	// start server
-	e.Logger.Fatal(e.Start(viper.GetString("additional_settings.webserveraddress") + ":" + viper.GetString("additional_settings.webserverport")))
+	e.Logger.Fatal(e.Start(viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport")))
 }
 
 // Process all the regular expression patterns associated with each color and compile them at boot time to optimize regex matching.
@@ -125,7 +128,8 @@ func handleConfigFile(configFilePath string) {
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
 	viper.SetDefault("logs", []string{`test\logfile.log`, `test\logfile2.log`})
-	viper.SetDefault("additional_settings.webserveraddress", "0.0.0.0")
+	viper.SetDefault("server_settings.webserveraddress", "0.0.0.0")
+	viper.SetDefault("server_settings.disablecors", false)
 
 	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err != nil {
