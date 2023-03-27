@@ -190,20 +190,15 @@ func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexC
 	parsedGlob, err := glob.Parse(logFilePath)
 	if err != nil {
 		panic(fmt.Sprintf("%q: failed to parse glob: %q", parsedGlob, err))
-
 	}
 
 	tailer, err := fswatcher.RunFileTailer([]glob.Glob{parsedGlob}, false, true, logger)
-	for {
-		select {
-		case line := <-tailer.Lines():
-			logger.Debug(line.Line)
-			logMessage := colorize(line.Line, logFilePath, patterns)
-			pubSub.Pub(logMessage, "lines")
-		default:
-			continue
-		}
+	for line := range tailer.Lines() {
+		logger.Debug(line.Line)
+		logMessage := colorize(line.Line, logFilePath, patterns)
+		pubSub.Pub(logMessage, "lines")
 	}
+
 }
 
 // Run each line through the regex patterns to determine if the line should be colored.
