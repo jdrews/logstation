@@ -24,51 +24,65 @@ import (
 )
 
 var (
+	// use go embed to package up the webServerFiles
 	//go:embed web/build
-	embeddedFiles embed.FS
+	webServerFiles embed.FS
 
+	// use go embed to serve up the defaultConfigFile
 	//go:embed logstation.default.conf
 	defaultConfigFile []byte
 
+	// define the websocket upgrader
 	upgrader = websocket.Upgrader{}
 
+	// default to CORS being enabled
 	disableCORS = false
 
+	// define a logger
 	logger = logrus.New()
 )
 
+// LogMessage is used to associate the log line Text with the originating/source LogFile when shipping log lines around
 type LogMessage struct {
 	Text    string `json:"text"`
 	LogFile string `json:"logfile"`
 }
 
+// CompiledRegexColors is used to associate the regex with the selected ANSI color
 type CompiledRegexColors struct {
 	regex *regexp.Regexp
 	color string
 }
 
 func main() {
+	// set the logger to output to stdout
+	logger.SetOutput(os.Stdout)
+
+	// process config file
 	configFilePtr := flag.String("c", "logstation.conf", "path to config file")
 	flag.Parse()
 	handleConfigFile(*configFilePtr)
+
+	// preprocess all the regex patterns
 	patterns := parseRegexPatterns()
 
+	// setup message broker
 	pubSub := pubsub.New(1)
 
+	// process all log files to watch
 	logFiles := viper.GetStringSlice("logs")
 	for _, logFile := range logFiles {
 		//begin watching the file in a goroutine for concurrency
 		go follow(logFile, pubSub, patterns)
 	}
 
+	// setup web server
 	e := echo.New()
 	e.HideBanner = true
-
 	e.Use(middleware.Logger())
-	logger.SetOutput(os.Stdout)
 
+	// disable CORS on the web server if desired
 	disableCORS = viper.GetBool("server_settings.disablecors")
-	// Disable the following in production. Using in development so I can `npm start` and dev the frontend. It bypasses CORS
 	if disableCORS {
 		logger.Warn("Running in disabled CORS mode. This is very dangerous! Be careful!")
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -76,6 +90,7 @@ func main() {
 			AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		}))
 	}
+
 	c, _ := handlers.NewContainer()
 
 	// GetLogstationName - Get Logstation Name
@@ -84,44 +99,27 @@ func main() {
 	// GetSettingsSyntax - Get Syntax Colors
 	e.GET("/settings/syntax", c.GetSettingsSyntax)
 
-	fsys, err := fs.Sub(embeddedFiles, "web/build")
+	// package up the built web files and serve them to the clients
+	fsys, err := fs.Sub(webServerFiles, "web/build")
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("error loading the web files into the server. error msg: %s", err))
 	}
-
 	fileHandler := http.FileServer(http.FS(fsys))
-
 	e.GET("/*", echo.WrapHandler(fileHandler))
 
-	// pass channel into handler
+	// pass message broker channel into websocket handler
 	wsHandlerChan := func(c echo.Context) error {
 		return wshandler(c, pubSub)
 	}
 	e.GET("/ws", wsHandlerChan)
 
-	// start server
+	// start the web server
 	e.Logger.Fatal(e.Start(viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport")))
 }
 
-// Process all the regular expression patterns associated with each color and compile them at boot time to optimize regex matching.
-func parseRegexPatterns() []CompiledRegexColors {
-	var syntaxColors models.SyntaxColors
-	err := viper.UnmarshalKey("syntaxColors", &syntaxColors)
-	if err != nil {
-		logger.Fatal("Unable to unmarshall syntax colors from config file. Please check the colors in the config.")
-		return nil
-	}
-	crcs := make([]CompiledRegexColors, len(syntaxColors))
-	for index, element := range syntaxColors {
-		regex, err := regexp.Compile(element.Regex)
-		if err != nil {
-			logger.Fatal("Unable to compile the regex of ", element.Regex, " associated with the color ", element.Color, ". Please check the conf file and ensure your regex syntax is valid. More details here: ", err)
-		}
-		crcs[index] = CompiledRegexColors{regex, element.Color}
-	}
-	return crcs
-}
-
+// handleConfigFile processes the given config file and sets up app variables
+// If no config file is provided or the configFilePath is empty,
+// it will make a config file with the [logstation.default.conf] and quit the app
 func handleConfigFile(configFilePath string) {
 
 	configFilename := "logstation.conf"
@@ -150,41 +148,29 @@ func handleConfigFile(configFilePath string) {
 	logger.Info("Loaded ", viper.ConfigFileUsed())
 }
 
-func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
-	if disableCORS {
-		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	}
-	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+// parseRegexPatterns processes all the regular expression patterns associated with each color
+// and compiles them at boot time to optimize regex matching.
+func parseRegexPatterns() []CompiledRegexColors {
+	var syntaxColors models.SyntaxColors
+	err := viper.UnmarshalKey("syntaxColors", &syntaxColors)
 	if err != nil {
+		logger.Fatal("Unable to unmarshall syntax colors from config file. Please check the colors in the config.")
 		return nil
 	}
-	defer func(ws *websocket.Conn) {
-		wsCloseErr := ws.Close()
-		if wsCloseErr != nil {
-			panic(wsCloseErr)
+	crcs := make([]CompiledRegexColors, len(syntaxColors))
+	for index, element := range syntaxColors {
+		regex, err := regexp.Compile(element.Regex)
+		if err != nil {
+			logger.Fatal("Unable to compile the regex of ", element.Regex, " associated with the color ", element.Color, ". Please check the conf file and ensure your regex syntax is valid. More details here: ", err)
 		}
-	}(ws)
-
-	linesChannel := pubSub.Sub("lines")
-	defer pubSub.Unsub(linesChannel, "lines")
-
-	for line := range linesChannel {
-		jsonLine, marshalErr := json.Marshal(line)
-		if marshalErr != nil {
-			logger.Fatal(marshalErr)
-		}
-		// Write
-		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine) //TODO: look into using WriteJSON instead to simplify code
-		//err := ws.WriteJSON(line)
-		if wsErr != nil {
-			logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-			logger.Warn(wsErr)
-			break
-		}
+		crcs[index] = CompiledRegexColors{regex, element.Color}
 	}
-	return nil
+	return crcs
 }
 
+// follow begins a tailer for the specified logFilePath and publishes log lines to the given pubSub message broker
+// When follow picks up a log line, it also runs the line through regex via func colorize
+// to determine if it matches a color pattern
 func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexColors) {
 
 	parsedGlob, err := glob.Parse(logFilePath)
@@ -201,7 +187,7 @@ func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexC
 
 }
 
-// Run each line through the regex patterns to determine if the line should be colored.
+// colorize runs each line from a logFile through the regex patterns to determine if the line should be colored.
 // Outputs a LogMessage with line color information
 func colorize(line string, logFile string, patterns []CompiledRegexColors) LogMessage {
 	for _, element := range patterns {
@@ -236,4 +222,39 @@ func colorize(line string, logFile string, patterns []CompiledRegexColors) LogMe
 		}
 	}
 	return LogMessage{line, logFile}
+}
+
+// wshandler handles incoming websocket connections and serves up log lines to the client
+func wshandler(c echo.Context, pubSub *pubsub.PubSub) error {
+	if disableCORS {
+		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	}
+	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return nil
+	}
+	defer func(ws *websocket.Conn) {
+		wsCloseErr := ws.Close()
+		if wsCloseErr != nil {
+			panic(wsCloseErr)
+		}
+	}(ws)
+
+	linesChannel := pubSub.Sub("lines")
+	defer pubSub.Unsub(linesChannel, "lines")
+
+	for line := range linesChannel {
+		jsonLine, marshalErr := json.Marshal(line)
+		if marshalErr != nil {
+			logger.Fatal(marshalErr)
+		}
+		// Write
+		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine)
+		if wsErr != nil {
+			logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
+			logger.Warn(wsErr)
+			break
+		}
+	}
+	return nil
 }
