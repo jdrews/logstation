@@ -9,9 +9,6 @@ builds:
       - linux
       - windows
       - darwin
-    ignore:
-      - goos: darwin
-        goarch: arm64
 
 archives:
   - format: tar.gz
