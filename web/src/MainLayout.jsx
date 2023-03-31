@@ -22,7 +22,7 @@ const MainLayout = (props) => {
   const handleLogSelection = (event, newLogFile) => {
     setSelectedLogFile(newLogFile);
   };
-
+  // TODO: on first load select the first tab
   return (
     <Container
       disableGutters
