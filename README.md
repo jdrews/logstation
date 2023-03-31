@@ -4,7 +4,7 @@ Tails a set of log files and serves them up on a web server with syntax colors v
 
 Binaries available in [releases](https://github.com/jdrews/logstation/releases). See [usage](https://github.com/jdrews/logstation#usage) below.
 
-Focus on:
+Goals:
 - Run on anything and everything 
 - Support as many browsers as possible
 - Ease deployment and usage with a single executable with minimal configuration required
@@ -16,12 +16,12 @@ Developed with Go and React
 
 ### Usage ###
 * Call `logstation` or `logstation.exe` 
-* It will create an logstation.conf in your current directory if one doesn't exist and exit
-* Update logstation.conf as desired
-* Call `logstation` or `logstation.exe` again to start it
-* Navigate to `http://127.0.0.1:8884` to start tailing (or your IP)
+   * It will create an logstation.conf in your current directory if one doesn't exist and exit
+   * Update logstation.conf as desired
+   * Call `logstation` or `logstation.exe` again
+* Navigate to `http://127.0.0.1:8884` to start tailing (refer to [logstation.conf](logstation.default.conf) for listen IP and port)
 
-Can also use `-c your-logstation.conf` argument to specify a config file
+You can also use `-c your-logstation.conf` argument to specify a config file
 
 Take a look at [an example logstation.conf here](logstation.default.conf).
 
@@ -32,7 +32,7 @@ logstation uses [goreleaser](https://github.com/goreleaser/goreleaser) for all r
 To build all targets locally you can run   
 `goreleaser build --snapshot --clean`  
    
-If want to build for a specific target you can set environment variables for your target   
+If you want to build for a specific target you can set environment variables   
 In powershell this would look like:    
 `$env:GOOS="linux"; $env:GOARCH="amd64"; goreleaser build --snapshot --clean --single-target`
 
