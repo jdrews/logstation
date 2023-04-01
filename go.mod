@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/cskr/pubsub v1.0.2
-	github.com/fatih/color v1.14.1
+	github.com/fatih/color v1.15.0
 	github.com/fstab/grok_exporter v0.2.8
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.10.2
@@ -39,7 +39,7 @@ require (
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/exp v0.0.0-20200917184745-18d7dbdd5567 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
