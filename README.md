@@ -38,5 +38,15 @@ In powershell this would look like:
 
 Reference the [releases](https://github.com/jdrews/logstation/releases) and [.goreleaser.yaml](.goreleaser.yaml) for all officially supported targets. 
 
+### Releasing ### 
+
+* Push a tag following [semver](https://semver.org/)
+  * `git tag -a v2.0.0-beta1 -m "Beta release of v2.0.0"`
+  * `git push origin v2.0.0-beta1`
+* Ensure you have an environment variable with `GITHUB_TOKEN="YOUR_GH_TOKEN"` and minimum of `write:packages` permissions
+* Release!   
+  * `goreleaser release`
+* Read the [goreleaser quickstart](https://goreleaser.com/quick-start/) for more details
+
 ### Versions ###
 Prior to 2.x, this app was built using Scala/Play/JS. At 2.x this app was rewritten in Go and React. If you're looking for the older versions reference the releases prior to 2.x. 
