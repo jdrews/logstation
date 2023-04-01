@@ -6,7 +6,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.11.12",
-    "@patternfly/react-core": "^4.276.6",
+    "@patternfly/react-core": "^4.276.8",
     "@patternfly/react-icons": "^4.93.6",
     "@patternfly/react-log-viewer": "^4.87.100",
     "@testing-library/jest-dom": "^5.14.1",
