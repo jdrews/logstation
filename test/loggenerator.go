@@ -42,7 +42,9 @@ var lipsumwords = []string{"a", "ac", "accumsan", "ad", "adipiscing", "aenean", 
 	"vulputate"}
 
 var punctuation = []string{".", "?", "!"}
-var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE", ""}
+
+// var severity = []string{"ERROR", "WARN", "INFO", "DEBUG", "TRACE", ""}
+var severity = []string{"INFO", "DEBUG", "TRACE"} // NOTE: This is the pretty view (everything alright! No problems!)
 
 func main() {
 	logPtr := flag.String("logfile", "test/logfile.log", "Name of logfile that receives the generated log lines")
