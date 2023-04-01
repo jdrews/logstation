@@ -181,7 +181,7 @@ func follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexC
 	tailer, err := fswatcher.RunFileTailer([]glob.Glob{parsedGlob}, false, true, logger)
 	for line := range tailer.Lines() {
 		logger.Debug(line.Line)
-		logMessage := colorize(line.Line, logFilePath, patterns)
+		logMessage := colorize(line.Line, line.File, patterns)
 		pubSub.Pub(logMessage, "lines")
 	}
 
