@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "logstation",
+  "name": "logstation: stream log files to the browser",
   "icons": [
     {
       "src": "favicon.ico",

@@ -1,7 +1,7 @@
 before:
   hooks:
     - go mod tidy
-    - npm run --prefix web build
+    - yarn --cwd web build
 builds:
   - env:
       - CGO_ENABLED=0

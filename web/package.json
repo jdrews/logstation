@@ -2,6 +2,7 @@
   "name": "logstation",
   "version": "2.0.0",
   "private": true,
+  "packageManager": "yarn@3.5.0",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
@@ -11,44 +12,21 @@
     "@patternfly/react-log-viewer": "^4.87.100",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "reconnecting-websocket": "^4.4.0",
-    "web-vitals": "^1.1.2",
-    "websocket": "^1.0.34"
+    "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^7.6.0",
-    "react-scripts": "5.0.1",
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^12.1.5",
-    "@testing-library/user-event": "^14.4.3",
-    "source-map-explorer": "^2.5.3",
+    "@parcel/transformer-webmanifest": "^2.8.3",
+    "parcel": "^2.8.3",
     "prettier": "2.8.4",
-    "rimraf": "^4.4.1"
+    "process": "^0.11.10",
+    "rimraf": "^4.4.1",
+    "shx": "^0.3.4"
   },
   "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "clean": "rimraf .cache .tmp lib build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "start": "parcel public/index.html",
+    "build": "yarn patch-patternfly; parcel build public/index.html",
+    "clean": "rimraf .cache .tmp lib build",
+    "//": "TODO: patch-patternfly is to fix an upstream problem tracked at: https://github.com/patternfly/patternfly/issues/4930",
+    "patch-patternfly": "shx sed -i 's/..\\/..\\/assets\\//\\/node_modules\\/@patternfly\\/react-styles\\/css\\/assets\\//g' node_modules/@patternfly/react-styles/css/components/BackgroundImage/background-image.css node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css node_modules/@patternfly/react-styles/css/components/FormControl/form-control.css"
   }
 }
