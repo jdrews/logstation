@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -58,11 +59,14 @@ func main() {
 
 	// Prepare file
 	rand.Seed(time.Now().Unix())
+	err := os.MkdirAll(filepath.Dir(*logPtr), 0777)
+	if err != nil {
+		log.Fatalf("failed creating directory path: %s", err)
+	}
 	file, err := os.OpenFile(*logPtr, os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
-		os.Exit(1)
 	}
 
 	c := make(chan os.Signal)
