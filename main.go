@@ -25,7 +25,7 @@ import (
 
 var (
 	// use go embed to package up the webServerFiles
-	//go:embed web/build
+	//go:embed web/dist
 	webServerFiles embed.FS
 
 	// use go embed to serve up the defaultConfigFile
@@ -100,7 +100,7 @@ func main() {
 	e.GET("/settings/syntax", c.GetSettingsSyntax)
 
 	// package up the built web files and serve them to the clients
-	fsys, err := fs.Sub(webServerFiles, "web/build")
+	fsys, err := fs.Sub(webServerFiles, "web/dist")
 	if err != nil {
 		panic(fmt.Errorf("error loading the web files into the server. error msg: %s", err))
 	}
