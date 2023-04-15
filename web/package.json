@@ -23,9 +23,9 @@
     "shx": "^0.3.4"
   },
   "scripts": {
-    "start": "parcel public/index.html",
+    "start": "parcel --port 1234 --hmr-port 1201 public/index.html --open",
     "build": "yarn patch-patternfly; parcel build public/index.html",
-    "clean": "rimraf .cache .tmp lib build",
+    "clean": "rimraf dist",
     "//": "TODO: patch-patternfly is to fix an upstream problem tracked at: https://github.com/patternfly/patternfly/issues/4930",
     "patch-patternfly": "shx sed -i 's/..\\/..\\/assets\\//\\/node_modules\\/@patternfly\\/react-styles\\/css\\/assets\\//g' node_modules/@patternfly/react-styles/css/components/BackgroundImage/background-image.css node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css node_modules/@patternfly/react-styles/css/components/FormControl/form-control.css"
   }

@@ -2,15 +2,8 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import MainLayout from "./MainLayout";
 import { useEffect, useState } from "react";
 
-// configure the wsurl and url dynamically based on prod or dev settings
-const wsurl =
-  process.env.NODE_ENV === "production"
-    ? "ws://" + window.location.host + "/ws"
-    : "ws://localhost:8884/ws";
-const url =
-  process.env.NODE_ENV === "production"
-    ? window.location.protocol + "//" + window.location.host
-    : "http://localhost:8884";
+const wsurl = "ws://" + window.location.host + "/ws";
+const url = window.location.protocol + "//" + window.location.host;
 
 const rws = new ReconnectingWebSocket(wsurl);
 
