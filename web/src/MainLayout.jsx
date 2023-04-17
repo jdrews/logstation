@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
+import { isSafari } from "react-device-detect";
 
 function a11yProps(index) {
   return {
@@ -69,17 +70,33 @@ const MainLayout = (props) => {
               label={
                 <Tooltip title={logFile}>
                   <div
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      width: "9rem",
-                      direction: "rtl",
-                      textAlign: "left",
-                    }}
+                    style={
+                      isSafari
+                        ? {
+                            textAlign: "center",
+                            textOverflow: "clip",
+                            width: "9rem",
+                          }
+                        : {
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            width: "9rem",
+                            direction: "rtl",
+                            textAlign: "left",
+                          }
+                    }
                   >
-                    <Typography noWrap align={"left"} fontSize="0.8rem">
-                      {logFile}
+                    <Typography
+                      noWrap
+                      align={isSafari ? "center" : "left"}
+                      fontSize="0.8rem"
+                    >
+                      {
+                        // Safari does not respect the rtl text overflow CSS magic above (... on the left)
+                        //    Only show the filename for safari (not the path)
+                        isSafari ? logFile.split(/[\\\/]/).pop() : logFile
+                      }
                     </Typography>
                   </div>
                 </Tooltip>
