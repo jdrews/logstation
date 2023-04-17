@@ -22,7 +22,7 @@
     "path-browserify": "^1.0.1",
     "prettier": "2.8.7",
     "process": "^0.11.10",
-    "rimraf": "^4.4.1",
+    "rimraf": "^5.0.0",
     "shx": "^0.3.4"
   },
   "scripts": {
