@@ -24,7 +24,6 @@ const App = () => {
         });
     };
     rws.onmessage = (message) => {
-      console.log(message.data);
       const logObject = JSON.parse(message.data); // get the JSON object from the websocket message data payload
       // example object: {logfile: "./logfile2.log", text: "log message body"}
       const logFileName = logObject.logfile;
