@@ -1,4 +1,5 @@
-# logstation #
+
+# ![image](https://raw.githubusercontent.com/jdrews/logstation/master/web/public/favicon-32x32.png)  logstation #
 
 Tails a set of log files and serves them up on a web server with syntax colors via regex. 
 
@@ -9,8 +10,7 @@ Goals:
 - Support as many browsers as possible
 - Ease deployment and usage with a single executable with minimal configuration required
 
-![image](https://user-images.githubusercontent.com/172766/228132770-567a2551-8d0d-43f0-b3a8-4517c141de7d.png)
-
+![image](https://user-images.githubusercontent.com/172766/232646725-4943f11e-a26b-4932-a8d7-c85110cd019a.png)
 
 Developed with Go and React 
 
