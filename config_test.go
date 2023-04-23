@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestWithDefaultConfigFile(t *testing.T) {
+func TestHandleConfigFile_Default(t *testing.T) {
 	// blank out all of viper's configs
 	viper.Reset()
 	// process the default config
@@ -28,7 +28,7 @@ func TestWithDefaultConfigFile(t *testing.T) {
 	}
 }
 
-func TestBadPath(t *testing.T) {
+func TestHandleConfigFile_BadPath(t *testing.T) {
 	// blank out all of viper's configs
 	viper.Reset()
 	// attempt to remove logstation.conf
@@ -45,7 +45,7 @@ func TestBadPath(t *testing.T) {
 	// Setup a subprocess to run the test
 	// follows the ideas from Go Dev Andrew Gerrand in his Testing Techniques talk
 	//  https://go.dev/talks/2014/testing.slide#23
-	cmd := exec.Command(os.Args[0], "-test.run=TestBadPath")
+	cmd := exec.Command(os.Args[0], "-test.run=TestHandleConfigFile_BadPath")
 	cmd.Env = append(os.Environ(), "DO_IT=1")
 	err = cmd.Run()
 	if err == nil {
