@@ -16,7 +16,7 @@ all:
 	$(MAKE) app
 
 app:
-	go build -o ${FILENAME} ./main.go
+	go build -o ${FILENAME}
 
 web:
 	cd web && npm run build
