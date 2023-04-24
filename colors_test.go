@@ -1,35 +1,37 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/fstab/grok_exporter/tailer/fswatcher"
 	"testing"
 )
 
 func TestParseRegexPatterns(t *testing.T) {
-	// load in the default config file so we get some regex patterns
+	// Load in the default config file so we get some regex patterns
 	HandleConfigFile("logstation.default.conf")
 
 	// ParseRegexPatterns pulls from the viper config as an input
-	var compiledRegexColors = ParseRegexPatterns()
+	compiledRegexColors := ParseRegexPatterns()
 
 	// Check the number of CompiledRegexColors
-	var parsedColors = len(compiledRegexColors)
-	var expectedColors = 5
+	parsedColors := len(compiledRegexColors)
+	expectedColors := 5
 	if parsedColors != expectedColors {
 		t.Errorf("Should have had %d CompiledRegexColors. Ended up with %d", expectedColors, parsedColors)
 	}
 
 	// Verify the first color is hired
-	var parsedColor = compiledRegexColors[0].color
-	var expectedColor = "hired"
+	parsedColor := compiledRegexColors[0].color
+	expectedColor := "hired"
 	if parsedColor != expectedColor {
 		t.Errorf("First regex should have been %s. Ended up with %s", expectedColor, parsedColor)
 	}
 
 	// Verify the first color works with an expected ERROR string
-	var testString = "[ERROR]: There's something wrong going on!"
-	var parsedRegex = compiledRegexColors[0].regex
+	testString := "[ERROR]: There's something wrong going on!"
+	parsedRegex := compiledRegexColors[0].regex
 	if parsedRegex.MatchString(testString) {
 		return //it matches!
 	} else {
@@ -38,28 +40,38 @@ func TestParseRegexPatterns(t *testing.T) {
 }
 
 func TestColorize(t *testing.T) {
-	// load in the default config file so we get some regex patterns
+	// load in the default config file, so we get some regex patterns
 	HandleConfigFile("logstation.default.conf")
 
 	// Get the compiledRegexColors
-	var compiledRegexColors = ParseRegexPatterns()
+	compiledRegexColors := ParseRegexPatterns()
 
-	// Test a ERROR/hired line
-	var testString = "[ERROR]: There's something wrong going on!"
-	var testLogFile = "test/logfile.log"
-	var logMessage = Colorize(testString, testLogFile, compiledRegexColors)
-	// make a testString HiRed ANSI so we can compare the output of Colorize
-	var testStringColored = color.HiRedString(testString)
+	// Enable ANSI colors regardless of terminal state
+	color.NoColor = false
 
-	// Compare the test built string to the Colorized string
-	// TODO: Something is stripping ANSI escape codes above. This makes the compare always pass. Need to fix this.
-	var escapedLogMessage = fmt.Sprintf("%q", logMessage.Text)
-	var escapedTestStringColored = fmt.Sprintf("%q", testStringColored)
-	if escapedTestStringColored != escapedLogMessage {
-		t.Errorf("LogMessage.Text should have been colored red. It was not. line: %s", logMessage.Text)
+	// Test a INFO  line
+	testLine := fswatcher.Line{
+		Line: "[INFO]: You might want to know about this...",
+		File: "test/logfile.log",
 	}
-	if logMessage.LogFile != testLogFile {
-		t.Errorf("LogMessage.LogFile should have been %s. Ended up with %s", testLogFile, logMessage.LogFile)
+	logMessage := Colorize(testLine.Line, testLine.File, compiledRegexColors)
+
+	// Setup a read buffer to read back the lines
+	rb := new(bytes.Buffer)
+	_, err := fmt.Fprint(rb, logMessage.Text, "\n")
+	if err != nil {
+		return
 	}
 
+	// Read the line back from the buffer
+	line, _ := rb.ReadString('\n')
+	scannedLine := fmt.Sprintf("%q", line)
+
+	// Prepare a colored string to compare to
+	colored := fmt.Sprintf("\x1b[%dm%s\x1b[0m\n", color.FgHiGreen, testLine.Line)
+	escapedForm := fmt.Sprintf("%q", colored)
+
+	if scannedLine != escapedForm {
+		t.Errorf("Expecting %s, got '%s'\n", escapedForm, scannedLine)
+	}
 }
