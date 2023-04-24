@@ -8,30 +8,30 @@ import (
 )
 
 func TestHandleConfigFile_Default(t *testing.T) {
-	// blank out all of viper's configs
+	// Blank out all of viper's configs
 	viper.Reset()
-	// process the default config
+	// Process the default config
 	HandleConfigFile("logstation.default.conf")
 
 	// Should have 3 log files processed
-	var parsedLogs = len(viper.GetStringSlice("logs"))
-	var expectedLogs = 3
+	parsedLogs := len(viper.GetStringSlice("logs"))
+	expectedLogs := 3
 	if parsedLogs != expectedLogs {
 		t.Errorf("Should have had %d log files. Ended up with %d", expectedLogs, parsedLogs)
 	}
 
 	// Should have a logStationName called "logstation"
-	var parsedName = viper.GetString("logStationName")
-	var expectedName = "logstation"
+	parsedName := viper.GetString("logStationName")
+	expectedName := "logstation"
 	if parsedName != expectedName {
 		t.Errorf("Should have had a logstation name of \"%s\". Ended up with %s", expectedName, parsedName)
 	}
 }
 
 func TestHandleConfigFile_BadPath(t *testing.T) {
-	// blank out all of viper's configs
+	// Blank out all of viper's configs
 	viper.Reset()
-	// attempt to remove logstation.conf
+	// Attempt to remove logstation.conf
 	err := os.Remove("logstation.conf")
 	if !(err == nil || os.IsNotExist(err)) { // continue if no errors or if the conf file doesn't exist
 		panic(err)
@@ -49,7 +49,7 @@ func TestHandleConfigFile_BadPath(t *testing.T) {
 	cmd.Env = append(os.Environ(), "DO_IT=1")
 	err = cmd.Run()
 	if err == nil {
-		// it ran fine. let's check if it wrote the log file
+		// It ran fine. Let's check if it wrote the log file
 		_, err = os.Stat("logstation.conf")
 		if err == nil {
 			return // logstation.conf exists! Test passes
