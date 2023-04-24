@@ -8,6 +8,10 @@ import (
 	"testing"
 )
 
+// TestParseRegexPatterns is a unit test for the ParseRegexPatterns function
+//
+//	This unit test loads the default config and parses the color-to-regex patterns in the default config
+//	It then verifies the output compiledRegexColors is setup as expected
 func TestParseRegexPatterns(t *testing.T) {
 	// Load in the default config file so we get some regex patterns
 	HandleConfigFile("logstation.default.conf")
@@ -39,6 +43,12 @@ func TestParseRegexPatterns(t *testing.T) {
 	}
 }
 
+// TestColorize is a unit test for the Colorize function
+//
+//	It loads up the default config and parses the color-to-regex patterns in the default config
+//	It then colorizes the log line per ANSI specs
+//	To test if the colors work, it writes the line to a Buffer and then reads it back
+//	comparing it to an expected log line.
 func TestColorize(t *testing.T) {
 	// Load in the default config file, so we get some regex patterns
 	HandleConfigFile("logstation.default.conf")

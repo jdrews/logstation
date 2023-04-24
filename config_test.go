@@ -7,6 +7,9 @@ import (
 	"testing"
 )
 
+// TestHandleConfigFile_Default tests the HandleConfigFile using a default config file
+//
+//	After loading up the default config file, it checks a few viper settings to ensure it was read in correctly
 func TestHandleConfigFile_Default(t *testing.T) {
 	// Blank out all of viper's configs
 	viper.Reset()
@@ -28,6 +31,12 @@ func TestHandleConfigFile_Default(t *testing.T) {
 	}
 }
 
+// TestHandleConfigFile_Default tests the HandleConfigFile using a conf file that doesn't exist
+//
+//	What should happen after that is that logstation will create a config file for you and exit
+//	This test runs a subprocess to see if it exits as expected and writes the logfile
+//	Uses the ideas of Go Dev Andrew Gerrand in his Testing Techniques talk
+//		at https://go.dev/talks/2014/testing.slide#23
 func TestHandleConfigFile_BadPath(t *testing.T) {
 	// Blank out all of viper's configs
 	viper.Reset()
@@ -43,8 +52,6 @@ func TestHandleConfigFile_BadPath(t *testing.T) {
 		return
 	}
 	// Setup a subprocess to run the test
-	// follows the ideas from Go Dev Andrew Gerrand in his Testing Techniques talk
-	//  https://go.dev/talks/2014/testing.slide#23
 	cmd := exec.Command(os.Args[0], "-test.run=TestHandleConfigFile_BadPath")
 	cmd.Env = append(os.Environ(), "DO_IT=1")
 	err = cmd.Run()
