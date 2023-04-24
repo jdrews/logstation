@@ -15,12 +15,21 @@ func writeALine(t *testing.T, logFilePath string, logString string) {
 	// Write a line to the logFilePath
 	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		t.Fatalf("failed creating file: %s", err)
+		t.Errorf("failed creating file: %s", err)
 	}
 	datawriter := bufio.NewWriter(file)
-	datawriter.WriteString(fmt.Sprint(logString))
-	datawriter.Flush()
-	file.Close()
+	_, err = datawriter.WriteString(fmt.Sprint(logString))
+	if err != nil {
+		t.Errorf("Unable to write a string to %s", logFilePath)
+	}
+	err = datawriter.Flush()
+	if err != nil {
+		t.Errorf("Unable to flush %s", logFilePath)
+	}
+	err = file.Close()
+	if err != nil {
+		t.Errorf("Unable to close %s", logFilePath)
+	}
 }
 
 // TestFollow is an integration test for the entire backend tailing system

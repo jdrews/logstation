@@ -40,7 +40,7 @@ func TestParseRegexPatterns(t *testing.T) {
 }
 
 func TestColorize(t *testing.T) {
-	// load in the default config file, so we get some regex patterns
+	// Load in the default config file, so we get some regex patterns
 	HandleConfigFile("logstation.default.conf")
 
 	// Get the compiledRegexColors
