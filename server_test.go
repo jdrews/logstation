@@ -54,7 +54,4 @@ func TestStartWebServer(t *testing.T) {
 	if responseString != expectedResponse {
 		t.Errorf("Response for /settings/logstation-name was expected to be %s, but got %s", expectedResponse, responseData)
 	}
-
-	//TODO: Test this
-	// maybe start up the webserver, and test a connection to it?
 }
