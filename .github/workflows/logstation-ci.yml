@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: '19.x'
           cache: 'yarn'
+          cache-dependency-path: ./web/yarn.lock
 
       - name: Install web
         run: yarn install
