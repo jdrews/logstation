@@ -21,9 +21,11 @@ jobs:
 
       - name: Install web
         run: yarn install
+        working-directory: ./web
 
       - name: Build web with Yarn
-        run: yarn --cwd web build
+        run: yarn build
+        working-directory: ./web
 
       - name: Set up Go
         uses: actions/setup-go@v3
