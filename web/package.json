@@ -6,7 +6,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.12.0",
-    "@patternfly/react-core": "^4.276.8",
+    "@patternfly/react-core": "^4.276.9",
     "@patternfly/react-icons": "^4.93.6",
     "@patternfly/react-log-viewer": "^4.87.100",
     "react": "^17.0.1",
