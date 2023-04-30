@@ -20,15 +20,15 @@ func writeALine(t *testing.T, logFilePath string, logString string) {
 	datawriter := bufio.NewWriter(file)
 	_, err = datawriter.WriteString(fmt.Sprint(logString))
 	if err != nil {
-		t.Errorf("Unable to write a string to %s", logFilePath)
+		t.Errorf("Unable to write a string to %s, err: %s", logFilePath, err)
 	}
 	err = datawriter.Flush()
 	if err != nil {
-		t.Errorf("Unable to flush %s", logFilePath)
+		t.Errorf("Unable to flush %s, err: %s", logFilePath, err)
 	}
 	err = file.Close()
 	if err != nil {
-		t.Errorf("Unable to close %s", logFilePath)
+		t.Errorf("Unable to close %s, err: %s", logFilePath, err)
 	}
 }
 
