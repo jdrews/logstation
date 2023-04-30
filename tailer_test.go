@@ -17,20 +17,20 @@ func writeALine(t *testing.T, logFilePath string, logString string) {
 	if err != nil {
 		t.Errorf("failed creating file: %s", err)
 	}
-	t.Logf("opened the file: %s", file)
+	t.Logf("%s: opened the file: %s", time.Now(), file.Name())
 	datawriter := bufio.NewWriter(file)
 	_, err = datawriter.WriteString(fmt.Sprint(logString))
 	if err != nil {
 		t.Errorf("Unable to write a string to %s, err: %s", logFilePath, err)
 	}
-	t.Logf("wrote the logString: %s", logString)
+	t.Logf("%s: wrote the logString: %s", time.Now(), logString)
 	err = datawriter.Flush()
 	if err != nil {
 		t.Errorf("Unable to flush %s, err: %s", logFilePath, err)
 	}
-	t.Logf("file flished: %s", logFilePath)
+	t.Logf("%s: file flished: %s", time.Now(), logFilePath)
 	err = file.Close()
-	t.Logf("file closed")
+	t.Logf("%s: file closed", time.Now())
 	if err != nil {
 		t.Errorf("Unable to close %s, err: %s", logFilePath, err)
 	}
@@ -75,7 +75,7 @@ func TestFollow(t *testing.T) {
 
 	// Write a line to the test log
 	writeALine(t, logFilePath, "[INFO]: You might want to know about this...\n")
-	t.Logf("Line written to %s", logFilePath)
+	t.Logf("%s: Line written to %s", time.Now(), logFilePath)
 
 	// Setup a timer for listening to the topic
 	listenDurationString := "5s"
@@ -92,7 +92,7 @@ func TestFollow(t *testing.T) {
 		if line == "poisonpill" {
 			break // The test failed because we didn't get a message in the listenDuration
 		}
-		t.Logf("Got a message on the lines channel! line: %s", line)
+		t.Logf("%s, Got a message on the lines channel! line: %s", time.Now(), line)
 
 		// Prepare the tailedLine for comparison
 		tailedLine := fmt.Sprintf("%q", line.(LogMessage).Text)
