@@ -58,7 +58,7 @@ func TestFollow(t *testing.T) {
 	escapedForm := fmt.Sprintf("%q", colored)
 
 	// Log file to test against
-	logFilePath := "logfile.log"
+	logFilePath := "./logfile.log"
 
 	// Setup message broker
 	pubSub := pubsub.New(1)
@@ -71,14 +71,14 @@ func TestFollow(t *testing.T) {
 	go Follow(logFilePath, pubSub, compiledRegexColors)
 
 	// Give the fswatcher.RunFileTailer enough time to startup
-	time.Sleep(time.Duration(5000) * time.Millisecond)
+	time.Sleep(time.Duration(2000) * time.Millisecond)
 
 	// Write a line to the test log
 	writeALine(t, logFilePath, "[INFO]: You might want to know about this...\n")
 	t.Logf("%s: Line written to %s", time.Now(), logFilePath)
 
 	// Setup a timer for listening to the topic
-	listenDurationString := "5s"
+	listenDurationString := "2s"
 	listenDuration, _ := time.ParseDuration(listenDurationString)
 	listenTimer := time.AfterFunc(listenDuration, func() {
 		t.Errorf("Waited %s for a message from Follow() and nothing came through. It's possible the tailer didn't get enough time to start tailing, or other bad things happened", listenDurationString)
