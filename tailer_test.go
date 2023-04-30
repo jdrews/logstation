@@ -13,7 +13,7 @@ import (
 // writeALine writes a logString line to a specified logFilePath
 func writeALine(t *testing.T, logFilePath string, logString string) {
 	// Write a line to the logFilePath
-	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND, 0644)
+	file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		t.Errorf("failed creating file: %s", err)
 	}
