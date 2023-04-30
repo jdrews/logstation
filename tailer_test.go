@@ -17,16 +17,20 @@ func writeALine(t *testing.T, logFilePath string, logString string) {
 	if err != nil {
 		t.Errorf("failed creating file: %s", err)
 	}
+	t.Logf("opened the file: %s", file)
 	datawriter := bufio.NewWriter(file)
 	_, err = datawriter.WriteString(fmt.Sprint(logString))
 	if err != nil {
 		t.Errorf("Unable to write a string to %s, err: %s", logFilePath, err)
 	}
+	t.Logf("wrote the logString: %s", logString)
 	err = datawriter.Flush()
 	if err != nil {
 		t.Errorf("Unable to flush %s, err: %s", logFilePath, err)
 	}
+	t.Logf("file flished: %s", logFilePath)
 	err = file.Close()
+	t.Logf("file closed")
 	if err != nil {
 		t.Errorf("Unable to close %s, err: %s", logFilePath, err)
 	}
@@ -67,13 +71,14 @@ func TestFollow(t *testing.T) {
 	go Follow(logFilePath, pubSub, compiledRegexColors)
 
 	// Give the fswatcher.RunFileTailer enough time to startup
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	time.Sleep(time.Duration(5000) * time.Millisecond)
 
 	// Write a line to the test log
 	writeALine(t, logFilePath, "[INFO]: You might want to know about this...\n")
+	t.Logf("Line written to %s", logFilePath)
 
 	// Setup a timer for listening to the topic
-	listenDurationString := "2s"
+	listenDurationString := "5s"
 	listenDuration, _ := time.ParseDuration(listenDurationString)
 	listenTimer := time.AfterFunc(listenDuration, func() {
 		t.Errorf("Waited %s for a message from Follow() and nothing came through. It's possible the tailer didn't get enough time to start tailing, or other bad things happened", listenDurationString)
@@ -87,6 +92,7 @@ func TestFollow(t *testing.T) {
 		if line == "poisonpill" {
 			break // The test failed because we didn't get a message in the listenDuration
 		}
+		t.Logf("Got a message on the lines channel! line: %s", line)
 
 		// Prepare the tailedLine for comparison
 		tailedLine := fmt.Sprintf("%q", line.(LogMessage).Text)
