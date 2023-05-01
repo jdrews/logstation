@@ -19,7 +19,7 @@
     "@parcel/transformer-webmanifest": "^2.8.3",
     "parcel": "^2.8.3",
     "path-browserify": "^1.0.1",
-    "prettier": "2.8.7",
+    "prettier": "2.8.8",
     "process": "^0.11.10",
     "rimraf": "^5.0.0",
     "shx": "^0.3.4"
