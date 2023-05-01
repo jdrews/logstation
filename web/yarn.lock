@@ -1274,7 +1274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-core@npm:^4.273.1, @patternfly/react-core@npm:^4.276.8":
+"@patternfly/react-core@npm:^4.273.1":
   version: 4.276.8
   resolution: "@patternfly/react-core@npm:4.276.8"
   dependencies:
@@ -1289,6 +1289,24 @@ __metadata:
     react: ^16.8 || ^17 || ^18
     react-dom: ^16.8 || ^17 || ^18
   checksum: e17806345aa9972867e8a9854cb3067ac7f9b06006bfd833b4ba3d3c71c2f8c76765b30b5511c3a214a254dc5c41ac53c6040ced726c65fcc3b0e0ec162051f7
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-core@npm:^4.276.9":
+  version: 4.276.9
+  resolution: "@patternfly/react-core@npm:4.276.9"
+  dependencies:
+    "@patternfly/react-icons": ^4.93.6
+    "@patternfly/react-styles": ^4.92.7
+    "@patternfly/react-tokens": ^4.94.6
+    focus-trap: 6.9.2
+    react-dropzone: 9.0.0
+    tippy.js: 5.1.2
+    tslib: ^2.0.0
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18
+    react-dom: ^16.8 || ^17 || ^18
+  checksum: 583c8d5285fb745196844549aa330a7f2fc8bd951c6f2374f584132a7030a23210ab29605fc02de0c7ae223344adb6705046ec53cf171fd178c2a8c5d01b78b5
   languageName: node
   linkType: hard
 
@@ -1323,6 +1341,13 @@ __metadata:
   version: 4.92.6
   resolution: "@patternfly/react-styles@npm:4.92.6"
   checksum: fef3317cf2c6f79afea3c1903372ac62a0e753b239f360c4c9896dbdbe98a2d72abd62e047cd29b6569a1c7d3654110cd3f3934a2268d01d1891855eeff2b72a
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-styles@npm:^4.92.7":
+  version: 4.92.7
+  resolution: "@patternfly/react-styles@npm:4.92.7"
+  checksum: 5ff91a424d818504a48a081450d2acd8bd4a285742f7ca6670de094c683125bbb746d25950613b07c3c0fefd345c2b3e022b8abd2ca01ccef0bc76f89413d75e
   languageName: node
   linkType: hard
 
@@ -2632,7 +2657,7 @@ __metadata:
     "@mui/material": ^5.12.0
     "@parcel/packager-raw-url": ^2.8.3
     "@parcel/transformer-webmanifest": ^2.8.3
-    "@patternfly/react-core": ^4.276.8
+    "@patternfly/react-core": ^4.276.9
     "@patternfly/react-icons": ^4.93.6
     "@patternfly/react-log-viewer": ^4.87.100
     parcel: ^2.8.3
