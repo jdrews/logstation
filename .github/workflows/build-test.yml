@@ -1,4 +1,4 @@
-name: Build and Test logstation
+name: Build/Test
 
 on:
   push:
