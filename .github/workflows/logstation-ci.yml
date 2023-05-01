@@ -11,7 +11,7 @@ env:
 
 jobs:
 
-  build:
+  build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,6 +22,10 @@ jobs:
           node-version: '19.x'
           cache: 'yarn'
           cache-dependency-path: ./web/yarn.lock
+
+      - name: Install yarn 3.x
+        run: yarn set version 3.x
+        working-directory: ./web
 
       - name: Install web
         run: yarn install
