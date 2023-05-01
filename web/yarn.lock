@@ -87,6 +87,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@emotion/babel-plugin@npm:^11.10.8":
+  version: 11.10.8
+  resolution: "@emotion/babel-plugin@npm:11.10.8"
+  dependencies:
+    "@babel/helper-module-imports": ^7.16.7
+    "@babel/runtime": ^7.18.3
+    "@emotion/hash": ^0.9.0
+    "@emotion/memoize": ^0.8.0
+    "@emotion/serialize": ^1.1.1
+    babel-plugin-macros: ^3.1.0
+    convert-source-map: ^1.5.0
+    escape-string-regexp: ^4.0.0
+    find-root: ^1.1.0
+    source-map: ^0.5.7
+    stylis: 4.1.4
+  checksum: b8e2ed0c68a2ea423c5c2efdcf37e0b482dcb74caba042d2987a058f151819f0574fb2298fba4f76fa23265e1975dcf337f1f59ad6f35a33db2f9bf1afe03ee0
+  languageName: node
+  linkType: hard
+
 "@emotion/cache@npm:^11.10.5":
   version: 11.10.5
   resolution: "@emotion/cache@npm:11.10.5"
@@ -177,12 +196,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.10.6":
-  version: 11.10.6
-  resolution: "@emotion/styled@npm:11.10.6"
+"@emotion/styled@npm:^11.10.8":
+  version: 11.10.8
+  resolution: "@emotion/styled@npm:11.10.8"
   dependencies:
     "@babel/runtime": ^7.18.3
-    "@emotion/babel-plugin": ^11.10.6
+    "@emotion/babel-plugin": ^11.10.8
     "@emotion/is-prop-valid": ^1.2.0
     "@emotion/serialize": ^1.1.1
     "@emotion/use-insertion-effect-with-fallbacks": ^1.0.0
@@ -193,7 +212,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: ed0ee4bec3b63ee9c5eb8216b22646313ff1ada06c5183f128d25b73252126e9fde625e81c868be7ccd666b686a73076f923ce188dac25e93d5062ddffdad46f
+  checksum: ceff0ac12f92289ea8febb1c3b4b70c1f3e110354452b9f6ee6461a7c01a24a0e2f071eb4303a7a289aad5cc8b62096561a150b0b6ed096bb1fd3e8503633226
   languageName: node
   linkType: hard
 
@@ -2653,7 +2672,7 @@ __metadata:
   resolution: "logstation@workspace:."
   dependencies:
     "@emotion/react": ^11.10.6
-    "@emotion/styled": ^11.10.6
+    "@emotion/styled": ^11.10.8
     "@mui/material": ^5.12.0
     "@parcel/packager-raw-url": ^2.8.3
     "@parcel/transformer-webmanifest": ^2.8.3
@@ -3715,6 +3734,13 @@ __metadata:
   version: 4.1.3
   resolution: "stylis@npm:4.1.3"
   checksum: d04dbffcb9bf2c5ca8d8dc09534203c75df3bf711d33973ea22038a99cc475412a350b661ebd99cbc01daa50d7eedcf0d130d121800eb7318759a197023442a6
+  languageName: node
+  linkType: hard
+
+"stylis@npm:4.1.4":
+  version: 4.1.4
+  resolution: "stylis@npm:4.1.4"
+  checksum: cd929bd89709def13b47e6c16b11317bf996a09b4e987fc45a235549c3adf49d41531e017d7df511daa095bc9468c923ae9094a934fe9c62440b7351874dafb7
   languageName: node
   linkType: hard
 
