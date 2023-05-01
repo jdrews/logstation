@@ -6,7 +6,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.12.0",
-    "@patternfly/react-core": "^4.276.8",
+    "@patternfly/react-core": "^4.276.9",
     "@patternfly/react-icons": "^4.93.6",
     "@patternfly/react-log-viewer": "^4.87.100",
     "react": "^17.0.1",
@@ -29,6 +29,6 @@
     "build": "yarn clean; yarn patch-patternfly; parcel build public/index.html",
     "clean": "rimraf dist",
     "//": "TODO: patch-patternfly is to fix an upstream problem tracked at: https://github.com/patternfly/patternfly/issues/4930",
-    "patch-patternfly": "shx sed -i 's/..\\/..\\/assets\\//\\/node_modules\\/@patternfly\\/react-styles\\/css\\/assets\\//g' node_modules/@patternfly/react-styles/css/components/BackgroundImage/background-image.css node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css node_modules/@patternfly/react-styles/css/components/FormControl/form-control.css"
+    "patch-patternfly": "shx sed -i 's/..\\/..\\/assets\\//\\/node_modules\\/@patternfly\\/react-styles\\/css\\/assets\\//g' node_modules/@patternfly/react-styles/css/components/BackgroundImage/background-image.css node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css node_modules/@patternfly/react-styles/css/components/FormControl/form-control.css node_modules/@patternfly/react-core/node_modules/@patternfly/react-styles/css/components/BackgroundImage/background-image.css node_modules/@patternfly/react-core/node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css node_modules/@patternfly/react-core/node_modules/@patternfly/react-styles/css/components/FormControl/form-control.css node_modules/@patternfly/react-core/node_modules/@patternfly/react-styles/css/components/AboutModalBox/about-modal-box.css"
   }
 }
