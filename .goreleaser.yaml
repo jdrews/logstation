@@ -1,7 +1,8 @@
 before:
   hooks:
-    - go mod tidy
+    - yarn -v # For debugging. Historical problems with running 1.x yarn. Need >=3.x yarn (berry)
     - yarn --cwd web build
+    - go mod tidy
 builds:
   - env:
       - CGO_ENABLED=0

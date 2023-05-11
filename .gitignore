@@ -13,6 +13,10 @@ logstation.conf
 *.exe
 openapi-generator-cli.jar
 logstation.iml
-/node_modules/
-
 dist/
+
+# main folder should not have web files
+.yarn/
+.yarnrc.yml
+/node_modules/
+package.json
