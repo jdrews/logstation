@@ -14,6 +14,7 @@ logstation.conf
 openapi-generator-cli.jar
 logstation.iml
 dist/
+/test/
 
 # main folder should not have web files
 .yarn/
