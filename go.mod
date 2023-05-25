@@ -8,7 +8,7 @@ require (
 	github.com/fstab/grok_exporter v0.2.8
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.10.2
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/viper v1.15.0
 )
 
