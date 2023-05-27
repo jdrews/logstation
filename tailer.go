@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/cskr/pubsub"
-	"github.com/fstab/grok_exporter/tailer/fswatcher"
-	"github.com/fstab/grok_exporter/tailer/glob"
+	"github.com/jdrews/go-tailer/fswatcher"
+	"github.com/jdrews/go-tailer/glob"
 )
 
 // Follow begins a tailer for the specified logFilePath and publishes log lines to the given pubSub message broker

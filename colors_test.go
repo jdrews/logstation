@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/fstab/grok_exporter/tailer/fswatcher"
+	"github.com/jdrews/go-tailer/fswatcher"
 	"testing"
 )
 
