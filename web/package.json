@@ -5,7 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
-    "@mui/material": "^5.12.2",
+    "@mui/material": "^5.13.3",
     "@patternfly/react-core": "^4.276.9",
     "@patternfly/react-icons": "^4.93.6",
     "@patternfly/react-log-viewer": "^4.87.100",
@@ -21,7 +21,7 @@
     "path-browserify": "^1.0.1",
     "prettier": "2.8.8",
     "process": "^0.11.10",
-    "rimraf": "^5.0.0",
+    "rimraf": "^5.0.1",
     "shx": "^0.3.4"
   },
   "scripts": {
