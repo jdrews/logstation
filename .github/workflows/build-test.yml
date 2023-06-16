@@ -42,4 +42,7 @@ jobs:
 
       - name: Test
         # TestFollow fails to work in GitHub Actions. Likely a result of permissions. Will investigate further later
-        run: go test -v -skip TestFollow ./...
+        run: go test -race -covermode=atomic -coverprofile=coverage.txt -v -skip TestFollow ./... 
+        
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
