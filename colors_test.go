@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/jdrews/go-tailer/fswatcher"
+	"strings"
 	"testing"
 )
 
@@ -45,13 +45,13 @@ func TestParseRegexPatterns(t *testing.T) {
 
 // TestColorize is a unit test for the Colorize function
 //
-//	It loads up the default config and parses the color-to-regex patterns in the default config
+//	It loads up a test config and parses the color-to-regex patterns in the config
 //	It then colorizes the log line per ANSI specs
-//	To test if the colors work, it writes the line to a Buffer and then reads it back
-//	comparing it to an expected log line.
+//	To test if the colors work,
+//	it compares ANSI escaped lines for the Colorize output and a locally constructed colored line
 func TestColorize(t *testing.T) {
-	// Load in the default config file, so we get some regex patterns
-	HandleConfigFile("logstation.default.conf")
+	// Load in a test config file, which has all the possible colors defined in it
+	HandleConfigFile("logstation.test.conf")
 
 	// Get the compiledRegexColors
 	compiledRegexColors := ParseRegexPatterns()
@@ -59,29 +59,41 @@ func TestColorize(t *testing.T) {
 	// Enable ANSI colors regardless of terminal state
 	color.NoColor = false
 
-	// Test a INFO  line
-	testLine := fswatcher.Line{
-		Line: "[INFO]: You might want to know about this...",
-		File: "test/logfile.log",
+	// Create a map of color name to ansi color
+	colorMap := map[string]color.Attribute{
+		"red":       color.FgRed,
+		"green":     color.FgGreen,
+		"yellow":    color.FgYellow,
+		"blue":      color.FgBlue,
+		"magenta":   color.FgMagenta,
+		"cyan":      color.FgCyan,
+		"hired":     color.FgHiRed,
+		"higreen":   color.FgHiGreen,
+		"hiyellow":  color.FgHiYellow,
+		"hiblue":    color.FgHiBlue,
+		"himagenta": color.FgHiMagenta,
+		"hicyan":    color.FgHiCyan,
 	}
-	logMessage := Colorize(testLine.Line, testLine.File, compiledRegexColors)
 
-	// Setup a read buffer to read back the lines
-	rb := new(bytes.Buffer)
-	_, err := fmt.Fprint(rb, logMessage.Text, "\n")
-	if err != nil {
-		return
+	// Loop through all the types of colors and ensure Colorize can pick it up
+	for _, regexColor := range compiledRegexColors {
+		// Create an example line, defined for each of the types of colors
+		testLine := fswatcher.Line{
+			Line: "#" + strings.ToUpper(regexColor.color) + "#: You might want to know about this...",
+			File: "test/logfile.log",
+		}
+		// Have Colorize color the line based on regex
+		logMessage := Colorize(testLine.Line, testLine.File, compiledRegexColors)
+
+		logMessageEscaped := fmt.Sprintf("%q", logMessage.Text+"\n")
+
+		// Prepare a colored string to compare to
+		colored := fmt.Sprintf("\x1b[%dm%s\x1b[0m\n", colorMap[regexColor.color], testLine.Line)
+		coloredEscaped := fmt.Sprintf("%q", colored)
+
+		if logMessageEscaped != coloredEscaped {
+			t.Errorf("When testing %s: Expecting %s, got '%s'\n", regexColor.color, coloredEscaped, logMessageEscaped)
+		}
 	}
 
-	// Read the line back from the buffer
-	line, _ := rb.ReadString('\n')
-	scannedLine := fmt.Sprintf("%q", line)
-
-	// Prepare a colored string to compare to
-	colored := fmt.Sprintf("\x1b[%dm%s\x1b[0m\n", color.FgHiGreen, testLine.Line)
-	escapedForm := fmt.Sprintf("%q", colored)
-
-	if scannedLine != escapedForm {
-		t.Errorf("Expecting %s, got '%s'\n", escapedForm, scannedLine)
-	}
 }
