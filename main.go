@@ -41,7 +41,7 @@ func main() {
 	logFiles := viper.GetStringSlice("logs")
 	for _, logFile := range logFiles {
 		//begin watching the file in a goroutine for concurrency
-		go Follow(logFile, pubSub, patterns)
+		go Follow(logFile, pubSub, patterns, false)
 	}
 
 	// startup the web server

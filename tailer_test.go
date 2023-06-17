@@ -68,7 +68,7 @@ func TestFollow(t *testing.T) {
 	defer pubSub.Unsub(linesChannel, "lines")
 
 	// Run Follow
-	go Follow(logFilePath, pubSub, compiledRegexColors)
+	go Follow(logFilePath, pubSub, compiledRegexColors, true)
 
 	// Give the fswatcher.RunFileTailer enough time to startup
 	time.Sleep(time.Duration(2000) * time.Millisecond)
