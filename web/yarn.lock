@@ -1206,13 +1206,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-core@npm:^4.276.9":
-  version: 4.276.9
-  resolution: "@patternfly/react-core@npm:4.276.9"
+"@patternfly/react-core@npm:^4.276.10":
+  version: 4.276.10
+  resolution: "@patternfly/react-core@npm:4.276.10"
   dependencies:
-    "@patternfly/react-icons": ^4.93.6
-    "@patternfly/react-styles": ^4.92.7
-    "@patternfly/react-tokens": ^4.94.6
+    "@patternfly/react-icons": ^4.93.7
+    "@patternfly/react-styles": ^4.92.8
+    "@patternfly/react-tokens": ^4.94.7
     focus-trap: 6.9.2
     react-dropzone: 9.0.0
     tippy.js: 5.1.2
@@ -1220,7 +1220,7 @@ __metadata:
   peerDependencies:
     react: ^16.8 || ^17 || ^18
     react-dom: ^16.8 || ^17 || ^18
-  checksum: 583c8d5285fb745196844549aa330a7f2fc8bd951c6f2374f584132a7030a23210ab29605fc02de0c7ae223344adb6705046ec53cf171fd178c2a8c5d01b78b5
+  checksum: 43345fbc4794f61a71089608b082c48edd2df7415421a37464570d920d3d5fda517a1cda3d3c695275af15361c3e22b064586a7d9c3d2a0923bdbdf54b7ea16b
   languageName: node
   linkType: hard
 
@@ -1231,6 +1231,16 @@ __metadata:
     react: ^16.8 || ^17 || ^18
     react-dom: ^16.8 || ^17 || ^18
   checksum: 4d314d49a5252ee4c30089641f5b3cd852f683aa550a144df729682edfcfd2eef011a6e10a671e21a4342f906b17b0bde25daff2615f3996625550daba42f629
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-icons@npm:^4.93.7":
+  version: 4.93.7
+  resolution: "@patternfly/react-icons@npm:4.93.7"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18
+    react-dom: ^16.8 || ^17 || ^18
+  checksum: 8fa4c730ce9f7f5c7c6ed923dacf5e894a88ba6f98d4502b7d4fc2664396c548f001215aba6c5e17f5e26b27176c10a2cc7ac4b3e4fc38d03a3e97ffb6caf4fc
   languageName: node
   linkType: hard
 
@@ -1258,10 +1268,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-styles@npm:^4.92.7":
-  version: 4.92.7
-  resolution: "@patternfly/react-styles@npm:4.92.7"
-  checksum: 5ff91a424d818504a48a081450d2acd8bd4a285742f7ca6670de094c683125bbb746d25950613b07c3c0fefd345c2b3e022b8abd2ca01ccef0bc76f89413d75e
+"@patternfly/react-styles@npm:^4.92.8":
+  version: 4.92.8
+  resolution: "@patternfly/react-styles@npm:4.92.8"
+  checksum: ab4cd3d57c96bb1988a3d635388108aeac1fb310be2678f06ea9c3ce47517c005ae47cbc93b7f90fa6208356282104dfbaa4a04980b7024b4c8129cd8c838687
   languageName: node
   linkType: hard
 
@@ -1269,6 +1279,13 @@ __metadata:
   version: 4.94.6
   resolution: "@patternfly/react-tokens@npm:4.94.6"
   checksum: a643b76c3bf74bfeccea024a09b7fbc390e2119e234886c90a5ed64d02c93f4267a1bc1007bf6be86b0cabc8e2a175696b114cf4778fda48866ec529e9ce27c1
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-tokens@npm:^4.94.7":
+  version: 4.94.7
+  resolution: "@patternfly/react-tokens@npm:4.94.7"
+  checksum: 726fe4d9edd996b228f02c02586e51969af72b846f8b14fa3090f476bb831bd8a12f8530d51baafe9d5aa21fb007553b57e2d96da5f3b03f6f9e174e5d640af9
   languageName: node
   linkType: hard
 
@@ -2631,7 +2648,7 @@ __metadata:
     "@mui/material": ^5.13.3
     "@parcel/packager-raw-url": ^2.9.1
     "@parcel/transformer-webmanifest": ^2.9.1
-    "@patternfly/react-core": ^4.276.9
+    "@patternfly/react-core": ^4.276.10
     "@patternfly/react-icons": ^4.93.6
     "@patternfly/react-log-viewer": ^4.87.100
     parcel: ^2.9.1
