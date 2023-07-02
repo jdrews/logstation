@@ -36,13 +36,23 @@ func writeALine(t *testing.T, logFilePath string, logString string) {
 	}
 }
 
-// TestFollow is an integration test for the entire backend tailing system
+// TestFollowFilesystem executes the testFollow integration test with the filesystem tailing method
+func TestFollowFilesystem(t *testing.T) {
+	testFollow(t, false, 10)
+}
+
+// TestFollowPolling executes the testFollow integration test with the polling tailing method
+func TestFollowPolling(t *testing.T) {
+	testFollow(t, true, 10)
+}
+
+// testFollow is an integration test for the entire backend tailing system
 //
 //	This test starts up the Follow function, which watches a specified log file,
 //	writes a line to the log file,
 //	and listens for a response on the pubsub topic.
 //	This test also verifies the message was correctly colored.
-func TestFollow(t *testing.T) {
+func testFollow(t *testing.T, polling bool, pollingTimeMS int) {
 	// Enable ANSI colors regardless of terminal state
 	color.NoColor = false
 
@@ -68,7 +78,7 @@ func TestFollow(t *testing.T) {
 	defer pubSub.Unsub(linesChannel, "lines")
 
 	// Run Follow
-	go Follow(logFilePath, pubSub, compiledRegexColors)
+	go Follow(logFilePath, pubSub, compiledRegexColors, polling, pollingTimeMS)
 
 	// Give the fswatcher.RunFileTailer enough time to startup
 	time.Sleep(time.Duration(2000) * time.Millisecond)

@@ -20,6 +20,8 @@ func HandleConfigFile(configFilePath string) {
 	viper.SetDefault("logs", []string{`test\logfile.log`, `test\logfile2.log`})
 	viper.SetDefault("server_settings.webserveraddress", "0.0.0.0")
 	viper.SetDefault("server_settings.disablecors", false)
+	viper.SetDefault("tailingMethod", "filesystem")
+	viper.SetDefault("pollingTimeMS", 10)
 
 	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err != nil {

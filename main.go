@@ -37,11 +37,19 @@ func main() {
 	// setup message broker
 	pubSub := pubsub.New(1)
 
+	// collect settings for tailingMethod
+	tailingMethod := viper.GetString("tailingMethod")
+	polling := false
+	if tailingMethod == "polling" {
+		polling = true
+	}
+	pollingTimeMS := viper.GetInt("pollingTimeMS")
+
 	// process all log files to watch
 	logFiles := viper.GetStringSlice("logs")
 	for _, logFile := range logFiles {
 		//begin watching the file in a goroutine for concurrency
-		go Follow(logFile, pubSub, patterns)
+		go Follow(logFile, pubSub, patterns, polling, pollingTimeMS)
 	}
 
 	// startup the web server
