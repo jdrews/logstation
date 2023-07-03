@@ -1,8 +1,11 @@
 name: release
 
 on:
-  pull_request:
-  push:
+  workflow_dispatch:
+# NOTE: In the future we might want to do auto releasing on every tag
+#  push:
+#    tags:
+#      - '*'
 
 permissions:
   contents: write
