@@ -3,7 +3,8 @@ package main
 import (
 	"embed"
 	"flag"
-	"github.com/cskr/pubsub"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
@@ -35,7 +36,12 @@ func main() {
 	patterns := ParseRegexPatterns()
 
 	// setup message broker
-	pubSub := pubsub.New(1)
+	pubSubConfig := gochannel.Config{
+		OutputChannelBuffer:            10000,
+		Persistent:                     false,
+		BlockPublishUntilSubscriberAck: true,
+	}
+	pubSub := gochannel.NewGoChannel(pubSubConfig, watermill.NewStdLogger(false, false))
 
 	// collect settings for tailingMethod
 	tailingMethod := viper.GetString("tailingMethod")

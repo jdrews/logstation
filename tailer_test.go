@@ -2,8 +2,12 @@ package main
 
 import (
 	"bufio"
+	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/cskr/pubsub"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/fatih/color"
 	"os"
 	"testing"
@@ -71,11 +75,14 @@ func testFollow(t *testing.T, polling bool, pollingTimeMS int) {
 	logFilePath := "./logfile.log"
 
 	// Setup message broker
-	pubSub := pubsub.New(1)
+	pubSubConfig := gochannel.Config{
+		OutputChannelBuffer: 10000,
+		Persistent:          false,
+	}
+	pubSub := gochannel.NewGoChannel(pubSubConfig, watermill.NewStdLogger(true, true))
 
 	// Subscribe to "lines" topic
-	linesChannel := pubSub.Sub("lines")
-	defer pubSub.Unsub(linesChannel, "lines")
+	linesChannel, _ := pubSub.Subscribe(context.Background(), "lines")
 
 	// Run Follow
 	go Follow(logFilePath, pubSub, compiledRegexColors, polling, pollingTimeMS)
@@ -90,22 +97,29 @@ func testFollow(t *testing.T, polling bool, pollingTimeMS int) {
 	// Setup a timer for listening to the topic
 	listenDurationString := "2s"
 	listenDuration, _ := time.ParseDuration(listenDurationString)
+	payload, _ := json.Marshal("poisonpill")
 	listenTimer := time.AfterFunc(listenDuration, func() {
 		t.Errorf("Waited %s for a message from Follow() and nothing came through. It's possible the tailer didn't get enough time to start tailing, or other bad things happened", listenDurationString)
 		// Let the test listener know that we're shutting things down
-		pubSub.Pub("poisonpill", "lines")
+
+		pubSub.Publish("lines", message.NewMessage("", payload))
 	})
 	defer listenTimer.Stop()
 
 	// Listen for a response
 	for line := range linesChannel {
-		if line == "poisonpill" {
+		if line.Equals(message.NewMessage("", payload)) {
 			break // The test failed because we didn't get a message in the listenDuration
 		}
 		t.Logf("%s, Got a message on the lines channel! line: %s", time.Now(), line)
 
 		// Prepare the tailedLine for comparison
-		tailedLine := fmt.Sprintf("%q", line.(LogMessage).Text)
+		logMessage := LogMessage{}
+		err2 := json.Unmarshal(line.Payload, &logMessage)
+		if err2 != nil {
+			logger.Fatal(err2)
+		}
+		tailedLine := fmt.Sprintf("%q", logMessage.Text)
 
 		// Check to see if it matches expectations
 		if tailedLine != escapedForm {

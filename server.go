@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/cskr/pubsub"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/gorilla/websocket"
 	"github.com/jdrews/logstation/api/server/handlers"
 	"github.com/labstack/echo/v4"
@@ -22,7 +23,7 @@ var (
 )
 
 // WebSocketHandler handles incoming websocket connections and serves up log lines to the client
-func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
+func WebSocketHandler(c echo.Context, pubSub *gochannel.GoChannel) error {
 	if disableCORS {
 		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	}
@@ -37,21 +38,25 @@ func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
 		}
 	}(ws)
 
-	linesChannel := pubSub.Sub("lines")
-	defer pubSub.Unsub(linesChannel, "lines")
+	linesChannel, err := pubSub.Subscribe(context.Background(), "lines")
+	//defer pubSub.Unsub(linesChannel, "lines")
 
 	for line := range linesChannel {
-		jsonLine, marshalErr := json.Marshal(line)
-		if marshalErr != nil {
-			logger.Fatal(marshalErr)
+		logMessage := LogMessage{}
+		err2 := json.Unmarshal(line.Payload, &logMessage)
+		if err2 != nil {
+			logger.Fatal(err2)
 		}
+		jsonLine, _ := json.Marshal(logMessage)
+		logger.Infof("WebSocketHandler: " + string(jsonLine))
 		// Write
-		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine)
+		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine) //TODO: suspect I'm writing to the websocket too fast. It closes quickly  after subsequent ms writes
 		if wsErr != nil {
 			logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
 			logger.Warn(wsErr)
 			break
 		}
+		line.Ack()
 	}
 	return nil
 }
@@ -60,7 +65,7 @@ func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
 //   - Serves up the React files for the client
 //   - Provides a REST API Server for various configurations on the client
 //   - Starts a WebSocket Server to pass the logfiles and loglines to the client
-func StartWebServer(pubSub *pubsub.PubSub) {
+func StartWebServer(pubSub *gochannel.GoChannel) {
 	// setup web server
 	e := echo.New()
 	e.HideBanner = true
