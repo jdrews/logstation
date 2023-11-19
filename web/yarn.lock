@@ -1236,6 +1236,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@patternfly/react-icons@npm:^5.1.1":
+  version: 5.1.1
+  resolution: "@patternfly/react-icons@npm:5.1.1"
+  peerDependencies:
+    react: ^17 || ^18
+    react-dom: ^17 || ^18
+  checksum: e557055ed9a4f4e6e53b1fcded3f8c95b060b122d25cb83d5467f2ea3e852d6eb32743d07750eb6cde983b766f96cb968e11afa410149a8e404c1855434e3856
+  languageName: node
+  linkType: hard
+
 "@patternfly/react-log-viewer@npm:^4.87.100":
   version: 4.87.100
   resolution: "@patternfly/react-log-viewer@npm:4.87.100"
@@ -2634,7 +2644,7 @@ __metadata:
     "@parcel/packager-raw-url": ^2.9.3
     "@parcel/transformer-webmanifest": ^2.9.3
     "@patternfly/react-core": ^4.276.9
-    "@patternfly/react-icons": ^4.93.6
+    "@patternfly/react-icons": ^5.1.1
     "@patternfly/react-log-viewer": ^4.87.100
     parcel: ^2.9.3
     path-browserify: ^1.0.1
