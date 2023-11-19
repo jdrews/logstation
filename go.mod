@@ -7,7 +7,7 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jdrews/go-tailer v1.1.0
-	github.com/labstack/echo/v4 v4.11.1
+	github.com/labstack/echo/v4 v4.11.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.17.0
 )
