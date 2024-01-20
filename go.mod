@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/cskr/pubsub v1.0.2
-	github.com/fatih/color v1.15.0
+	github.com/fatih/color v1.16.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jdrews/go-tailer v1.1.0
 	github.com/labstack/echo/v4 v4.11.4
