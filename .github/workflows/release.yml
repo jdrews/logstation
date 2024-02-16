@@ -2,6 +2,10 @@ name: release
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'New tag name'
+        required: true
 # NOTE: In the future we might want to do auto releasing on every tag
 #  push:
 #    tags:
