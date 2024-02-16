@@ -1,3 +1,5 @@
+release:
+  target_commitish: '{{ .Commit }}'
 before:
   hooks:
     - yarn -v # For debugging. Historical problems with running 1.x yarn. Need >=3.x yarn (berry)
