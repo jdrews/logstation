@@ -1242,6 +1242,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@patternfly/react-icons@npm:^4.93.7":
+  version: 4.93.7
+  resolution: "@patternfly/react-icons@npm:4.93.7"
+  peerDependencies:
+    react: ^16.8 || ^17 || ^18
+    react-dom: ^16.8 || ^17 || ^18
+  checksum: 8fa4c730ce9f7f5c7c6ed923dacf5e894a88ba6f98d4502b7d4fc2664396c548f001215aba6c5e17f5e26b27176c10a2cc7ac4b3e4fc38d03a3e97ffb6caf4fc
+  languageName: node
+  linkType: hard
+
 "@patternfly/react-log-viewer@npm:^4.87.100":
   version: 4.87.100
   resolution: "@patternfly/react-log-viewer@npm:4.87.100"
@@ -2666,7 +2676,7 @@ __metadata:
     "@parcel/packager-raw-url": ^2.11.0
     "@parcel/transformer-webmanifest": ^2.11.0
     "@patternfly/react-core": ^4.276.9
-    "@patternfly/react-icons": ^4.93.6
+    "@patternfly/react-icons": ^4.93.7
     "@patternfly/react-log-viewer": ^4.87.100
     parcel: ^2.11.0
     path-browserify: ^1.0.1
@@ -3478,7 +3488,7 @@ __metadata:
 
 "resolve@patch:resolve@npm%3A^1.1.6#~builtin<compat/resolve>":
   version: 1.22.1
-  resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=07638b"
   dependencies:
     is-core-module: "npm:^2.9.0"
     path-parse: "npm:^1.0.7"
