@@ -16,8 +16,6 @@ jobs:
       - name: Enable Corepack
         working-directory: ./web
         run: corepack enable
-        with:
-          node-version: '20.x'
 
       - name: Setup Node/Yarn environment
         uses: actions/setup-node@v4
