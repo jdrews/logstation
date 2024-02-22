@@ -3,7 +3,7 @@
 /.pnp
 .pnp.js
 /.parcel-cache
-/.yarn
+/.yarn/*
 
 # testing
 /coverage
