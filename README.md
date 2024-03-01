@@ -37,12 +37,19 @@ Take a look at [an example logstation.conf here](logstation.default.conf).
 
 logstation uses [goreleaser](https://github.com/goreleaser/goreleaser) for all releases   
 
-To build all targets locally you can run   
-`goreleaser build --snapshot --clean`  
+Start by building the web frontend: 
+* `cd web; yarn build`
+
+To build all targets locally you can run the following in the root directory:    
+
+* `goreleaser build --snapshot --clean`  
    
 If you want to build for a specific target you can set environment variables   
-In powershell this would look like:    
-`$env:GOOS="linux"; $env:GOARCH="amd64"; goreleaser build --snapshot --clean --single-target`
+* In bash this would look like:    
+`GOOS=linux GOARCH=amd64 goreleaser build --snapshot --clean --single-target`
+* In powershell this would look like:    
+`$env:GOOS="linux"; $env:GOARCH="amd64"; goreleaser build --snapshot --clean --single-target`   
+   
 
 Reference the [releases](https://github.com/jdrews/logstation/releases) and [.goreleaser.yaml](.goreleaser.yaml) for all officially supported targets. 
 
@@ -53,7 +60,8 @@ Reference the [releases](https://github.com/jdrews/logstation/releases) and [.go
   * `git push origin 2.0.0-beta1`
 * Ensure you have an environment variable with `GITHUB_TOKEN="YOUR_GH_TOKEN"` and minimum of `write:packages` permissions
 * Release!   
-  * `goreleaser release`
+  * `cd web; yarn build`
+  * `cd ..; goreleaser release`
 * Read the [goreleaser quickstart](https://goreleaser.com/quick-start/) for more details
 
 ### Versions ###
