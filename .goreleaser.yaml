@@ -2,8 +2,8 @@ release:
   target_commitish: '{{ .Commit }}'
 before:
   hooks:
-    - yarn -v # For debugging. Historical problems with running 1.x yarn. Need >=3.x yarn (berry)
-    - yarn --cwd web build
+    # - yarn -v # For debugging. Historical problems with running 1.x yarn. Need >=3.x yarn (berry)
+    # - yarn build # Performed via CI in the GitHub Action release.yml, or manually during a manual release (see README.md)
     - go mod tidy
 builds:
   - env:
