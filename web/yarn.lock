@@ -1414,7 +1414,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-core@npm:^5.0.0, @patternfly/react-core@npm:^5.2.1":
+"@patternfly/react-core@npm:^5.0.0":
   version: 5.2.1
   resolution: "@patternfly/react-core@npm:5.2.1"
   dependencies:
@@ -1431,6 +1431,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@patternfly/react-core@npm:^5.3.1":
+  version: 5.3.2
+  resolution: "@patternfly/react-core@npm:5.3.2"
+  dependencies:
+    "@patternfly/react-icons": "npm:^5.3.1"
+    "@patternfly/react-styles": "npm:^5.3.0"
+    "@patternfly/react-tokens": "npm:^5.3.0"
+    focus-trap: "npm:7.5.2"
+    react-dropzone: "npm:^14.2.3"
+    tslib: "npm:^2.5.0"
+  peerDependencies:
+    react: ^17 || ^18
+    react-dom: ^17 || ^18
+  checksum: 10/166b5934bf9e2e7a4c4efd8e6ec72469658a5fd74ad26f6c5e8e1c0ce01c52b5e8f4db707347f0d286844b2b0234ea17ef9fe96a5091d009509e1a94e52fdd06
+  languageName: node
+  linkType: hard
+
 "@patternfly/react-icons@npm:^5.0.0, @patternfly/react-icons@npm:^5.2.1":
   version: 5.2.1
   resolution: "@patternfly/react-icons@npm:5.2.1"
@@ -1438,6 +1455,16 @@ __metadata:
     react: ^17 || ^18
     react-dom: ^17 || ^18
   checksum: 10/aecdd3f5c9399cb60aec63a6ab8ef2e9519e48d8eaf954abac65b91ddc0d82112439ac026437336cf0d3b89f186a42827b1d068528c1d502e6d6b779cb17f7e0
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-icons@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "@patternfly/react-icons@npm:5.3.1"
+  peerDependencies:
+    react: ^17 || ^18
+    react-dom: ^17 || ^18
+  checksum: 10/7884518ea4562e08f04d3f35bbaa93ba2483df78c3f6a5a1322a30732b24424ca5c7c87262d8093813b35953fe9f29d6f1fb20fbb9be1d2abe318af66be7add6
   languageName: node
   linkType: hard
 
@@ -1463,10 +1490,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@patternfly/react-styles@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@patternfly/react-styles@npm:5.3.0"
+  checksum: 10/875d296d0d9f59f3eb61e8ac564cda45f77a34f26e0d0e566db88700c0c84e8c8abbb103e97069ba53c4a0f9df338fcb4791ca37564e76544e06e6811388cc0c
+  languageName: node
+  linkType: hard
+
 "@patternfly/react-tokens@npm:^5.2.1":
   version: 5.2.1
   resolution: "@patternfly/react-tokens@npm:5.2.1"
   checksum: 10/6dc162ad30c3b480e15e4aef90c41b923c70fd4e11c7f6e54f3341d4675800d3248e9b28ebe64b7860d790aa2751dd25fd838622fa7ed0ac172731a42f806a6a
+  languageName: node
+  linkType: hard
+
+"@patternfly/react-tokens@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@patternfly/react-tokens@npm:5.3.0"
+  checksum: 10/433e579131bf8a5036ac31d4673d4f5d7e8c9f94fd1aba578a540054888cd6b07cbeb435fbf4591380cb1974e0a1c893884932e7519aab048961f628c012f9dd
   languageName: node
   linkType: hard
 
@@ -2837,7 +2878,7 @@ __metadata:
     "@mui/material": "npm:^5.15.11"
     "@parcel/packager-raw-url": "npm:^2.12.0"
     "@parcel/transformer-webmanifest": "npm:^2.12.0"
-    "@patternfly/react-core": "npm:^5.2.1"
+    "@patternfly/react-core": "npm:^5.3.1"
     "@patternfly/react-icons": "npm:^5.2.1"
     "@patternfly/react-log-viewer": "npm:^5.1.0"
     parcel: "npm:^2.12.0"
