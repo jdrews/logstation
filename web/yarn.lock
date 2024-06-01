@@ -1445,12 +1445,12 @@ __metadata:
   linkType: hard
 
 "@patternfly/react-icons@npm:^5.0.0, @patternfly/react-icons@npm:^5.2.1":
-  version: 5.2.1
-  resolution: "@patternfly/react-icons@npm:5.2.1"
+  version: 5.3.2
+  resolution: "@patternfly/react-icons@npm:5.3.2"
   peerDependencies:
     react: ^17 || ^18
     react-dom: ^17 || ^18
-  checksum: 10/aecdd3f5c9399cb60aec63a6ab8ef2e9519e48d8eaf954abac65b91ddc0d82112439ac026437336cf0d3b89f186a42827b1d068528c1d502e6d6b779cb17f7e0
+  checksum: 10/a6ec116593e462a1fdf4f26e3f1dc10317119a35a45d8b739d1d87950895f1d0edf6db9e5d9a4667920bbbace3e8f3c89f952d039cb2619ca41b2ae535834385
   languageName: node
   linkType: hard
 
