@@ -70,6 +70,22 @@ paths:
           description: Not Found
       operationId: get-settings-syntax
       description: Retrieve an array of syntax colors and regex strings to colorize the log files
+  /settings/websocket-security:
+    get:
+      summary: Get WebSocket Security Setting
+      tags:
+        - settings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebSocketSecurity'
+              examples:
+                Get WebSocket Security:
+                  value:
+                    useSecureWebSocket: true
 components:
   schemas:
     LogstationName:
@@ -94,5 +110,15 @@ components:
           color: '#FF1F1F'
           regex: .*ERROR.*
       description: A syntax color and regex string for highlighting text
+    WebSocketSecurity:
+      title: WebSocketSecurity
+      type: object
+      properties:
+        useSecureWebSocket:
+          type: boolean
+          description: Use a secure WebSocket connection
+      x-examples:
+        example-1:
+          useSecureWebSocket: true
 tags:
   - name: settings

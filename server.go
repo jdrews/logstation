@@ -3,14 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
+	"net/http"
+
 	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
 	"github.com/jdrews/logstation/api/server/handlers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
-	"io/fs"
-	"net/http"
 )
 
 var (
@@ -83,6 +84,9 @@ func StartWebServer(pubSub *pubsub.PubSub) {
 
 	// GetSettingsSyntax - Get Syntax Colors
 	e.GET("/settings/syntax", c.GetSettingsSyntax)
+
+	// GetSettingsWebsocketSecurity - Get WebSocket Security Setting
+	e.GET("/settings/websocket-security", c.GetSettingsWebsocketSecurity)
 
 	// package up the built web files and serve them to the clients
 	fsys, err := fs.Sub(webServerFiles, "web/dist")
