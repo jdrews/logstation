@@ -2,19 +2,22 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import MainLayout from "./MainLayout";
 import { useEffect, useState } from "react";
 
-const wsurl = "ws://" + window.location.host + "/ws";
-const url = window.location.protocol + "//" + window.location.host;
-
-const rws = new ReconnectingWebSocket(wsurl);
-
 const App = () => {
+  const url = window.location.protocol + "//" + window.location.host;
+  // const url = "http://localhost:8884"; // used in dev mode, ignore otherwise
   const [logFiles, setLogFiles] = useState(new Map());
 
   useEffect(() => {
-    connect();
-  });
+    fetch(url + "/settings/websocket-security")
+        .then((response) => response.json())
+        .then((data) => {
+          const webSocketType = data.useSecureWebSocket ? "wss://" : "ws://";
+          connect(new ReconnectingWebSocket(webSocketType + window.location.host + "/ws")); 
+          // connect(new ReconnectingWebSocket(webSocketType + "localhost:8884" + "/ws")); // used in dev mode, ignore otherwise
+        });
+  }, []);
 
-  function connect() {
+  function connect(rws) {
     rws.onopen = () => {
       console.log("WebSocket Connected");
       fetch(url + "/settings/logstation-name")
