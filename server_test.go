@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/cskr/pubsub"
-	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/cskr/pubsub"
+	"github.com/spf13/viper"
 )
 
 // TestStartWebServer is a unit test for StartWebServer
@@ -53,5 +54,23 @@ func TestStartWebServer(t *testing.T) {
 	responseString := string(responseData)
 	if responseString != expectedResponse {
 		t.Errorf("Response for /settings/logstation-name was expected to be %s, but got %s", expectedResponse, responseData)
+	}
+
+	// Verify it responds to /settings/websocket-security
+	response, err = http.Get(serverUrl + "/settings/websocket-security")
+	if err != nil {
+		t.Errorf("Unable to request the webserver at %s", serverUrl+"/settings/websocket-security")
+	}
+	if response.StatusCode != 200 {
+		t.Errorf("Server responded with a bad status code: %s", response.Status)
+	}
+	responseData, err = io.ReadAll(response.Body)
+	if err != nil {
+		t.Errorf("Failed to read the body, err: %s", err)
+	}
+	expectedResponse = "{\"useSecureWebSocket\":false}\n"
+	responseString = string(responseData)
+	if responseString != expectedResponse {
+		t.Errorf("Response for /settings/websocket-security was expected to be %s, but got %s", expectedResponse, responseData)
 	}
 }
