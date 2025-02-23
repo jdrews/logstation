@@ -35,7 +35,7 @@
     "start": "parcel --port 1234 --no-hmr public/index.html --open",
     "build": "yarn clean; parcel build public/index.html",
     "clean": "rimraf dist",
-    "test": "vitest",
+    "test": "vitest run",
     "coverage": "vitest run --coverage"
   },
   "packageManager": "yarn@4.1.0"
