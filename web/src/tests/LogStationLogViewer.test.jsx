@@ -12,14 +12,18 @@ describe("LogStationLogViewer", () => {
     vi.clearAllMocks();
   });
 
+  const renderLogViewer = (data, logFileName) => {
+    return render(
+      <div style={{ width: "1000px", height: "700px" }}>
+        <LogStationLogViewer data={data} logFileName={logFileName} />
+      </div>,
+    );
+  };
+
   test("renders log viewer with provided data", () => async () => {
     // Wait for the component to render entirely before asserting
     await act(async () => {
-      render(
-        <div style={{ width: "1000px", height: "700px" }}>
-          <LogStationLogViewer data={mockData} logFileName="test.log" />
-        </div>,
-      );
+      renderLogViewer(mockData, "test.log");
     });
 
     mockData.forEach((line) => {
@@ -29,11 +33,7 @@ describe("LogStationLogViewer", () => {
 
   test("shows resume button when scrolled up", () => async () => {
     await act(async () => {
-      render(
-        <div style={{ width: "1000px", height: "700px" }}>
-          <LogStationLogViewer data={mockData} logFileName="test.log" />
-        </div>,
-      );
+      renderLogViewer(mockData, "test.log");
     });
 
     // Simulate scroll up to trigger pause
@@ -53,11 +53,7 @@ describe("LogStationLogViewer", () => {
 
   test("hides resume button when at bottom", () => async () => {
     await act(async () => {
-      render(
-        <div style={{ width: "1000px", height: "700px" }}>
-          <LogStationLogViewer data={mockData} logFileName="test.log" />
-        </div>,
-      );
+      renderLogViewer(mockData, "test.log");
     });
 
     // Simulate scroll up to trigger pause
@@ -88,12 +84,8 @@ describe("LogStationLogViewer", () => {
   });
 
   test("resets pause state when log file changes", () => async () => {
-    const { rerender } = await act(async () => {
-      render(
-        <div style={{ width: "1000px", height: "700px" }}>
-          <LogStationLogViewer data={mockData} logFileName="test.log" />
-        </div>,
-      );
+    await act(async () => {
+      renderLogViewer(mockData, "test.log");
     });
 
     // Simulate scroll up to trigger pause
@@ -111,11 +103,9 @@ describe("LogStationLogViewer", () => {
     expect(screen.getByText("resume")).toBeInTheDocument();
 
     // Change log file
-    rerender(
-      <div style={{ width: "1000px", height: "700px" }}>
-        <LogStationLogViewer data={mockData} logFileName="test2.log" />
-      </div>,
-    );
+    await act(async () => {
+      renderLogViewer(mockData, "test2.log");
+    });
 
     expect(screen.queryByText("resume")).not.toBeInTheDocument();
   });
