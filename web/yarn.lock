@@ -349,7 +349,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/react@npm:^11.11.4":
+"@emotion/react@npm:^11.14.0":
   version: 11.14.0
   resolution: "@emotion/react@npm:11.14.0"
   dependencies:
@@ -390,7 +390,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.11.5":
+"@emotion/styled@npm:^11.14.0":
   version: 11.14.0
   resolution: "@emotion/styled@npm:11.14.0"
   dependencies:
@@ -1309,7 +1309,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@parcel/packager-raw-url@npm:^2.12.0":
+"@parcel/packager-raw-url@npm:^2.13.3":
   version: 2.13.3
   resolution: "@parcel/packager-raw-url@npm:2.13.3"
   dependencies:
@@ -4214,10 +4214,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "logstation@workspace:."
   dependencies:
-    "@emotion/react": "npm:^11.11.4"
-    "@emotion/styled": "npm:^11.11.5"
+    "@emotion/react": "npm:^11.14.0"
+    "@emotion/styled": "npm:^11.14.0"
     "@mui/material": "npm:^6.4.5"
-    "@parcel/packager-raw-url": "npm:^2.12.0"
+    "@parcel/packager-raw-url": "npm:^2.13.3"
     "@parcel/transformer-webmanifest": "npm:^2.12.0"
     "@patternfly/react-log-viewer": "npm:^6.1.0"
     "@testing-library/dom": "npm:^10.4.0"
