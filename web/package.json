@@ -13,23 +13,23 @@
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
-    "@parcel/packager-raw-url": "^2.13.3",
-    "@parcel/transformer-webmanifest": "^2.12.0",
+    "@parcel/packager-raw-url": "^2.15.2",
+    "@parcel/transformer-webmanifest": "^2.15.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "^3.0.7",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "@vitest/coverage-v8": "^3.1.4",
     "canvas": "^3.1.0",
-    "jsdom": "^26.0.0",
+    "jsdom": "^26.1.0",
     "jsdom-testing-mocks": "^1.13.1",
-    "parcel": "^2.13.3",
+    "parcel": "^2.15.2",
     "path-browserify": "^1.0.1",
-    "prettier": "3.5.2",
+    "prettier": "3.5.3",
     "process": "^0.11.10",
     "rimraf": "^6.0.1",
-    "shx": "^0.3.4",
-    "vitest": "^3.0.7"
+    "shx": "^0.4.0",
+    "vitest": "^3.1.4"
   },
   "scripts": {
     "start": "parcel --port 1234 --no-hmr public/index.html --open",
