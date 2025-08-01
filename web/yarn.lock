@@ -4210,7 +4210,7 @@ __metadata:
     path-browserify: "npm:^1.0.1"
     prettier: "npm:3.5.3"
     process: "npm:^0.11.10"
-    react: "npm:^19.1.0"
+    react: "npm:^19.1.1"
     react-device-detect: "npm:^2.2.3"
     react-dom: "npm:^19.1.0"
     reconnecting-websocket: "npm:^4.4.0"
@@ -5088,10 +5088,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.1.0":
-  version: 19.1.0
-  resolution: "react@npm:19.1.0"
-  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
+"react@npm:^19.1.1":
+  version: 19.1.1
+  resolution: "react@npm:19.1.1"
+  checksum: 10/9801530fdc939e1a7a499422e930515b2400809cb39c2872984e99f832d233f61659a693871183dac3155c2f9b2c9dcf4440a56bd18983277ae92860e38c3a61
   languageName: node
   linkType: hard
 
