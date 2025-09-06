@@ -1,12 +1,15 @@
 {
-	"name": "Debian",
-	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+	"name": "logstation-devcontainer",
+	"image": "mcr.microsoft.com/devcontainers/base:debian",
 	"features": {
 		"ghcr.io/devcontainers/features/go:1": {},
+		"ghcr.io/devcontainers/features/node:1": {},
 		"ghcr.io/devcontainers-extra/features/corepack:1": {},
-		"ghcr.io/devcontainers-extra/features/npm-package:1": {}
 	},
-	"postCreateCommand": "go install github.com/goreleaser/goreleaser@latest",
+	"postCreateCommand": {
+		"goreleaser": "go install github.com/goreleaser/goreleaser/v2@latest",
+		"corepack": "cd web && corepack enable"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
