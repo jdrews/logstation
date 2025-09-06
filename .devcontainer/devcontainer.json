@@ -1,0 +1,17 @@
+{
+	"name": "Debian",
+	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+	"features": {
+		"ghcr.io/devcontainers/features/go:1": {},
+		"ghcr.io/devcontainers-extra/features/corepack:1": {},
+		"ghcr.io/devcontainers-extra/features/npm-package:1": {}
+	},
+	"postCreateCommand": "go install github.com/goreleaser/goreleaser@latest",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"golang.go"
+			]
+    	}
+	}
+}
