@@ -13,7 +13,7 @@
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
-    "@parcel/packager-raw-url": "^2.15.2",
+    "@parcel/packager-raw-url": "^2.16.0",
     "@parcel/transformer-webmanifest": "^2.15.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
