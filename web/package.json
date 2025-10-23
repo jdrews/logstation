@@ -9,7 +9,7 @@
     "@patternfly/react-log-viewer": "^6.2.0",
     "react": "^19.1.0",
     "react-device-detect": "^2.2.3",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.2.0",
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
