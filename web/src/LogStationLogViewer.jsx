@@ -60,7 +60,6 @@ const LogStationLogViewer = (props) => {
   };
 
   return (
-    //TODO: Tracking line wrap overflow bug in https://github.com/patternfly/react-log-viewer/issues/3
     <LogViewer
       hasLineNumbers={false}
       height={"100%"}
