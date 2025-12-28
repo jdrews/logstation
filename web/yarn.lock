@@ -2089,18 +2089,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@patternfly/react-log-viewer@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@patternfly/react-log-viewer@npm:6.2.0"
+"@patternfly/react-log-viewer@npm:v6.3.0-prerelease.2":
+  version: 6.3.0-prerelease.2
+  resolution: "@patternfly/react-log-viewer@npm:6.3.0-prerelease.2"
   dependencies:
     "@patternfly/react-core": "npm:^6.0.0"
     "@patternfly/react-icons": "npm:^6.0.0"
     "@patternfly/react-styles": "npm:^6.0.0"
     memoize-one: "npm:^5.1.0"
   peerDependencies:
-    react: ^17 || ^18
-    react-dom: ^17 || ^18
-  checksum: 10/d5d107e140de5503b5b31b4b7b9af3bc22901271b363a2e62b8e622c1d01231d3bd571516213a55f3eeb00fae59ddcdaa43901763afb042e74ec2082834061c2
+    react: ^17 || ^18 || ^19
+    react-dom: ^17 || ^18 || ^19
+  checksum: 10/4abfd812f3f03b2327c954d344dce193bacc38e16a9b00d13f5c057df68950c10784a2ec86f88c302c155848b15161477bec4f2a18b01edcc8fb7140e21a06d3
   languageName: node
   linkType: hard
 
@@ -4219,7 +4219,7 @@ __metadata:
     "@mui/material": "npm:^7.1.0"
     "@parcel/packager-raw-url": "npm:^2.15.2"
     "@parcel/transformer-webmanifest": "npm:^2.15.2"
-    "@patternfly/react-log-viewer": "npm:^6.2.0"
+    "@patternfly/react-log-viewer": "npm:v6.3.0-prerelease.2"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
