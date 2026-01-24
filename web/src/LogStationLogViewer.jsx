@@ -32,15 +32,16 @@ const LogStationLogViewer = (props) => {
 
   const onScroll = ({
     scrollOffsetToBottom,
-    _scrollDirection,
+    scrollDirection,
     scrollUpdateWasRequested,
   }) => {
     if (!scrollUpdateWasRequested) {
-      if (scrollOffsetToBottom > 0) {
-        // if we're not at the bottom
+      if (scrollDirection === "backward" && scrollOffsetToBottom > 50) {
+        // Only pause if we are scrolling up AND have moved significantly away from the bottom
         setIsPaused(true); // pause log
         setSelectedScrollToRow(undefined); // stop the pinning/tailing to the bottom via prop scrollToRow
-      } else {
+      } else if (scrollOffsetToBottom < 1) {
+        // if we are at the bottom (using < 1 to handle sub-pixel issues)
         setIsPaused(false); // tail the log (pin to the bottom of log)
       }
     }
