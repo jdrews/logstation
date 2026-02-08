@@ -10,6 +10,7 @@ statik/
 target/
 logstation
 logstation.conf
+logstation2.conf
 *.exe
 openapi-generator-cli.jar
 logstation.iml
