@@ -9,12 +9,12 @@ const App = () => {
 
   useEffect(() => {
     fetch(url + "/settings/websocket-security")
-        .then((response) => response.json())
-        .then((data) => {
-          const webSocketType = data.useSecureWebSocket ? "wss://" : "ws://";
-          connect(new ReconnectingWebSocket(webSocketType + window.location.host + "/ws")); 
-          // connect(new ReconnectingWebSocket(webSocketType + "localhost:8884" + "/ws")); // used in dev mode, ignore otherwise
-        });
+      .then((response) => response.json())
+      .then((data) => {
+        const webSocketType = data.useSecureWebSocket ? "wss://" : "ws://";
+        connect(new ReconnectingWebSocket(webSocketType + window.location.host + "/ws"));
+        // connect(new ReconnectingWebSocket(webSocketType + "localhost:8884" + "/ws")); // used in dev mode, ignore otherwise
+      });
   }, []);
 
   function connect(rws) {
@@ -32,19 +32,28 @@ const App = () => {
       const logFileName = logObject.logfile;
       const newLogLines = logObject.text;
 
-      // upsert the new log lines into the ES6 Map for the logFileName
-      setLogFiles(
-        new Map(
-          logFiles.set(logFileName, [
-            ...(logFiles.get(logFileName) ?? []),
-            newLogLines,
-          ])
-        )
-      );
+      // upsert the new log lines into the Map for the logFileName
+      setLogFiles((prevLogFiles) => {
+        const newMap = new Map(prevLogFiles);
+        const existingMessages = newMap.get(logFileName) || [];
+        newMap.set(logFileName, [...existingMessages, newLogLines]);
+        return newMap;
+      });
     };
   }
 
-  return <MainLayout logFiles={logFiles} />;
+  const clearLogs = () => {
+    setLogFiles((prevLogFiles) => {
+      const newMap = new Map();
+      // Keep the files in the list, just clear their content
+      for (const key of prevLogFiles.keys()) {
+        newMap.set(key, []);
+      }
+      return newMap;
+    });
+  };
+
+  return <MainLayout logFiles={logFiles} onClearLogs={clearLogs} />;
 };
 
 export default App;
