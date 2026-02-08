@@ -18,7 +18,8 @@ Goals:
 - Support as many browsers as possible
 - Ease deployment and usage with a single executable with minimal configuration required
 
-![image](https://user-images.githubusercontent.com/172766/232646725-4943f11e-a26b-4932-a8d7-c85110cd019a.png)
+<img width="1912" height="1076" alt="image" src="https://github.com/user-attachments/assets/9e7a19c2-a09f-4210-9ae7-f4d9179ebb16" />
+
 
 Developed with Go and React 
 
@@ -66,3 +67,4 @@ Reference the [releases](https://github.com/jdrews/logstation/releases) and [.go
 
 ### Versions ###
 Prior to 2.x, this app was built using Scala/Play/JS. At 2.x this app was rewritten in Go and React. If you're looking for the older versions reference the releases prior to 2.x. 
+
