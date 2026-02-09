@@ -16,6 +16,7 @@ openapi-generator-cli.jar
 logstation.iml
 dist/
 /test/
+.vscode/
 
 # main folder should not have web files
 .yarn/

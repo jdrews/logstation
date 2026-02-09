@@ -1,17 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 240 10% 10%;
-    --foreground: 210 40% 98%;
-  }
+@theme {
+  --color-background: hsl(240 10% 10%);
+  --color-foreground: hsl(210 40% 98%);
+}
 
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 ::-webkit-scrollbar {
