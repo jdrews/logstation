@@ -6,7 +6,8 @@ See below for the latest versions that are actively receiving security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2.x.x   | :white_check_mark: |
+| 3.x.x   | :white_check_mark: |
+| 2.x.x   | :x:                |
 | 0.x.x   | :x:                |
 
 
