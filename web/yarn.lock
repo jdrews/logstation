@@ -4195,7 +4195,7 @@ __metadata:
     reconnecting-websocket: "npm:^4.4.0"
     rimraf: "npm:^6.1.2"
     shx: "npm:^0.4.0"
-    tailwind-merge: "npm:^3.4.0"
+    tailwind-merge: "npm:^3.5.0"
     tailwindcss: "npm:^4.1.18"
     vitest: "npm:^4.0.18"
   languageName: unknown
@@ -5532,10 +5532,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^3.4.0":
-  version: 3.4.0
-  resolution: "tailwind-merge@npm:3.4.0"
-  checksum: 10/d8caeb40ee3ec0eae2996f8a86d77c82a1751fc9c61a31d6153b4252cb734deaf98d351205aff5c204beee7b73497add8492411e75187acb8506b4d981e4ccc2
+"tailwind-merge@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "tailwind-merge@npm:3.5.0"
+  checksum: 10/888861e2fc685dc282e6c0d735a2ca7656c3f13da6947896401f50aea924e481ab6dc7629b6f6a28125505f1b06ee97381ad792849204f34ee1ede375b119e0c
   languageName: node
   linkType: hard
 
