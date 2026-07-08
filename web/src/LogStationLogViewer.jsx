@@ -2,10 +2,64 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { Virtuoso } from "react-virtuoso";
 import Anser from "anser";
 import { clsx } from "clsx";
+import safeRegex from "safe-regex2";
 
 // Helper to escape regex special characters if searchTerm is text
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Build a safe RegExp from user input. If the user provides /pattern/ syntax,
+// validate it with safe-regex2 first; unsafe patterns fall back to literal search.
+function buildSafeRegExp(patternOrSearch, flags) {
+  // Check if this is regex syntax /.../
+  const isRegexSyntax = typeof patternOrSearch === "string" &&
+    patternOrSearch.startsWith("/") && patternOrSearch.endsWith("/") && patternOrSearch.length > 2;
+
+  let source;
+  if (isRegexSyntax) {
+    const rawPattern = patternOrSearch.slice(1, -1);
+    try {
+      // Validate the pattern is not vulnerable to ReDoS before using it
+      if (safeRegex(rawPattern)) {
+        source = rawPattern;
+      } else {
+        // Unsafe regex — fall back to escaped literal search on the full input
+        return new RegExp(escapeRegExp(patternOrSearch), flags);
+      }
+    } catch {
+      // Invalid regex syntax — fall back to escaped literal
+      return new RegExp(escapeRegExp(patternOrSearch), flags);
+    }
+  } else {
+    source = escapeRegExp(patternOrSearch);
+  }
+
+  return new RegExp(source, flags);
+}
+
+// Variant that wraps the pattern in a capture group for highlighting via split()
+function buildSafeRegExpGrouped(patternOrSearch, flags) {
+  const isRegexSyntax = typeof patternOrSearch === "string" &&
+    patternOrSearch.startsWith("/") && patternOrSearch.endsWith("/") && patternOrSearch.length > 2;
+
+  let source;
+  if (isRegexSyntax) {
+    const rawPattern = patternOrSearch.slice(1, -1);
+    try {
+      if (safeRegex(rawPattern)) {
+        source = `(${rawPattern})`;
+      } else {
+        return new RegExp(`(${escapeRegExp(patternOrSearch)})`, flags);
+      }
+    } catch {
+      return new RegExp(`(${escapeRegExp(patternOrSearch)})`, flags);
+    }
+  } else {
+    source = `(${escapeRegExp(patternOrSearch)})`;
+  }
+
+  return new RegExp(source, flags);
 }
 
 const LogStationLogViewer = ({
@@ -24,19 +78,7 @@ const LogStationLogViewer = ({
   const matches = useMemo(() => {
     if (!searchTerm || !data) return [];
 
-    // Determine if regex or text
-    let regex;
-    try {
-      // Try to create a regex if it looks like one /.../
-      if (searchTerm.startsWith("/") && searchTerm.endsWith("/") && searchTerm.length > 2) {
-        regex = new RegExp(searchTerm.slice(1, -1), "i");
-      } else {
-        regex = new RegExp(escapeRegExp(searchTerm), "i");
-      }
-    } catch (e) {
-      // Fallback to text search if regex invalid
-      regex = new RegExp(escapeRegExp(searchTerm), "i");
-    }
+    const regex = buildSafeRegExp(searchTerm, "i");
 
     const matchedIndices = [];
     data.forEach((line, index) => {
@@ -108,17 +150,8 @@ const LogStationLogViewer = ({
 
     const json = Anser.ansiToJson(line, { use_classes: false });
 
-    // Prepare regex for rendering
-    let regex;
-    try {
-      if (searchTerm.startsWith("/") && searchTerm.endsWith("/") && searchTerm.length > 2) {
-        regex = new RegExp(`(${searchTerm.slice(1, -1)})`, "gi");
-      } else {
-        regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
-      }
-    } catch {
-      regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi");
-    }
+    // Prepare safe regex for rendering highlights
+    const regex = buildSafeRegExpGrouped(searchTerm, "gi");
 
     return (
       <div className={clsx(
