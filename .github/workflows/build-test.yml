@@ -33,7 +33,7 @@ jobs:
         working-directory: ./web
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Test Backend
         # TestFollow fails to work in GitHub Actions. Likely a result of permissions. Will investigate further later
-        run: go test -race -coverprofile=coverage.txt -v -skip TestFollow ./...
+        run: go test -race -covermode=atomic -coverprofile=coverage.txt -v -skip TestFollow ./...
 
       - name: Test Frontend
         working-directory: ./web
