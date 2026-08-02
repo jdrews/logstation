@@ -30,7 +30,7 @@
     "jsdom-testing-mocks": "^1.16.0",
     "parcel": "^2.16.4",
     "path-browserify": "^1.0.1",
-    "postcss": "^8.5.15",
+    "postcss": "^8.5.18",
     "prettier": "^3.8.1",
     "process": "^0.11.10",
     "rimraf": "^6.1.3",
