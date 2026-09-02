@@ -3445,7 +3445,7 @@ __metadata:
     lucide-react: "npm:^0.575.0"
     parcel: "npm:^2.16.4"
     path-browserify: "npm:^1.0.1"
-    postcss: "npm:^8.5.18"
+    postcss: "npm:^8.5.26"
     prettier: "npm:^3.8.1"
     process: "npm:^0.11.10"
     react: "npm:^19.2.4"
@@ -3658,6 +3658,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10/13c74a5208d455286f7af46f42ac9f3d7b821b8a719aff8dbd5ad3fb80399c0c63cdd1e92d046ea576e403bec05262fbb7e116beb4cfcd5b5483550372bd94b1
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^3.3.17":
+  version: 3.3.18
+  resolution: "nanoid@npm:3.3.18"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 10/1b3b4fdac831b92b56d1dbe8b1e63a372432faf86ea383134e3b53141ef8108a60b7f84343b5cefecac9550bb74edf8164da93ea07d1c4f757039bc75d8a5d9e
   languageName: node
   linkType: hard
 
@@ -3930,14 +3939,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.5.18":
-  version: 8.5.18
-  resolution: "postcss@npm:8.5.18"
+"postcss@npm:^8.5.26":
+  version: 8.5.26
+  resolution: "postcss@npm:8.5.26"
   dependencies:
-    nanoid: "npm:^3.3.12"
+    nanoid: "npm:^3.3.17"
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
-  checksum: 10/b43f2d2493d82dc43fa50d21cf184bf3b66229e7f53fa1dedc7b8a7c4cecd7ac8ee18fad099f47570da7f78bbf46997a4c6e6c87d8d8ece683dc1f32cda6db3b
+  checksum: 10/842a624f822f77cb37264cc24f0cf97c0a69dd8d6f7b4a6d76b5a8dc95355899dd044f33a2d4e890da858293de570fce18dff453f3b629ff14cac67a3591895a
   languageName: node
   linkType: hard
 
