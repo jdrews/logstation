@@ -3256,7 +3256,7 @@ __metadata:
     parcel: "npm:^2.16.4"
     path-browserify: "npm:^1.0.1"
     postcss: "npm:^8.5.26"
-    prettier: "npm:^3.8.1"
+    prettier: "npm:^3.9.9"
     process: "npm:^0.11.10"
     react: "npm:^19.2.4"
     react-device-detect: "npm:^2.2.3"
@@ -3773,12 +3773,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.8.1":
-  version: 3.9.4
-  resolution: "prettier@npm:3.9.4"
+"prettier@npm:^3.9.9":
+  version: 3.9.9
+  resolution: "prettier@npm:3.9.9"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 10/4a0dc4389d442f5aca0beb12778c90b6ceb9831940b01a1df5eba9150b5ce96fa52eda9074a10a370e732adc03e2f645597dfd8b7e3f1e94dee28df01004a0fd
+  checksum: 10/3d11a8095a7db50f0fbc8086ad96be676401154b63a2e9023e1274893457dccab19a9c211f4fb2cae7244e800bea2d5185d9bb6fc510f48a53017815e47d4e6d
   languageName: node
   linkType: hard
 
