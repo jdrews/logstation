@@ -41,10 +41,18 @@ jobs:
         run: yarn build
         working-directory: ./web
 
+      - name: Resolve Go version
+        id: go-version
+        run: |
+          # Install the latest patch release of the go.mod major.minor, so CI
+          # never relies on GOTOOLCHAIN auto-downloading an unpatched release
+          # when go.mod requires a newer Go (see golang/go#75031).
+          echo "version=$(awk '/^go /{print $2}' go.mod | cut -d. -f1-2)" >> "$GITHUB_OUTPUT"
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.25'
+          go-version: ${{ steps.go-version.outputs.version }}
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
