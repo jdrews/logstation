@@ -77,6 +77,16 @@ func testFollow(t *testing.T, polling bool, pollingTimeMS int) {
 	linesChannel := pubSub.Sub("lines")
 	defer pubSub.Unsub(linesChannel, "lines")
 
+	// Create the log file before starting Follow. The tailer is started with
+	// failOnMissingFile=true, so it bails out if the file does not exist at
+	// startup. writeALine appends to it later, but the file must be present
+	// first for the tailer to watch it.
+	emptyFile, err := os.Create(logFilePath)
+	if err != nil {
+		t.Fatalf("Failed to create %s, err: %s", logFilePath, err)
+	}
+	emptyFile.Close()
+
 	// Run Follow
 	go Follow(logFilePath, pubSub, compiledRegexColors, polling, pollingTimeMS)
 
