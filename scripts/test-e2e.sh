@@ -57,17 +57,17 @@ cleanup() {
   RESULT=$?
   # On failure, preserve the logstation/generator logs for triage.
   # A successful run leaves nothing behind.
-  if [ "$RESULT" -ne 0 ]; then
+  if [[ "$RESULT" -ne 0 ]]; then
     mkdir -p "$REPO_ROOT/e2e-failure-logs"
     cp -f "$WORK_DIR"/*.log "$REPO_ROOT/e2e-failure-logs/" 2>/dev/null || true
     echo "E2E failed (exit $RESULT); logs saved to $REPO_ROOT/e2e-failure-logs/"
   fi
   echo ""
   echo "Cleaning up e2e environment..."
-  if [ -n "$GENERATOR_PID" ] && kill -0 "$GENERATOR_PID" 2>/dev/null; then
+  if [[ -n "$GENERATOR_PID" ]] && kill -0 "$GENERATOR_PID" 2>/dev/null; then
     kill "$GENERATOR_PID" 2>/dev/null || true
   fi
-  if [ -n "$LOGSTATION_PID" ] && kill -0 "$LOGSTATION_PID" 2>/dev/null; then
+  if [[ -n "$LOGSTATION_PID" ]] && kill -0 "$LOGSTATION_PID" 2>/dev/null; then
     kill "$LOGSTATION_PID" 2>/dev/null || true
   fi
   # Backstop for anything that outlived its PID (re-spawned children, etc.)
@@ -79,9 +79,11 @@ cleanup() {
 trap cleanup EXIT
 
 # ── Build ────────────────────────────────────────────────────────────────────
-if [ ! -d web/node_modules ]; then
+if [[ ! -d web/node_modules ]]; then
   echo "Installing web dependencies..."
-  (cd web && yarn install)
+  # Lifecycle scripts disabled: the build does not need native install
+  # scripts, and this avoids executing untrusted package scripts.
+  (cd web && YARN_ENABLE_SCRIPTS=false yarn install)
 fi
 echo "Building web frontend..."
 (cd web && yarn build)
@@ -91,7 +93,7 @@ go build -o "$WORK_DIR/bin/logstation" .
 
 # Prefer a local loggenerator checkout; fall back to installing the module
 # from github.com/jdrews/loggenerator (the CI path — no checkout there).
-if [ -f loggenerator/main.go ]; then
+if [[ -f loggenerator/main.go ]]; then
   echo "Building loggenerator from local checkout..."
   (cd loggenerator && go build -o "$WORK_DIR/bin/loggenerator" .)
 else
@@ -117,7 +119,7 @@ for i in $(seq 1 30); do
     echo "logstation is ready!"
     break
   fi
-  if [ "$i" -eq 30 ]; then
+  if [[ "$i" -eq 30 ]]; then
     echo "ERROR: logstation did not come up (see $WORK_DIR/logstation.log)" >&2
     cat "$WORK_DIR/logstation.log" >&2
     exit 1
@@ -127,14 +129,16 @@ done
 
 # ── Playwright ───────────────────────────────────────────────────────────────
 cd "$REPO_ROOT/test/e2e"
-if [ ! -d node_modules ]; then
-  npm ci --no-audit --no-fund
+if [[ ! -d node_modules ]]; then
+  # --ignore-scripts: @playwright/test needs no lifecycle scripts; the
+  # browser is installed explicitly via the playwright CLI below.
+  npm ci --no-audit --no-fund --ignore-scripts
 fi
 
 echo "Running E2E tests..."
 set +e
 E2E_BASE_URL="$BASE_URL" E2E_LOGFILE="$E2E_LOGFILE" E2E_NAME="$E2E_NAME" \
-  npx playwright test
+  ./node_modules/.bin/playwright test
 RESULT=$?
 set -e
 
