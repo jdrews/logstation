@@ -33,13 +33,9 @@ export async function waitForAppReady(page) {
 // visible rows exist in the DOM; the viewer is bottom-aligned and follows
 // output, so the most recent lines are what you get.
 export async function visibleLogLines(page) {
-  const rows = page.locator('[data-testid="log-row"]');
-  const count = await rows.count();
-  const lines = [];
-  for (let i = 0; i < count; i += 1) {
-    lines.push((await rows.nth(i).innerText()).trim());
-  }
-  return lines;
+  return page.$$eval("[data-testid='log-row']", (els) =>
+    els.map((el) => el.innerText.trim())
+  );
 }
 
 // The largest line-sequence number among the given lines. loggenerator
@@ -49,7 +45,7 @@ export function maxSequence(lines) {
   let max = -1;
   for (const line of lines) {
     const match = /^(\d+):/.exec(line);
-    if (match) max = Math.max(max, parseInt(match[1], 10));
+    if (match) max = Math.max(max, Number.parseInt(match[1], 10));
   }
   return max;
 }

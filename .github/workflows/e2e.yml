@@ -45,11 +45,26 @@ jobs:
           go-version: ${{ steps.go-version.outputs.version }}
 
       - name: Install e2e dependencies
-        run: npm ci --no-audit --no-fund
+        # --ignore-scripts: @playwright/test needs no lifecycle scripts; the
+        # browser is installed explicitly by the playwright step below.
+        run: npm ci --no-audit --no-fund --ignore-scripts
         working-directory: ./test/e2e
 
+      # Playwright downloads its browser from its own CDN (not from GitHub),
+      # so cache it to keep runs off the ~120 MB download. The key tracks the
+      # lockfile, which pins @playwright/test and with it the browser build.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: logstation-playwright-${{ runner.os }}-${{ hashFiles('test/e2e/package-lock.json') }}
+          restore-keys: |
+            logstation-playwright-${{ runner.os }}-
+
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        # Invoke the locally installed CLI directly rather than via npx,
+        # which could fetch and run an unverified package.
+        run: ./node_modules/.bin/playwright install --with-deps chromium
         working-directory: ./test/e2e
 
       - name: Run E2E suite
