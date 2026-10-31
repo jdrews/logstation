@@ -154,10 +154,13 @@ const LogStationLogViewer = ({
     const regex = buildSafeRegExpGrouped(searchTerm, "gi");
 
     return (
-      <div className={clsx(
-        "font-mono text-sm leading-6 whitespace-pre-wrap break-all px-4 py-0.5 hover:bg-zinc-800/50",
-        isActiveMatch && "bg-blue-900/40 ring-1 ring-inset ring-blue-500/50" // Highlight full line for active match
-      )}>
+      <div
+        data-testid="log-row"
+        className={clsx(
+          "font-mono text-sm leading-6 whitespace-pre-wrap break-all px-4 py-0.5 hover:bg-zinc-800/50",
+          isActiveMatch && "bg-blue-900/40 ring-1 ring-inset ring-blue-500/50" // Highlight full line for active match
+        )}
+      >
         {json.map((chunk, chunkIdx) => {
           const style = {};
           // Anser returns "r, g, b" for palette colors
@@ -222,7 +225,7 @@ const LogStationLogViewer = ({
   }, [isPaused, data.length]);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full" data-testid="log-viewer">
       <Virtuoso
         ref={virtuosoRef}
         totalCount={data.length}

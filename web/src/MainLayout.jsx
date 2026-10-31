@@ -113,6 +113,8 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
           {[...logFiles.keys()].map((fileName) => (
             <button
               key={fileName}
+              data-testid="sidebar-logfile"
+              data-logfile={fileName}
               onClick={() => {
                 setSelectedLogFile(fileName);
                 setIsPaused(false); // Resume tailing on file switch
@@ -170,6 +172,7 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
             </div>
             <input
               type="text"
+              data-testid="search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -185,7 +188,7 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <span className="text-xs text-zinc-500 mr-2">
+                <span className="text-xs text-zinc-500 mr-2" data-testid="match-counter">
                   {totalMatches > 0 ? `${currentMatchIndex + 1}/${totalMatches}` : "0/0"}
                 </span>
                 <button
@@ -209,6 +212,7 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
           {/* Controls */}
           <div className="flex items-center gap-2">
             <button
+              data-testid="pause-button"
               onClick={() => setIsPaused(!isPaused)}
               className={`px-3 py-1.5 text-xs font-medium rounded transition-colors flex items-center gap-2 ${isPaused
                 ? "bg-green-600 hover:bg-green-700 text-white"
@@ -220,6 +224,7 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
               <span>{isPaused ? "Resume" : "Pause"}</span>
             </button>
             <button
+              data-testid="clear-button"
               onClick={handleClear}
               className="p-2 text-zinc-400 hover:text-white transition-colors"
               title="Clear Buffer"
