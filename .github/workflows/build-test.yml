@@ -25,7 +25,10 @@ jobs:
           cache-dependency-path: ./web/yarn.lock
 
       - name: Install web
-        run: yarn install
+        # Lifecycle scripts are disabled: the build and tests do not need the
+        # native build scripts (the deps ship prebuilt binaries), and this avoids
+        # executing untrusted package scripts during install.
+        run: YARN_ENABLE_SCRIPTS=false yarn install
         working-directory: ./web
 
       - name: Build web with Yarn
