@@ -34,6 +34,37 @@ You can also use `-c your-logstation.conf` argument to specify a config file
 
 Take a look at [an example logstation.conf here](logstation.default.conf).
 
+### Containers ###
+
+An official image is published to [GitHub Container Registry](https://github.com/jdrews/logstation/pkgs/container/logstation) on every tag push. It is built from [Chainguard](https://images.chainguard.dev) base images, runs as a non-root user, and is available for `linux/amd64` and `linux/arm64`.
+
+The image works with both `docker` and `podman`. The [`Containerfile`](Containerfile) uses standard Dockerfile syntax, so you can also build it locally:
+
+```sh
+podman build -f Containerfile -t logstation:dev .
+```
+
+On first run, if no config file is present, logstation generates a default `logstation.conf` in `/config` and then starts the server. To run it with a directory of logs:
+
+```sh
+podman run -d --name logstation \
+  -p 8884:8884 \
+  -v /var/log:/logs:z \
+  ghcr.io/jdrews/logstation:latest
+```
+
+Then navigate to `http://127.0.0.1:8884`.
+
+To use your own config, bind-mount it with the `:z` SELinux flag so the container's non-root user can read it (this works with both `docker` and `podman`, including rootless podman). Point the `logs` list in your config at the mounted files, e.g. `/logs/*.log`:
+
+```sh
+podman run -d --name logstation \
+  -p 8884:8884 \
+  -v /var/log:/logs:z \
+  -v ./logstation.conf:/config/logstation.conf:z \
+  ghcr.io/jdrews/logstation:latest
+```
+
 ### Building ###
 
 logstation uses [goreleaser](https://github.com/goreleaser/goreleaser) for all releases   
