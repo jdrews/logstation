@@ -38,6 +38,10 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
+  "resolutions": {
+    "node-gyp/undici": ">=8.12.2",
+    "glob/minimatch": ">=11.0.1"
+  },
   "scripts": {
     "start": "parcel --port 1234 --no-hmr public/index.html --open",
     "build": "yarn clean; parcel build public/index.html",
