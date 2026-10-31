@@ -34,6 +34,7 @@ func TestStartWebServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to request the webserver at %s", serverUrl)
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		t.Errorf("Server responded with a bad status code: %s", response.Status)
 	}
@@ -43,6 +44,7 @@ func TestStartWebServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to request the webserver at %s", serverUrl+"/settings/logstation-name")
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		t.Errorf("Server responded with a bad status code: %s", response.Status)
 	}
@@ -61,6 +63,7 @@ func TestStartWebServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to request the webserver at %s", serverUrl+"/settings/websocket-security")
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		t.Errorf("Server responded with a bad status code: %s", response.Status)
 	}
