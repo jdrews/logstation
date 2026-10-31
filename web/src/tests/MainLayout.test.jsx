@@ -71,4 +71,25 @@ describe("MainLayout", () => {
       expect(screen.getByText("log line 2")).toBeInTheDocument();
     });
   });
+
+  test("should show the file name (basename) when the sidebar is collapsed", () => async () => {
+    const logFiles = new Map([["/var/log/app.log", ["log line 1"]]]);
+
+    render(
+      <div style={{ width: "1000px", height: "700px" }}>
+        <MainLayout logFiles={logFiles} />
+      </div>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("/var/log/app.log")).toBeInTheDocument();
+    });
+
+    // Collapse the sidebar; the rotated labels then show only the basename
+    fireEvent.click(screen.getByTitle("Collapse Sidebar"));
+
+    await waitFor(() => {
+      expect(screen.getByText("app.log")).toBeInTheDocument();
+    });
+  });
 });
