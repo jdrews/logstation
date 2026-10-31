@@ -12,6 +12,7 @@ import {
   X
 } from "lucide-react";
 import LogStationLogViewer from "./LogStationLogViewer";
+import { trimTrailingSeparators, basename } from "./utils/path";
 
 // Green dot for active logs
 const ActiveIndicator = () => (
@@ -133,14 +134,14 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
                     style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}
                   >
                     {/* Shorten file name to just the file name, not the path */}
-                    {fileName.trim().replace(/[/\\]+$/, "").split(/[/\\]/).pop()}
+                    {basename(fileName.trim())}
                   </span>
                 </>
               ) : (
                 <>
                   <span className="truncate text-sm" style={{ direction: "rtl", textAlign: "left" }} title={fileName}>
                     {/* Remove trailing slash */}
-                    {"\u200E" + fileName.trim().replace(/[/\\]+$/, "")}
+                    {"\u200E" + trimTrailingSeparators(fileName.trim())}
                   </span>
                   {selectedLogFile === fileName && <ActiveIndicator />}
                 </>
