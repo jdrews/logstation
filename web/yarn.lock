@@ -2172,13 +2172,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bezier-easing@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "bezier-easing@npm:2.1.0"
-  checksum: 10/086dfd042ccf91c3a9de811b635381aa6580e9f83d1951ed4ce4d4007645d8f3cebd491cb6259719ce9320df213316b99dd8e39e78997944b1c252a1d4b424b5
-  languageName: node
-  linkType: hard
-
 "bidi-js@npm:^1.0.3":
   version: 1.0.3
   resolution: "bidi-js@npm:1.0.3"
@@ -2361,13 +2354,6 @@ __metadata:
     shebang-command: "npm:^1.2.0"
     which: "npm:^1.2.9"
   checksum: 10/7abf6137b23293103a22bfeaf320f2d63faae70d97ddb4b58597237501d2efdd84cdc69a30246977e0c5f68216593894d41a7f122915dd4edf448db14c74171b
-  languageName: node
-  linkType: hard
-
-"css-mediaquery@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "css-mediaquery@npm:0.1.2"
-  checksum: 10/f2f7512daa015f98b82bd65bbdd7c2100b16dddf22784bde2a8085f10f11e8775da57108016fe767f5e400afe64581c15d4e649c47725af7eac5f4094fa7ae43
   languageName: node
   linkType: hard
 
@@ -2909,16 +2895,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsdom-testing-mocks@npm:^1.16.0":
-  version: 1.16.0
-  resolution: "jsdom-testing-mocks@npm:1.16.0"
-  dependencies:
-    bezier-easing: "npm:^2.1.0"
-    css-mediaquery: "npm:^0.1.2"
-  checksum: 10/0a5c6970a44051827648ec1e9caeb910ff9f260c58aef9e4634dfdff5fb1d402bb6ca053eca34ab3c1428a8726353a0cdcea3356d46e7e1d84afc0953a5ecac4
-  languageName: node
-  linkType: hard
-
 "jsdom@npm:^28.0.0":
   version: 28.1.0
   resolution: "jsdom@npm:28.1.0"
@@ -3255,7 +3231,6 @@ __metadata:
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     jsdom: "npm:^28.0.0"
-    jsdom-testing-mocks: "npm:^1.16.0"
     lucide-react: "npm:^0.575.0"
     parcel: "npm:^2.16.4"
     path-browserify: "npm:^1.0.1"

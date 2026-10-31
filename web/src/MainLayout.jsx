@@ -188,10 +188,18 @@ const MainLayout = ({ logFiles, onClearLogs }) => {
                 <span className="text-xs text-zinc-500 mr-2">
                   {totalMatches > 0 ? `${currentMatchIndex + 1}/${totalMatches}` : "0/0"}
                 </span>
-                <button onClick={handlePrevMatch} className="p-1 hover:text-white text-zinc-500">
+                <button
+                  onClick={handlePrevMatch}
+                  className="p-1 hover:text-white text-zinc-500"
+                  title="Previous Match"
+                >
                   <ChevronUp className="w-4 h-4" />
                 </button>
-                <button onClick={handleNextMatch} className="p-1 hover:text-white text-zinc-500">
+                <button
+                  onClick={handleNextMatch}
+                  className="p-1 hover:text-white text-zinc-500"
+                  title="Next Match"
+                >
                   <ChevronDown className="w-4 h-4" />
                 </button>
               </div>
