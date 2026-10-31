@@ -1,0 +1,27 @@
+# Build artifacts
+web/dist
+web/.parcel-cache
+web/coverage
+web/node_modules
+dist/
+*.log
+
+# Go build artifacts
+logstation
+*.exe
+
+# Version control
+.git
+.gitignore
+
+# IDE / editor
+.vscode
+.devcontainer
+*.swp
+
+# Repo metadata
+coverage.txt
+.github
+*.md
+LICENSE.txt
+SECURITY.md
