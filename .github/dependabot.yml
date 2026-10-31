@@ -13,6 +13,8 @@ updates:
       
   # Maintain dependencies for npm
   - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/web" # Location of package manifests
+    directories: # Locations of package manifests
+      - "/web"
+      - "/test/e2e"
     schedule:
       interval: "monthly"

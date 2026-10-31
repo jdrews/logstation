@@ -7,5 +7,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2"
-  }
+  },
+  "packageManager": "yarn@4.1.0"
 }
