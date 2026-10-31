@@ -1,0 +1,11 @@
+{
+  "name": "logstation-e2e",
+  "private": true,
+  "description": "Playwright e2e suite for logstation. Run via scripts/test-e2e.sh, which launches logstation + loggenerator and exports E2E_BASE_URL / E2E_LOGFILE.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
