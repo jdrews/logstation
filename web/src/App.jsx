@@ -14,6 +14,9 @@ const App = () => {
         const webSocketType = data.useSecureWebSocket ? "wss://" : "ws://";
         connect(new ReconnectingWebSocket(webSocketType + window.location.host + "/ws"));
         // connect(new ReconnectingWebSocket(webSocketType + "localhost:8884" + "/ws")); // used in dev mode, ignore otherwise
+      })
+      .catch((error) => {
+        console.error("Failed to load websocket security settings:", error);
       });
   }, []);
 
@@ -24,6 +27,9 @@ const App = () => {
         .then((response) => response.json())
         .then((data) => {
           document.title = data.name;
+        })
+        .catch((error) => {
+          console.error("Failed to load logstation name:", error);
         });
     };
     rws.onmessage = (message) => {
