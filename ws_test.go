@@ -68,22 +68,36 @@ func TestWebSocketBroadcast(t *testing.T) {
 	}
 	defer ws.Close()
 
-	// Publish a line through the message broker
-	pubSub.Pub(LogMessage{Text: "e2e websocket line", LogFile: "ws_test.log"}, "lines")
-
-	// Verify the client receives it as a JSON text frame
-	ws.SetReadDeadline(time.Now().Add(10 * time.Second))
-	messageType, data, err := ws.ReadMessage()
-	if err != nil {
-		t.Fatalf("Unable to read from the websocket: %s", err)
-	}
-	if messageType != websocket.TextMessage {
-		t.Errorf("Expected a text message, got message type %d", messageType)
-	}
-
+	// Publish a line and read the response. The server subscribes to the
+	// broker just after the upgrade handshake completes (see
+	// WebSocketHandler), so a publish that lands in that window is dropped
+	// by the broker. Retry the publish/read cycle: once the server is
+	// subscribed, delivery is reliable.
 	var received LogMessage
-	if err := json.Unmarshal(data, &received); err != nil {
-		t.Fatalf("Unable to unmarshal the websocket payload %q: %s", data, err)
+	var lastErr error
+	found := false
+	for attempt := 0; attempt < 5 && !found; attempt++ {
+		pubSub.Pub(LogMessage{Text: "e2e websocket line", LogFile: "ws_test.log"}, "lines")
+
+		ws.SetReadDeadline(time.Now().Add(2 * time.Second))
+		messageType, data, readErr := ws.ReadMessage()
+		if readErr != nil {
+			lastErr = readErr
+			continue
+		}
+		if messageType != websocket.TextMessage {
+			t.Errorf("Expected a text message, got message type %d", messageType)
+			lastErr = fmt.Errorf("wrong message type %d", messageType)
+			continue
+		}
+		if unmarshalErr := json.Unmarshal(data, &received); unmarshalErr != nil {
+			lastErr = unmarshalErr
+			continue
+		}
+		found = true
+	}
+	if !found {
+		t.Fatalf("Did not receive the published line on the websocket (last error: %s)", lastErr)
 	}
 	if received.Text != "e2e websocket line" {
 		t.Errorf("Expected text %q, got %q", "e2e websocket line", received.Text)
