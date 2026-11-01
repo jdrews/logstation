@@ -109,10 +109,10 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 				logger.Error("Failed to marshal log line: ", marshalErr)
 				continue
 			}
-			if setErr := ws.SetWriteDeadline(time.Now().Add(wsWriteDeadline)); setErr != nil {
-				logger.Warn("Lost connection to websocket client! Closing this connection. More info: ", setErr)
-				return nil
-			}
+			// SetWriteDeadline's error is intentionally not checked (the
+			// pattern from gorilla's chat example): if it fails, the
+			// connection is broken and WriteMessage fails right after.
+			ws.SetWriteDeadline(time.Now().Add(wsWriteDeadline))
 			if writeErr := ws.WriteMessage(websocket.TextMessage, jsonLine); writeErr != nil {
 				logger.Warn("Lost connection to websocket client! Closing this connection. More info: ", writeErr)
 				return nil
