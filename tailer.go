@@ -29,7 +29,12 @@ func Follow(logFilePath string, pubSub *pubsub.PubSub, patterns []CompiledRegexC
 	for line := range tailer.Lines() {
 		logger.Debug(line.Line)
 		logMessage := Colorize(line.Line, line.File, patterns)
-		pubSub.Pub(logMessage, "lines")
+		// TryPub is non-blocking per subscriber: a client that cannot keep
+		// up (e.g. its websocket write is stalled on a full TCP buffer)
+		// drops lines for itself only. Pub would block the single broker
+		// goroutine on that client's full queue, wedging delivery to every
+		// other client as well (issue #110).
+		pubSub.TryPub(logMessage, "lines")
 	}
 
 }

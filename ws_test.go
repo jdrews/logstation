@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -104,5 +105,145 @@ func TestWebSocketBroadcast(t *testing.T) {
 	}
 	if received.LogFile != "ws_test.log" {
 		t.Errorf("Expected logfile %q, got %q", "ws_test.log", received.LogFile)
+	}
+}
+
+// TestDeadWebSocketClientDoesNotStallOtherClients is a regression test for
+// issue #110 at the websocket layer.
+//
+//	A client that vanishes without closing its websocket (a crashing
+//	browser, a dropped network) used to stall the server's write to it
+//	forever (no read pump, no write deadline). The handler then stopped
+//	draining its subscription channel, and the blocking pubsub fan-out
+//	wedged on that full channel, skipping lines for EVERY other client.
+//
+//	The test fills the dead client's TCP buffers so the server's writes to
+//	it stall, and then asserts that (1) a healthy client still receives
+//	every single line and (2) a newly connected client can still receive
+//	lines after the dead one is killed. With the pre-fix code the broker
+//	wedges and both assertions fail.
+func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
+	// Shorten the write deadline so a stalled client's handler gives up in
+	// 200 ms instead of 10 s.
+	origDeadline := wsWriteDeadline
+	wsWriteDeadline = 200 * time.Millisecond
+	t.Cleanup(func() { wsWriteDeadline = origDeadline })
+
+	// Same broker configuration as main()
+	pubSub := pubsub.New(pubSubQueueSize)
+
+	// Start the webserver on a free port (same pattern as
+	// TestWebSocketBroadcast)
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("Unable to find a free port: %s", err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
+	viper.Set("server_settings.webserverport", strconv.Itoa(port))
+	go StartWebServer(pubSub)
+
+	baseUrl := fmt.Sprintf("http://127.0.0.1:%d", port)
+	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
+
+	ready := false
+	for i := 0; i < 30; i++ {
+		response, getErr := http.Get(baseUrl + "/settings/logstation-name")
+		if getErr == nil {
+			response.Body.Close()
+			if response.StatusCode == 200 {
+				ready = true
+				break
+			}
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	if !ready {
+		t.Fatalf("Webserver did not come up at %s", baseUrl)
+	}
+
+	// Client A: healthy, drains every line it is sent.
+	wsA, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial the websocket (client A): %s", err)
+	}
+	defer wsA.Close()
+	var aCount int64
+	go func() {
+		for {
+			if _, _, readErr := wsA.ReadMessage(); readErr != nil {
+				return
+			}
+			atomic.AddInt64(&aCount, 1)
+		}
+	}()
+
+	// Client B: the client that will die. Shrink its TCP receive buffer so
+	// the server's writes to it stall once the kernel buffers fill, and
+	// never read from it (a dead client's kernel stops consuming too).
+	wsB, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial the websocket (client B): %s", err)
+	}
+	if tcpConn, ok := wsB.NetConn().(*net.TCPConn); ok {
+		_ = tcpConn.SetReadBuffer(4096)
+	}
+
+	// Push enough lines that B's kernel buffers fill and the server's
+	// writes to B stall. Publish in batches, waiting for A to catch up
+	// after each one so A's own queue can never overflow: a healthy client
+	// must lose nothing. (B, by design, never catches up.)
+	const (
+		totalLines = 12000
+		batchSize  = 512
+	)
+	line := LogMessage{Text: strings.Repeat("x", 1024)}
+	for i := 0; i < totalLines; i += batchSize {
+		n := batchSize
+		if i+n > totalLines {
+			n = totalLines - i
+		}
+		for j := 0; j < n; j++ {
+			pubSub.TryPub(line, "lines")
+		}
+		waitForLineCount(t, &aCount, int64(i+n), 15*time.Second)
+	}
+
+	// Kill B the way a crashing client dies: abrupt TCP close, no
+	// websocket close frame. Its unread buffers make the kernel send a RST.
+	if tcpConn, ok := wsB.NetConn().(*net.TCPConn); ok {
+		_ = tcpConn.Close()
+	}
+
+	// A new client C must be able to connect and receive lines: the broker
+	// and server must be fully operational despite B's death.
+	wsC, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial the websocket (client C) after client B died: %s", err)
+	}
+	defer wsC.Close()
+	wsC.SetReadDeadline(time.Now().Add(10 * time.Second))
+	pubSub.TryPub(LogMessage{Text: "post-mortem marker"}, "lines")
+	_, data, readErr := wsC.ReadMessage()
+	if readErr != nil {
+		t.Fatalf("Client C did not receive a line after client B died: %s", readErr)
+	}
+	var marker LogMessage
+	if err := json.Unmarshal(data, &marker); err != nil {
+		t.Fatalf("Client C received an unparsable message: %s", err)
+	}
+	if marker.Text != "post-mortem marker" {
+		t.Errorf("Expected %q, got %q", "post-mortem marker", marker.Text)
+	}
+}
+
+// waitForLineCount blocks until *count reaches target or the test fails.
+func waitForLineCount(t *testing.T, count *int64, target int64, timeout time.Duration) {
+	deadline := time.Now().Add(timeout)
+	for atomic.LoadInt64(count) < target {
+		if time.Now().After(deadline) {
+			t.Fatalf("Timed out waiting for %d lines, healthy client only received %d", target, atomic.LoadInt64(count))
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

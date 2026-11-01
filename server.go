@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
@@ -24,6 +26,18 @@ var (
 
 	// default to CORS being enabled
 	disableCORS = false
+
+	// wsWriteDeadline bounds how long a single write (or ping) to a client
+	// may block before the connection is declared dead. Without it, a
+	// half-dead client whose TCP buffer is full blocks WriteMessage
+	// forever, pinning the handler and its subscription. It is a var (not
+	// a const) so tests can shorten it.
+	wsWriteDeadline = 10 * time.Second
+
+	// wsPingInterval is how often we ping the client. Pings keep idle
+	// connections alive through NATs and give us a periodic, cheap probe
+	// of the connection's health.
+	wsPingInterval = 30 * time.Second
 )
 
 // WebSocketHandler handles incoming websocket connections and serves up log lines to the client
@@ -35,30 +49,76 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 	if err != nil {
 		return nil
 	}
-	defer func(ws *websocket.Conn) {
-		wsCloseErr := ws.Close()
-		if wsCloseErr != nil {
-			panic(wsCloseErr)
-		}
-	}(ws)
 
 	linesChannel := pubSub.Sub("lines")
-	defer pubSub.Unsub(linesChannel, "lines")
 
-	for line := range linesChannel {
-		jsonLine, marshalErr := json.Marshal(line)
-		if marshalErr != nil {
-			logger.Fatal(marshalErr)
+	// done is closed as soon as the connection stops being usable in either
+	// direction, so the writer loop below can stop and the subscription can
+	// be released promptly.
+	//
+	// This protocol is one-way (server -> client), so without the read pump
+	// below a client that vanishes without a proper close frame leaves this
+	// handler blocked in WriteMessage until (if ever) a write fails. The
+	// stuck handler stops draining its subscription channel, and with a
+	// blocking broker fan-out that wedges line delivery for every other
+	// client (issue #110). The read pump, the write deadline, and the pings
+	// together guarantee a dead client is noticed and cleaned up.
+	done := make(chan struct{})
+	var closeOnce sync.Once
+	closeDone := func() { closeOnce.Do(func() { close(done) }) }
+
+	// Read pump: the client never sends application data, so any result
+	// from ReadMessage means the connection is going away. Closing the
+	// websocket makes any in-flight write fail promptly. (Writing the close
+	// from the read side is the pattern from gorilla's chat example: one
+	// reader, one writer, Close is safe to call from either.)
+	go func() {
+		defer closeDone()
+		for {
+			if _, _, readErr := ws.ReadMessage(); readErr != nil {
+				_ = ws.Close()
+				return
+			}
 		}
-		// Write
-		wsErr := ws.WriteMessage(websocket.TextMessage, jsonLine)
-		if wsErr != nil {
-			logger.Warn("Lost connection to websocket client! Maybe they're gone? Closing this connection. More info: ")
-			logger.Warn(wsErr)
-			break
+	}()
+
+	pingTicker := time.NewTicker(wsPingInterval)
+	defer pingTicker.Stop()
+
+	defer func() {
+		closeDone()
+		pubSub.Unsub(linesChannel, "lines")
+		_ = ws.Close()
+	}()
+
+	for {
+		select {
+		case <-done:
+			return nil
+		case <-pingTicker.C:
+			// WriteControl is documented safe to call alongside the
+			// writer and carries its own deadline, so a dead peer fails
+			// the ping promptly instead of hanging.
+			if pingErr := ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(wsWriteDeadline)); pingErr != nil {
+				logger.Warn("Lost connection to websocket client (ping failed)! Closing this connection. More info: ", pingErr)
+				return nil
+			}
+		case line := <-linesChannel:
+			jsonLine, marshalErr := json.Marshal(line)
+			if marshalErr != nil {
+				logger.Error("Failed to marshal log line: ", marshalErr)
+				continue
+			}
+			if setErr := ws.SetWriteDeadline(time.Now().Add(wsWriteDeadline)); setErr != nil {
+				logger.Warn("Lost connection to websocket client! Closing this connection. More info: ", setErr)
+				return nil
+			}
+			if writeErr := ws.WriteMessage(websocket.TextMessage, jsonLine); writeErr != nil {
+				logger.Warn("Lost connection to websocket client! Closing this connection. More info: ", writeErr)
+				return nil
+			}
 		}
 	}
-	return nil
 }
 
 // StartWebServer configures and then starts the webserver, which does the following:
