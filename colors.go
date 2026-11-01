@@ -22,6 +22,12 @@ type CompiledRegexColors struct {
 // ParseRegexPatterns processes all the regular expression patterns associated with each color
 // and compiles them at boot time to optimize regex matching.
 func ParseRegexPatterns() []CompiledRegexColors {
+	// logstation uses fatih/color to generate ANSI-escaped strings that are
+	// shipped to browser clients over websockets, not to print to a terminal.
+	// Since v1.16, fatih/color auto-disables color when stdout is not a TTY,
+	// which would strip every ANSI code in a server context. Force it on.
+	color.NoColor = false
+
 	var syntaxColors models.SyntaxColors
 	err := viper.UnmarshalKey("syntaxColors", &syntaxColors)
 	if err != nil {

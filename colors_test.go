@@ -97,3 +97,31 @@ func TestColorize(t *testing.T) {
 	}
 
 }
+
+// TestParseRegexPatternsForcesColorOn is a regression test for the fatih/color
+// TTY-detection change (v1.16): when stdout is not a terminal, the library
+// disables ANSI output, which silently stripped every color from the lines
+// shipped to browser clients after the dependency bump. The production
+// startup path (ParseRegexPatterns) must re-enable color in that scenario.
+func TestParseRegexPatternsForcesColorOn(t *testing.T) {
+	// Simulate a server: stdout is not a terminal, so fatih/color starts with
+	// color disabled. Set explicitly so the test is hermetic with respect to
+	// other tests' modifications of this global.
+	color.NoColor = true
+
+	// Load in a test config file, which has all the possible colors defined in it
+	HandleConfigFile("logstation.test.conf")
+
+	// Run the production startup path
+	compiledRegexColors := ParseRegexPatterns()
+
+	if color.NoColor {
+		t.Fatal("ParseRegexPatterns should re-enable ANSI colors for server (non-TTY) use. color.NoColor is still true")
+	}
+
+	// The end goal is colorized output, not just a flipped flag
+	logMessage := Colorize("You might want to know about this... #HIBLUE#", "test/logfile.log", compiledRegexColors)
+	if !strings.Contains(logMessage.Text, "\x1b[") {
+		t.Errorf("Colorize output %q should contain ANSI escape sequences", logMessage.Text)
+	}
+}
