@@ -1,6 +1,22 @@
 version: 2
 release:
   target_commitish: '{{ .Commit }}'
+  # Prepend a container image section to the release notes. The image is
+  # published by the Container Publish workflow (dispatched by release.yml
+  # after goreleaser succeeds). Use .Tag (v3.1.1), not .Version (3.1.1):
+  # the container images are tagged with the full release tag.
+  header: |
+    ## Container image
+
+    This release is published to the GitHub Container Registry.
+    Pull and run it with docker (or podman):
+
+    ```
+    docker pull ghcr.io/jdrews/logstation:{{ .Tag }}
+    docker run --rm -p 8884:8884 ghcr.io/jdrews/logstation:{{ .Tag }}
+    ```
+
+    Tags: `{{ .Tag }}` (this release) and `latest` (most recent release).
 before:
   hooks:
     # - yarn -v # For debugging. Historical problems with running 1.x yarn. Need >=3.x yarn (berry)
