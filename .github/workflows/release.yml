@@ -74,4 +74,7 @@ jobs:
         # workflow runs for events created with GITHUB_TOKEN, so neither the
         # release event nor a tag push will trigger the Container Publish
         # workflow. Dispatch it explicitly now that the release succeeded.
+        # (gh requires GH_TOKEN to be set explicitly inside Actions.)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run container-publish.yml -f tag="${{ github.event.inputs.tag }}"
