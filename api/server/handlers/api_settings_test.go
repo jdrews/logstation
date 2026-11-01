@@ -40,7 +40,7 @@ func TestGetSettingsSyntax(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf("Expected status %d, got %d", http.StatusOK, rec.Code)
 	}
-	if body := rec.Body.String(); body == "" {
+	if rec.Body.String() == "" {
 		t.Error("Expected a non-empty syntax colors response")
 	}
 }
