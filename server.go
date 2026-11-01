@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/cskr/pubsub"
 	"github.com/gorilla/websocket"
 	"github.com/jdrews/logstation/api/server/handlers"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -23,7 +27,7 @@ var (
 )
 
 // WebSocketHandler handles incoming websocket connections and serves up log lines to the client
-func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
+func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 	if disableCORS {
 		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	}
@@ -64,8 +68,7 @@ func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
 func StartWebServer(pubSub *pubsub.PubSub) {
 	// setup web server
 	e := echo.New()
-	e.HideBanner = true
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 
 	// disable CORS on the web server if desired
 	disableCORS = viper.GetBool("server_settings.disablecors")
@@ -97,11 +100,22 @@ func StartWebServer(pubSub *pubsub.PubSub) {
 	e.GET("/*", echo.WrapHandler(fileHandler))
 
 	// pass message broker channel into websocket handler
-	wsHandlerChan := func(c echo.Context) error {
+	wsHandlerChan := func(c *echo.Context) error {
 		return WebSocketHandler(c, pubSub)
 	}
 	e.GET("/ws", wsHandlerChan)
 
-	// start the web server
-	e.Logger.Fatal(e.Start(viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport")))
+	// start the web server. v5 moved banner hiding off the Echo instance
+	// into StartConfig; signals are handled via the context (matching
+	// what v5's Start does internally) so Ctrl+C still shuts down cleanly.
+	sc := echo.StartConfig{
+		Address:    viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport"),
+		HideBanner: true,
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := sc.Start(ctx, e); err != nil {
+		e.Logger.Error("web server failed", "error", err)
+		os.Exit(1)
+	}
 }
