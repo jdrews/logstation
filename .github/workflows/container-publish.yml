@@ -1,13 +1,29 @@
 name: Container Publish
 
 on:
-  push:
-    tags:
-      - 'v*'
+  # The GitHub release is the source of truth for a published version, so
+  # publish the container when a release is created ("released") or when a
+  # draft release is published ("published"). Triggering on tag pushes is
+  # fragile: goreleaser creates the release (and, as a side effect, the tag
+  # ref) via the GitHub API, and API-created refs generate no push event.
+  release:
+    types: [released, published]
+  # Manual escape hatch for backfills and re-publishes, e.g.:
+  #   gh workflow run container-publish.yml -f tag=v3.1.0
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to publish (e.g. v3.1.0)'
+        required: true
 
 permissions:
   contents: read
   packages: write
+
+# The version tag for this run: the release's tag, or the manually supplied
+# one for workflow_dispatch.
+env:
+  VERSION_TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
 
 jobs:
   publish:
@@ -15,6 +31,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # Build the exact tagged commit, not the default branch HEAD
+          # (which is what workflow_dispatch would check out by default).
+          ref: ${{ format('refs/tags/{0}', env.VERSION_TAG) }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
@@ -36,7 +56,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest
-            type=ref,add=1
+            type=raw,value=${{ env.VERSION_TAG }}
 
       - name: Build and push
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
