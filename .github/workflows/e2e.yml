@@ -11,7 +11,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Enable Corepack
         working-directory: ./web
@@ -45,6 +45,17 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go-version.outputs.version }}
+          # Cache the Go module downloads (logstation deps + loggenerator).
+          cache: true
+
+      - name: Cache Go build cache
+        # Compiled artifacts from `go build`/`go test` (logstation, loggenerator).
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/go-build
+          key: logstation-go-build-${{ runner.os }}-go${{ steps.go-version.outputs.version }}-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            logstation-go-build-${{ runner.os }}-go${{ steps.go-version.outputs.version }}-
 
       - name: Install e2e dependencies
         # Lifecycle scripts are disabled: @playwright/test needs no lifecycle
