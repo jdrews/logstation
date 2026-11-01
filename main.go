@@ -9,6 +9,13 @@ import (
 	"os"
 )
 
+const (
+	// pubSubQueueSize is the number of lines each subscriber of the message
+	// broker can have queued ahead of it. See the pubsub.New call in main()
+	// for why this matters (burst absorption + non-blocking fan-out).
+	pubSubQueueSize = 1024
+)
+
 var (
 	// use go embed to package up the webServerFiles
 	//go:embed web/dist
@@ -35,7 +42,15 @@ func main() {
 	patterns := ParseRegexPatterns()
 
 	// setup message broker
-	pubSub := pubsub.New(1)
+	//
+	// Each subscriber gets a queue of pubSubQueueSize lines. The queue must
+	// be large enough to absorb a burst of lines (issue #110: many lines can
+	// arrive within the same millisecond) without the subscriber having to
+	// drain in real time. Because Follow publishes with the non-blocking
+	// TryPub, a subscriber that falls more than pubSubQueueSize lines behind
+	// drops lines for itself only, instead of wedging the broker and
+	// skipping lines for every other client.
+	pubSub := pubsub.New(pubSubQueueSize)
 
 	// collect settings for tailingMethod
 	tailingMethod := viper.GetString("tailingMethod")

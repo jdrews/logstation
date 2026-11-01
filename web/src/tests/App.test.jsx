@@ -159,6 +159,43 @@ describe("App", () => {
     expect(screen.getAllByTitle("other.log")).not.toHaveLength(0);
   });
 
+  test("does not skip log lines when a burst of lines arrives in the same millisecond (issue #110)", async () => {
+    mockFetchSequence(
+      json({ useSecureWebSocket: false }),
+      json({ name: "Logstation" }),
+    );
+    const { socket } = await renderConnectedApp();
+
+    // Issue #110: lines written to the log file within the same millisecond
+    // (e.g. a single multi-line write like Python's f.write("1\n2\n...\n10\n"))
+    // reach the browser as a burst of websocket messages inside one React
+    // update batch, and the viewer showed gaps in the sequence (1, 2, 4, 6,
+    // 8, 10).
+    //
+    // The requirement this pins: no line of a same-millisecond burst may be
+    // skipped. A handler that derives the next state from a stale snapshot of
+    // the previous state (the render-closure value of logFiles) keeps only the
+    // last line of the batch, because React applies only the last queued
+    // non-functional update. The current handler uses a functional update,
+    // which folds each message in order, so the whole burst survives.
+    //
+    // Reproduce the condition by delivering a burst of messages inside a
+    // single act(): they all land in one React batch, before any re-render,
+    // exactly like lines published within the same millisecond.
+    const burstCount = 10;
+    act(() => {
+      for (let i = 1; i <= burstCount; i++) {
+        socket.receive(JSON.stringify({ logfile: "app.log", text: `burst line ${i}` }));
+      }
+    });
+    await flushAsync();
+
+    // Every line of the burst must survive, in order.
+    for (let i = 1; i <= burstCount; i++) {
+      expect(screen.getByText(`burst line ${i}`)).toBeInTheDocument();
+    }
+  });
+
   test("clear buffer empties log lines but keeps the file list", async () => {
     mockFetchSequence(
       json({ useSecureWebSocket: false }),
