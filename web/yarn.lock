@@ -3173,7 +3173,7 @@ __metadata:
     react: "npm:^19.2.4"
     react-device-detect: "npm:^2.2.3"
     react-dom: "npm:^19.2.4"
-    react-virtuoso: "npm:^4.18.15"
+    react-virtuoso: "npm:^4.18.20"
     reconnecting-websocket: "npm:^4.4.0"
     rimraf: "npm:^6.1.3"
     safe-regex2: "npm:^5.1.1"
@@ -3780,13 +3780,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtuoso@npm:^4.18.15":
-  version: 4.18.19
-  resolution: "react-virtuoso@npm:4.18.19"
+"react-virtuoso@npm:^4.18.20":
+  version: 4.18.20
+  resolution: "react-virtuoso@npm:4.18.20"
   peerDependencies:
     react: ">=16 || >=17 || >= 18 || >= 19"
     react-dom: ">=16 || >=17 || >= 18 || >=19"
-  checksum: 10/fd82bacabcf6c86745221d274c5aa5ef5b2f360eb16b696f27faba2be3ed12767d55843858274092ad77dee669a090667c59fb543fdc6da8cd344f14fcf8f6c9
+  checksum: 10/71fcf9619b61051ebb70441a58e4aa5791ba83a9109037c60a87ad3492f2d9b493ae99761175ae8331945b72e2639fcbd53ea56eda9e4a7479bb7364963c07a2
   languageName: node
   linkType: hard
 
