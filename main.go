@@ -52,6 +52,9 @@ func main() {
 		go Follow(logFile, pubSub, patterns, polling, pollingTimeMS)
 	}
 
-	// startup the web server
-	StartWebServer(pubSub)
+	// startup the web server. Fatal logs the error and exits with status 1,
+	// matching the old echo Logger.Fatal behavior.
+	if err := StartWebServer(pubSub); err != nil {
+		logger.Fatal(err)
+	}
 }
