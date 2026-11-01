@@ -132,36 +132,8 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 
 	// Same broker configuration as main()
 	pubSub := pubsub.New(pubSubQueueSize)
-
-	// Start the webserver on a free port (same pattern as
-	// TestWebSocketBroadcast)
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("Unable to find a free port: %s", err)
-	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	listener.Close()
-	viper.Set("server_settings.webserverport", strconv.Itoa(port))
-	go StartWebServer(pubSub)
-
-	baseUrl := fmt.Sprintf("http://127.0.0.1:%d", port)
+	baseUrl := startTestServer(t, pubSub)
 	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
-
-	ready := false
-	for i := 0; i < 30; i++ {
-		response, getErr := http.Get(baseUrl + "/settings/logstation-name")
-		if getErr == nil {
-			response.Body.Close()
-			if response.StatusCode == 200 {
-				ready = true
-				break
-			}
-		}
-		time.Sleep(200 * time.Millisecond)
-	}
-	if !ready {
-		t.Fatalf("Webserver did not come up at %s", baseUrl)
-	}
 
 	// Client A: healthy, drains every line it is sent.
 	wsA, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
@@ -238,23 +210,7 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 	// cycle until C is subscribed: what matters is that the broker and
 	// server deliver to a fresh client after B's death, not the first
 	// attempt's timing.
-	var marker LogMessage
-	found := false
-	for attempt := 0; attempt < 5 && !found; attempt++ {
-		pubSub.TryPub(LogMessage{Text: "post-mortem marker"}, "lines")
-		wsC.SetReadDeadline(time.Now().Add(2 * time.Second))
-		_, data, readErr := wsC.ReadMessage()
-		if readErr != nil {
-			continue
-		}
-		if err := json.Unmarshal(data, &marker); err != nil {
-			continue
-		}
-		found = true
-	}
-	if !found {
-		t.Fatal("Client C did not receive a line after client B died: the broker or server is stalled")
-	}
+	marker := waitForLine(t, pubSub, wsC, LogMessage{Text: "post-mortem marker"})
 	if marker.Text != "post-mortem marker" {
 		t.Errorf("Expected %q, got %q", "post-mortem marker", marker.Text)
 	}
@@ -289,6 +245,32 @@ func startTestServer(t *testing.T, pubSub *pubsub.PubSub) string {
 		t.Fatalf("Webserver did not come up at %s", baseUrl)
 	}
 	return baseUrl
+}
+
+// waitForLine publishes each msg to the "lines" topic and waits for the
+// client to receive a line, unmarshalling it into a LogMessage. The server
+// subscribes a client just after the websocket upgrade, so a publish in that
+// window is dropped: the publish/read cycle is retried up to 5 times (the
+// same race TestWebSocketBroadcast handles with a retry loop).
+func waitForLine(t *testing.T, pubSub *pubsub.PubSub, ws *websocket.Conn, msgs ...interface{}) LogMessage {
+	t.Helper()
+	var received LogMessage
+	for attempt := 0; attempt < 5; attempt++ {
+		for _, msg := range msgs {
+			pubSub.TryPub(msg, "lines")
+		}
+		ws.SetReadDeadline(time.Now().Add(2 * time.Second))
+		_, data, readErr := ws.ReadMessage()
+		if readErr != nil {
+			continue
+		}
+		if err := json.Unmarshal(data, &received); err != nil {
+			continue
+		}
+		return received
+	}
+	t.Fatal("Did not receive a line on the websocket after 5 attempts")
+	return LogMessage{}
 }
 
 // TestWebSocketUpgradeRejectsNonWebSocketRequests verifies that a plain
@@ -341,23 +323,7 @@ func TestWebSocketCleanCloseReleasesClient(t *testing.T) {
 	}
 	defer wsB.Close()
 
-	var received LogMessage
-	found := false
-	for attempt := 0; attempt < 5 && !found; attempt++ {
-		pubSub.TryPub(LogMessage{Text: "after clean close"}, "lines")
-		wsB.SetReadDeadline(time.Now().Add(2 * time.Second))
-		_, data, readErr := wsB.ReadMessage()
-		if readErr != nil {
-			continue
-		}
-		if err := json.Unmarshal(data, &received); err != nil {
-			continue
-		}
-		found = true
-	}
-	if !found {
-		t.Fatal("Server did not serve a new client after a clean close")
-	}
+	received := waitForLine(t, pubSub, wsB, LogMessage{Text: "after clean close"})
 	if received.Text != "after clean close" {
 		t.Errorf("Expected %q, got %q", "after clean close", received.Text)
 	}
@@ -383,18 +349,18 @@ func TestWebSocketCORSDisabledAllowsCrossOrigin(t *testing.T) {
 	ws.Close()
 }
 
-// unmarshalable models a message on the "lines" topic whose JSON encoding
+// unencodable models a message on the "lines" topic whose JSON encoding
 // fails; the handler must log and skip it, not drop the connection.
-type unmarshalable struct{}
+type unencodable struct{}
 
-func (unmarshalable) MarshalJSON() ([]byte, error) {
+func (unencodable) MarshalJSON() ([]byte, error) {
 	return nil, errors.New("cannot marshal")
 }
 
-// TestWebSocketHandlerSurvivesUnmarshalableLine verifies that a line that
+// TestWebSocketHandlerSurvivesUnencodableLine verifies that a line that
 // fails json.Marshal is skipped by the handler (the marshal-error path) and
 // that normal lines keep flowing on the same connection.
-func TestWebSocketHandlerSurvivesUnmarshalableLine(t *testing.T) {
+func TestWebSocketHandlerSurvivesUnencodableLine(t *testing.T) {
 	pubSub := pubsub.New(pubSubQueueSize)
 	baseUrl := startTestServer(t, pubSub)
 	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
@@ -405,25 +371,8 @@ func TestWebSocketHandlerSurvivesUnmarshalableLine(t *testing.T) {
 	}
 	defer ws.Close()
 
-	var received LogMessage
-	found := false
-	for attempt := 0; attempt < 5 && !found; attempt++ {
-		// One bad line (skipped by the handler) and one good line.
-		pubSub.TryPub(unmarshalable{}, "lines")
-		pubSub.TryPub(LogMessage{Text: "survivor"}, "lines")
-		ws.SetReadDeadline(time.Now().Add(2 * time.Second))
-		_, data, readErr := ws.ReadMessage()
-		if readErr != nil {
-			continue
-		}
-		if err := json.Unmarshal(data, &received); err != nil {
-			continue
-		}
-		found = true
-	}
-	if !found {
-		t.Fatal("Handler stopped serving lines after an unmarshalable line")
-	}
+	// One bad line (skipped by the handler) and one good line.
+	received := waitForLine(t, pubSub, ws, unencodable{}, LogMessage{Text: "survivor"})
 	if received.Text != "survivor" {
 		t.Errorf("Expected %q, got %q", "survivor", received.Text)
 	}
