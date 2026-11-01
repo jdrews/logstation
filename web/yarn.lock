@@ -3179,7 +3179,7 @@ __metadata:
     safe-regex2: "npm:^5.1.2"
     shx: "npm:^0.4.0"
     tailwind-merge: "npm:^3.5.0"
-    tailwindcss: "npm:^4.1.18"
+    tailwindcss: "npm:^4.3.3"
     vite: "npm:^8.3.5"
     vitest: "npm:^5.0.5"
   languageName: unknown
@@ -4157,17 +4157,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwindcss@npm:4.3.3":
+"tailwindcss@npm:4.3.3, tailwindcss@npm:^4.3.3":
   version: 4.3.3
   resolution: "tailwindcss@npm:4.3.3"
   checksum: 10/f6e4972b37f1c411ef0bd89260aabd10d4d953b50c56979f327f5fc8a27bcaf5c62fd4bf55d196d7667085ad276842e1e15b1de1bbfd532da46c2e9073dc8e0d
-  languageName: node
-  linkType: hard
-
-"tailwindcss@npm:^4.1.18":
-  version: 4.3.2
-  resolution: "tailwindcss@npm:4.3.2"
-  checksum: 10/cd9c061c07954ae9fee860da00298c829ca9f53263d7221e7b7a549cd0fa45bda3869021a7950f13ca91cf75576b4d2e181124dade55e517834324fafd0add1b
   languageName: node
   linkType: hard
 
