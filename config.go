@@ -27,9 +27,12 @@ func HandleConfigFile(configFilePath string) {
 	viper.SetConfigFile(configFilePath)
 	if err := viper.ReadInConfig(); err != nil {
 		if errors.Is(err, os.ErrNotExist) || errors.As(err, &viper.ConfigFileNotFoundError{}) {
-			logger.Warn("Config file not found at ", configFilePath)
-			logger.Warn("Writing default config file to ", configFilename)
-			logger.Warn("Please open and edit config file before running this application again. Exiting...")
+			// First run: no config file yet. Writing the default and exiting is
+			// the intended flow (not an error), so log it informatively and say
+			// plainly what the user should do next.
+			logger.Info("No config file found at ", configFilePath)
+			logger.Info("Writing default config file to ", configFilename)
+			logger.Info("Edit the config file, then run logstation again to start the server. Exiting.")
 			err := os.WriteFile(configFilename, defaultConfigFile, 0644)
 			if err != nil {
 				panic(err)
