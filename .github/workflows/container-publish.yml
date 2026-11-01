@@ -3,12 +3,17 @@ name: Container Publish
 on:
   # The GitHub release is the source of truth for a published version, so
   # publish the container when a release is created ("released") or when a
-  # draft release is published ("published"). Triggering on tag pushes is
-  # fragile: goreleaser creates the release (and, as a side effect, the tag
-  # ref) via the GitHub API, and API-created refs generate no push event.
+  # draft release is published ("published").
+  #
+  # Limitation: GitHub suppresses workflow runs for events created with
+  # GITHUB_TOKEN, so releases created by the github-actions bot (e.g. by
+  # goreleaser in release.yml) do NOT fire this trigger - release.yml
+  # dispatches this workflow explicitly instead. This trigger covers
+  # releases created by a human in the UI.
   release:
     types: [released, published]
-  # Manual escape hatch for backfills and re-publishes, e.g.:
+  # Primary path for automated releases (dispatched by release.yml after
+  # goreleaser succeeds) and manual escape hatch for backfills, e.g.:
   #   gh workflow run container-publish.yml -f tag=v3.1.0
   workflow_dispatch:
     inputs:

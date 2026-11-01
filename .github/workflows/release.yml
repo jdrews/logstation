@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write # for dispatching the Container Publish workflow after goreleaser
 
 jobs:
   goreleaser:
@@ -66,3 +67,11 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger container publish
+        # Goreleaser creates the release (and, as a side effect, the tag ref)
+        # via the GitHub API as the github-actions bot. GitHub suppresses
+        # workflow runs for events created with GITHUB_TOKEN, so neither the
+        # release event nor a tag push will trigger the Container Publish
+        # workflow. Dispatch it explicitly now that the release succeeded.
+        run: gh workflow run container-publish.yml -f tag="${{ github.event.inputs.tag }}"
