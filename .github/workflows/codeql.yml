@@ -12,13 +12,11 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ "main" ]
+  # PRs only. The main branch is scanned by GitHub's managed "Code scanning
+  # results" workflow (CodeQL + SonarCloud), so a push/schedule trigger here
+  # would scan it a second time.
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "main" ]
-  schedule:
-    - cron: '26 4 * * 4'
 
 jobs:
   analyze:
