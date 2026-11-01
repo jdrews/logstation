@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -256,6 +257,175 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 	}
 	if marker.Text != "post-mortem marker" {
 		t.Errorf("Expected %q, got %q", "post-mortem marker", marker.Text)
+	}
+}
+
+// startTestServer boots a full webserver (pubsub + /ws endpoint) on a free
+// port and returns its base URL, waiting until it responds.
+func startTestServer(t *testing.T, pubSub *pubsub.PubSub) string {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("Unable to find a free port: %s", err)
+	}
+	port := listener.Addr().(*net.TCPAddr).Port
+	listener.Close()
+	viper.Set("server_settings.webserverport", strconv.Itoa(port))
+	go StartWebServer(pubSub)
+
+	baseUrl := fmt.Sprintf("http://127.0.0.1:%d", port)
+	ready := false
+	for i := 0; i < 30; i++ {
+		response, getErr := http.Get(baseUrl + "/settings/logstation-name")
+		if getErr == nil {
+			response.Body.Close()
+			if response.StatusCode == 200 {
+				ready = true
+				break
+			}
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+	if !ready {
+		t.Fatalf("Webserver did not come up at %s", baseUrl)
+	}
+	return baseUrl
+}
+
+// TestWebSocketUpgradeRejectsNonWebSocketRequests verifies that a plain
+// HTTP request to /ws fails the upgrade and the handler returns cleanly
+// (the upgrade-error path of WebSocketHandler).
+func TestWebSocketUpgradeRejectsNonWebSocketRequests(t *testing.T) {
+	pubSub := pubsub.New(pubSubQueueSize)
+	baseUrl := startTestServer(t, pubSub)
+
+	response, err := http.Get(baseUrl + "/ws")
+	if err != nil {
+		t.Fatalf("Unable to request /ws: %s", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode == http.StatusOK {
+		t.Errorf("Expected a non-websocket request to /ws to be rejected, got 200")
+	}
+}
+
+// TestWebSocketCleanCloseReleasesClient verifies that a client which closes
+// its websocket properly (close frame) is detected by the server's read
+// pump and its subscription is released, and that the server keeps serving
+// new clients. The shortened ping interval also exercises the periodic
+// ping success path.
+func TestWebSocketCleanCloseReleasesClient(t *testing.T) {
+	origPingInterval := wsPingInterval
+	wsPingInterval = 100 * time.Millisecond
+	t.Cleanup(func() { wsPingInterval = origPingInterval })
+
+	pubSub := pubsub.New(pubSubQueueSize)
+	baseUrl := startTestServer(t, pubSub)
+	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
+
+	// Client A connects, stays long enough for a few pings to fly (the ping
+	// success path), then closes its websocket cleanly (close frame).
+	wsA, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial the websocket: %s", err)
+	}
+	time.Sleep(300 * time.Millisecond)
+	if closeErr := wsA.Close(); closeErr != nil {
+		t.Fatalf("Unable to close the websocket cleanly: %s", closeErr)
+	}
+
+	// The server must notice the clean close (read pump) and keep working:
+	// a new client connects and receives lines.
+	wsB, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial a replacement websocket: %s", err)
+	}
+	defer wsB.Close()
+
+	var received LogMessage
+	found := false
+	for attempt := 0; attempt < 5 && !found; attempt++ {
+		pubSub.TryPub(LogMessage{Text: "after clean close"}, "lines")
+		wsB.SetReadDeadline(time.Now().Add(2 * time.Second))
+		_, data, readErr := wsB.ReadMessage()
+		if readErr != nil {
+			continue
+		}
+		if err := json.Unmarshal(data, &received); err != nil {
+			continue
+		}
+		found = true
+	}
+	if !found {
+		t.Fatal("Server did not serve a new client after a clean close")
+	}
+	if received.Text != "after clean close" {
+		t.Errorf("Expected %q, got %q", "after clean close", received.Text)
+	}
+}
+
+// TestWebSocketCORSDisabledAllowsCrossOrigin verifies that with
+// server_settings.disablecors enabled, a cross-origin websocket handshake
+// succeeds (the CheckOrigin branch of WebSocketHandler).
+func TestWebSocketCORSDisabledAllowsCrossOrigin(t *testing.T) {
+	viper.Set("server_settings.disablecors", true)
+	t.Cleanup(func() { viper.Set("server_settings.disablecors", false) })
+
+	pubSub := pubsub.New(pubSubQueueSize)
+	baseUrl := startTestServer(t, pubSub)
+	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
+
+	headers := http.Header{}
+	headers.Add("Origin", "http://evil.example.com")
+	ws, _, err := websocket.DefaultDialer.Dial(wsUrl, headers)
+	if err != nil {
+		t.Fatalf("Expected the cross-origin handshake to succeed with disableCORS=true: %s", err)
+	}
+	ws.Close()
+}
+
+// unmarshalable models a message on the "lines" topic whose JSON encoding
+// fails; the handler must log and skip it, not drop the connection.
+type unmarshalable struct{}
+
+func (unmarshalable) MarshalJSON() ([]byte, error) {
+	return nil, errors.New("cannot marshal")
+}
+
+// TestWebSocketHandlerSurvivesUnmarshalableLine verifies that a line that
+// fails json.Marshal is skipped by the handler (the marshal-error path) and
+// that normal lines keep flowing on the same connection.
+func TestWebSocketHandlerSurvivesUnmarshalableLine(t *testing.T) {
+	pubSub := pubsub.New(pubSubQueueSize)
+	baseUrl := startTestServer(t, pubSub)
+	wsUrl := strings.Replace(baseUrl, "http", "ws", 1) + "/ws"
+
+	ws, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	if err != nil {
+		t.Fatalf("Unable to dial the websocket: %s", err)
+	}
+	defer ws.Close()
+
+	var received LogMessage
+	found := false
+	for attempt := 0; attempt < 5 && !found; attempt++ {
+		// One bad line (skipped by the handler) and one good line.
+		pubSub.TryPub(unmarshalable{}, "lines")
+		pubSub.TryPub(LogMessage{Text: "survivor"}, "lines")
+		ws.SetReadDeadline(time.Now().Add(2 * time.Second))
+		_, data, readErr := ws.ReadMessage()
+		if readErr != nil {
+			continue
+		}
+		if err := json.Unmarshal(data, &received); err != nil {
+			continue
+		}
+		found = true
+	}
+	if !found {
+		t.Fatal("Handler stopped serving lines after an unmarshalable line")
+	}
+	if received.Text != "survivor" {
+		t.Errorf("Expected %q, got %q", "survivor", received.Text)
 	}
 }
 
