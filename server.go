@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -21,30 +22,30 @@ import (
 )
 
 var (
-	// define the websocket upgrader
-	upgrader = websocket.Upgrader{}
-
 	// default to CORS being enabled
 	disableCORS = false
 
-	// wsWriteDeadline bounds how long a single write (or ping) to a client
-	// may block before the connection is declared dead. Without it, a
-	// half-dead client whose TCP buffer is full blocks WriteMessage
-	// forever, pinning the handler and its subscription. It is a var (not
-	// a const) so tests can shorten it.
-	wsWriteDeadline = 10 * time.Second
+	// wsWriteDeadlineNanos bounds how long a single write (or ping) to a
+	// client may block before the connection is declared dead. Without it,
+	// a half-dead client whose TCP buffer is full blocks WriteMessage
+	// forever, pinning the handler and its subscription. It is stored in
+	// nanoseconds and accessed atomically so tests can shorten it without
+	// racing the handler goroutines, which outlive the tests.
+	wsWriteDeadlineNanos atomic.Int64
 
-	// wsPingInterval is how often we ping the client. Pings keep idle
-	// connections alive through NATs and give us a periodic, cheap probe
-	// of the connection's health.
-	wsPingInterval = 30 * time.Second
+	// wsPingIntervalNanos is how often we ping the client. Pings keep idle
+	// connections alive through NATs and give us a periodic, cheap probe of
+	// the connection's health. Atomic for the same reason as above.
+	wsPingIntervalNanos atomic.Int64
 )
 
+func init() {
+	wsWriteDeadlineNanos.Store(10 * time.Second.Nanoseconds())
+	wsPingIntervalNanos.Store(30 * time.Second.Nanoseconds())
+}
+
 // WebSocketHandler handles incoming websocket connections and serves up log lines to the client
-func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
-	if disableCORS {
-		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	}
+func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub, upgrader websocket.Upgrader) error {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return nil
@@ -82,7 +83,7 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 		}
 	}()
 
-	pingTicker := time.NewTicker(wsPingInterval)
+	pingTicker := time.NewTicker(time.Duration(wsPingIntervalNanos.Load()))
 	defer pingTicker.Stop()
 
 	defer func() {
@@ -99,7 +100,7 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 			// WriteControl is documented safe to call alongside the
 			// writer and carries its own deadline, so a dead peer fails
 			// the ping promptly instead of hanging.
-			if pingErr := ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(wsWriteDeadline)); pingErr != nil {
+			if pingErr := ws.WriteControl(websocket.PingMessage, nil, time.Now().Add(time.Duration(wsWriteDeadlineNanos.Load()))); pingErr != nil {
 				logger.Warn("Lost connection to websocket client (ping failed)! Closing this connection. More info: ", pingErr)
 				return nil
 			}
@@ -112,7 +113,7 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 			// SetWriteDeadline's error is intentionally not checked (the
 			// pattern from gorilla's chat example): if it fails, the
 			// connection is broken and WriteMessage fails right after.
-			ws.SetWriteDeadline(time.Now().Add(wsWriteDeadline))
+			ws.SetWriteDeadline(time.Now().Add(time.Duration(wsWriteDeadlineNanos.Load())))
 			if writeErr := ws.WriteMessage(websocket.TextMessage, jsonLine); writeErr != nil {
 				logger.Warn("Lost connection to websocket client! Closing this connection. More info: ", writeErr)
 				return nil
@@ -129,6 +130,19 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 // It returns an error if the server fails to start (e.g. the port is already
 // in use); main decides what to do with it.
 func StartWebServer(pubSub *pubsub.PubSub) error {
+	e := newWebServer(pubSub)
+
+	// start the web server. Signals are handled via the context (matching
+	// what v5's Start does internally) so Ctrl+C still shuts down cleanly.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	return startWebServer(e, ctx, nil)
+}
+
+// newWebServer builds the fully configured echo server (middleware, REST
+// routes, websocket handler) without starting it. StartWebServer runs it;
+// tests use it to start and stop a server on a free port.
+func newWebServer(pubSub *pubsub.PubSub) *echo.Echo {
 	// setup web server
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
@@ -162,26 +176,37 @@ func StartWebServer(pubSub *pubsub.PubSub) error {
 	fileHandler := http.FileServer(http.FS(fsys))
 	e.GET("/*", echo.WrapHandler(fileHandler))
 
+	// Each server owns its upgrader so per-server settings (like
+	// CheckOrigin) can never leak across servers.
+	upgrader := websocket.Upgrader{}
+	if disableCORS {
+		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	}
+
 	// pass message broker channel into websocket handler
-	wsHandlerChan := func(c *echo.Context) error {
-		return WebSocketHandler(c, pubSub)
+	wsHandlerChan := func(ctx *echo.Context) error {
+		return WebSocketHandler(ctx, pubSub, upgrader)
 	}
 	e.GET("/ws", wsHandlerChan)
 
-	// start the web server. Signals are handled via the context (matching
-	// what v5's Start does internally) so Ctrl+C still shuts down cleanly.
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-	return startWebServer(e, ctx)
+	return e
 }
 
 // startWebServer runs the echo server until it is shut down or fails,
 // returning the underlying error. v5 moved banner hiding off the Echo
-// instance into StartConfig.
-func startWebServer(e *echo.Echo, ctx context.Context) error {
+// instance into StartConfig. onServer (may be nil) receives the underlying
+// *http.Server once it is created, so callers can close it directly: the
+// context-based graceful shutdown cannot end websocket connections.
+func startWebServer(e *echo.Echo, ctx context.Context, onServer func(*http.Server)) error {
 	sc := echo.StartConfig{
 		Address:    viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport"),
 		HideBanner: true,
+		BeforeServeFunc: func(s *http.Server) error {
+			if onServer != nil {
+				onServer(s)
+			}
+			return nil
+		},
 	}
 	return sc.Start(ctx, e)
 }
