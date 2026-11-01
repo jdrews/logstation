@@ -24,9 +24,11 @@ var (
 
 // WebSocketHandler handles incoming websocket connections and serves up log lines to the client
 func WebSocketHandler(c echo.Context, pubSub *pubsub.PubSub) error {
-	if disableCORS {
-		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	}
+	// NOTE: disableCORS intentionally does NOT relax the WebSocket origin check.
+	// CORS only governs XHR/fetch requests; WebSocket upgrades need their own
+	// origin validation to prevent Cross-Site WebSocket Hijacking (CSWSH).
+	// The upgrader's default CheckOrigin (verifying the Origin header matches
+	// the request Host) is used here instead of unconditionally allowing all origins.
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return nil
