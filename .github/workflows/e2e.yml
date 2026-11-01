@@ -46,7 +46,7 @@ jobs:
         with:
           go-version: ${{ steps.go-version.outputs.version }}
           # Cache the Go module downloads (logstation deps + loggenerator).
-          cache: 'go'
+          cache: true
 
       - name: Cache Go build cache
         # Compiled artifacts from `go build`/`go test` (logstation, loggenerator).
