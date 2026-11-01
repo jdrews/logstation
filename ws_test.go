@@ -178,6 +178,15 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 		}
 	}()
 
+	// The server subscribes a client just after the upgrade, so a publish
+	// in that window is dropped (the same race TestWebSocketBroadcast
+	// handles with a retry loop). Send a pre-flight line until A proves it
+	// is subscribed before the real traffic starts.
+	for atomic.LoadInt64(&aCount) < 1 {
+		pubSub.TryPub(LogMessage{Text: "pre-flight"}, "lines")
+		time.Sleep(50 * time.Millisecond)
+	}
+
 	// Client B: the client that will die. Shrink its TCP receive buffer so
 	// the server's writes to it stall once the kernel buffers fill, and
 	// never read from it (a dead client's kernel stops consuming too).
@@ -222,15 +231,28 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 		t.Fatalf("Unable to dial the websocket (client C) after client B died: %s", err)
 	}
 	defer wsC.Close()
-	wsC.SetReadDeadline(time.Now().Add(10 * time.Second))
-	pubSub.TryPub(LogMessage{Text: "post-mortem marker"}, "lines")
-	_, data, readErr := wsC.ReadMessage()
-	if readErr != nil {
-		t.Fatalf("Client C did not receive a line after client B died: %s", readErr)
-	}
+
+	// As with client A, the server subscribes C just after the upgrade, so
+	// a marker published in that window is dropped. Retry the publish/read
+	// cycle until C is subscribed: what matters is that the broker and
+	// server deliver to a fresh client after B's death, not the first
+	// attempt's timing.
 	var marker LogMessage
-	if err := json.Unmarshal(data, &marker); err != nil {
-		t.Fatalf("Client C received an unparsable message: %s", err)
+	found := false
+	for attempt := 0; attempt < 5 && !found; attempt++ {
+		pubSub.TryPub(LogMessage{Text: "post-mortem marker"}, "lines")
+		wsC.SetReadDeadline(time.Now().Add(2 * time.Second))
+		_, data, readErr := wsC.ReadMessage()
+		if readErr != nil {
+			continue
+		}
+		if err := json.Unmarshal(data, &marker); err != nil {
+			continue
+		}
+		found = true
+	}
+	if !found {
+		t.Fatal("Client C did not receive a line after client B died: the broker or server is stalled")
 	}
 	if marker.Text != "post-mortem marker" {
 		t.Errorf("Expected %q, got %q", "post-mortem marker", marker.Text)
