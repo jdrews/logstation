@@ -12,7 +12,7 @@
     "react-dom": "^19.2.4",
     "react-virtuoso": "^4.18.15",
     "reconnecting-websocket": "^4.4.0",
-    "safe-regex2": "^5.1.1",
+    "safe-regex2": "^5.1.2",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
