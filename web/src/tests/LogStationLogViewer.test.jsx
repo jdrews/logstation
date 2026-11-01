@@ -205,7 +205,8 @@ describe("LogStationLogViewer", () => {
           "\x1b[4munderlined text\x1b[0m",
         ],
       });
-      expect(screen.getByText("bold text")).toHaveStyle({ fontWeight: "bold" });
+      // jsdom >= 30 computes the spec value for font-weight: bold, i.e. 700
+      expect(screen.getByText("bold text")).toHaveStyle({ fontWeight: "700" });
       expect(screen.getByText("dim text")).toHaveStyle({ opacity: "0.7" });
       expect(screen.getByText("italic text")).toHaveStyle({ fontStyle: "italic" });
       expect(screen.getByText("underlined text")).toHaveStyle({ textDecoration: "underline" });
