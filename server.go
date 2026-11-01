@@ -65,7 +65,10 @@ func WebSocketHandler(c *echo.Context, pubSub *pubsub.PubSub) error {
 //   - Serves up the React files for the client
 //   - Provides a REST API Server for various configurations on the client
 //   - Starts a WebSocket Server to pass the logfiles and loglines to the client
-func StartWebServer(pubSub *pubsub.PubSub) {
+//
+// It returns an error if the server fails to start (e.g. the port is already
+// in use); main decides what to do with it.
+func StartWebServer(pubSub *pubsub.PubSub) error {
 	// setup web server
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
@@ -105,17 +108,20 @@ func StartWebServer(pubSub *pubsub.PubSub) {
 	}
 	e.GET("/ws", wsHandlerChan)
 
-	// start the web server. v5 moved banner hiding off the Echo instance
-	// into StartConfig; signals are handled via the context (matching
+	// start the web server. Signals are handled via the context (matching
 	// what v5's Start does internally) so Ctrl+C still shuts down cleanly.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	return startWebServer(e, ctx)
+}
+
+// startWebServer runs the echo server until it is shut down or fails,
+// returning the underlying error. v5 moved banner hiding off the Echo
+// instance into StartConfig.
+func startWebServer(e *echo.Echo, ctx context.Context) error {
 	sc := echo.StartConfig{
 		Address:    viper.GetString("server_settings.webserveraddress") + ":" + viper.GetString("server_settings.webserverport"),
 		HideBanner: true,
 	}
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-	if err := sc.Start(ctx, e); err != nil {
-		e.Logger.Error("web server failed", "error", err)
-		os.Exit(1)
-	}
+	return sc.Start(ctx, e)
 }
