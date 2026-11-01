@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,38 +31,9 @@ import (
 //	main.go). On a fresh clone, run `cd web && yarn build` first, or the
 //	build fails before the test even starts.
 func TestWebSocketBroadcast(t *testing.T) {
-	// Pick a free port so the test never collides with a running instance
-	// (and never with the e2e suite's dedicated port).
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("Unable to find a free port: %s", err)
-	}
-	port := listener.Addr().(*net.TCPAddr).Port
-	listener.Close()
-	viper.Set("server_settings.webserverport", strconv.Itoa(port))
-
-	// Setup message broker and start the webserver
+	// Setup message broker and start the webserver on a free port
 	pubSub := pubsub.New(1)
-	go StartWebServer(pubSub)
-
-	baseUrl := fmt.Sprintf("http://127.0.0.1:%d", port)
-
-	// Give the StartWebServer enough time to startup
-	ready := false
-	for i := 0; i < 30; i++ {
-		response, getErr := http.Get(baseUrl + "/settings/logstation-name")
-		if getErr == nil {
-			response.Body.Close()
-			if response.StatusCode == 200 {
-				ready = true
-				break
-			}
-		}
-		time.Sleep(200 * time.Millisecond)
-	}
-	if !ready {
-		t.Fatalf("Webserver did not come up at %s", baseUrl)
-	}
+	baseUrl := startTestServer(t, pubSub)
 
 	// Dial the websocket endpoint
 	ws, _, err := websocket.DefaultDialer.Dial(strings.Replace(baseUrl, "http", "ws", 1)+"/ws", nil)
@@ -126,9 +98,9 @@ func TestWebSocketBroadcast(t *testing.T) {
 func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 	// Shorten the write deadline so a stalled client's handler gives up in
 	// 200 ms instead of 10 s.
-	origDeadline := wsWriteDeadline
-	wsWriteDeadline = 200 * time.Millisecond
-	t.Cleanup(func() { wsWriteDeadline = origDeadline })
+	origDeadline := wsWriteDeadlineNanos.Load()
+	wsWriteDeadlineNanos.Store(200 * time.Millisecond.Nanoseconds())
+	t.Cleanup(func() { wsWriteDeadlineNanos.Store(origDeadline) })
 
 	// Same broker configuration as main()
 	pubSub := pubsub.New(pubSubQueueSize)
@@ -217,7 +189,9 @@ func TestDeadWebSocketClientDoesNotStallOtherClients(t *testing.T) {
 }
 
 // startTestServer boots a full webserver (pubsub + /ws endpoint) on a free
-// port and returns its base URL, waiting until it responds.
+// port and returns its base URL, waiting until it responds. The server is
+// stopped in cleanup so its handler goroutines don't outlive the test and
+// race with the next test's setup.
 func startTestServer(t *testing.T, pubSub *pubsub.PubSub) string {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -226,7 +200,19 @@ func startTestServer(t *testing.T, pubSub *pubsub.PubSub) string {
 	port := listener.Addr().(*net.TCPAddr).Port
 	listener.Close()
 	viper.Set("server_settings.webserverport", strconv.Itoa(port))
-	go StartWebServer(pubSub)
+
+	e := newWebServer(pubSub)
+	ctx, cancel := context.WithCancel(context.Background())
+	// The http.Server is handed over atomically: the context-based graceful
+	// shutdown cannot end websocket connections, so cleanup closes it hard.
+	var srv atomic.Pointer[http.Server]
+	go startWebServer(e, ctx, func(s *http.Server) { srv.Store(s) })
+	t.Cleanup(func() {
+		cancel()
+		if s := srv.Load(); s != nil {
+			_ = s.Close()
+		}
+	})
 
 	baseUrl := fmt.Sprintf("http://127.0.0.1:%d", port)
 	ready := false
@@ -296,9 +282,9 @@ func TestWebSocketUpgradeRejectsNonWebSocketRequests(t *testing.T) {
 // new clients. The shortened ping interval also exercises the periodic
 // ping success path.
 func TestWebSocketCleanCloseReleasesClient(t *testing.T) {
-	origPingInterval := wsPingInterval
-	wsPingInterval = 100 * time.Millisecond
-	t.Cleanup(func() { wsPingInterval = origPingInterval })
+	origPingInterval := wsPingIntervalNanos.Load()
+	wsPingIntervalNanos.Store(100 * time.Millisecond.Nanoseconds())
+	t.Cleanup(func() { wsPingIntervalNanos.Store(origPingInterval) })
 
 	pubSub := pubsub.New(pubSubQueueSize)
 	baseUrl := startTestServer(t, pubSub)

@@ -39,7 +39,7 @@ func TestStartWebServerStartupFailure(t *testing.T) {
 	defer listener.Close()
 	setTestServerAddress(t, port)
 
-	if err := startWebServer(echo.New(), context.Background()); err == nil {
+	if err := startWebServer(echo.New(), context.Background(), nil); err == nil {
 		t.Error("Expected startWebServer to fail on an in-use port, got nil error")
 	}
 }
@@ -54,7 +54,7 @@ func TestStartWebServerGracefulShutdown(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
-	go func() { done <- startWebServer(echo.New(), ctx) }()
+	go func() { done <- startWebServer(echo.New(), ctx, nil) }()
 
 	// Wait until the server answers, then cancel for a graceful shutdown.
 	// The bare echo instance has no routes, so any HTTP response (even a
