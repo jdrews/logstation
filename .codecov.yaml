@@ -1,0 +1,12 @@
+# Codecov configuration.
+#
+# The "codecov/project" check compares this PR's coverage to the base branch.
+# Coverage measured between runs of identical code can vary slightly (flaky
+# tests, platform differences), so allow a 1% threshold to prevent spurious
+# failures - e.g. on PRs that only touch YAML workflow files.
+coverage:
+  status:
+    project:
+      default:
+        target: auto # compare against the base branch's coverage
+        threshold: 1%
